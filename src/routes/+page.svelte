@@ -1,4 +1,6 @@
 <script lang="ts">
+    export let data;
+
     let checker = false;
     function DoSomething() {
         checker = !checker;
@@ -16,3 +18,9 @@ do something
 </button>
 
 <input type="checkbox" checked={checker}>
+
+<div>
+    {#each data.pets as { name, owner } (name)}
+        <div>{name} - {owner}</div>
+    {/each}
+</div>
