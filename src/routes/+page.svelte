@@ -1,6 +1,11 @@
 <script lang="ts">
     export let data;
 
+    $: pets = data.pets.map(row => ({
+        name: row.name,
+        owner: row.owner
+    })) as Array<{ name: string; owner: string }>;
+
     let checker = false;
     function DoSomething() {
         checker = !checker;
@@ -19,8 +24,12 @@ do something
 
 <input type="checkbox" checked={checker}>
 
+<h2>database test</h2>
 <div>
-    {#each data.pets as { name, owner } (name)}
-        <div>{name} - {owner}</div>
-    {/each}
+    <p>my pets (if you do not see any pets, something is wrong)</p>
+    <ul>
+        {#each pets as { name, owner } (name)}
+            <li><div>{name} - {owner}</div></li>
+        {/each}
+    </ul>
 </div>
