@@ -1,2 +1,18 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<script lang="ts">
+    let checker = false;
+    function DoSomething() {
+        checker = !checker;
+    }
+
+
+</script>
+<h1>welcome to the jungle</h1>
+
+<button
+on:click={() => {
+    DoSomething();
+}}>
+do something
+</button>
+
+<input type="checkbox" checked={checker}>
