@@ -13,6 +13,15 @@
 
 
 </script>
+<header class="flex justify-between bg-gray-200 p-2 items-center text-gray-600 border-b-2">
+	<nav class="flex">
+		<a class="block" href="/">Tester Page</a>
+		<a class="block" href="/home">Home</a>
+		<a class="block" href="/login">Login</a>
+	</nav> 
+	
+</header>
+
 <h1>welcome to the jungle</h1>
 
 <button
