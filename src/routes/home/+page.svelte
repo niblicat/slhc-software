@@ -21,8 +21,8 @@
 
     let inputValueName = "";
     let inputValueYear = "";
-    let filteredNames = [];
-    let filteredYears = [];
+    let filteredNames: Array<string> = [];
+    let filteredYears: Array<string> = [];
 
     // Employee and year data for demo purposes -- still need to connect to database
     const employeeItems = ["Jayme", "Jared", "Angel"];
