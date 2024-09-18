@@ -5,44 +5,59 @@
 <script lang="ts">
     export let data;
 
-    import Navbar from './lib/Navbar.svelte'
-	import Sidebar from './lib/Sidebar.svelte'
+    import Navbar from './lib/Navbar.svelte';
+    import Sidebar from './lib/Sidebar.svelte';
     import Link from './lib/Link.svelte';
-	import Input from './lib/DropdownInput.svelte';
+    import Input from './lib/DropdownInput.svelte';
 
-	let nameMenuOpen = false;
+    // Dropdown menu state
+    let nameMenuOpen = false;
     let yearMenuOpen = false;
     let open = false;
-	let inputValueName = "";
-    let inputValueYear = "";
 
-	$: console.log(inputValueName);
-    $: console.log(inputValueYear);
-	
-	const employeeItems = ["name1", "name2", "name3", "will need to connect this to database"]; //needs connecting
-	const yearItems = ["2020", "2021", "2022", "will need to connect this to database"]; //needs connecting
+    // Selected user and year
+    let selectedUser = "No user selected";
+    let selectedYear = "No year selected";
+
+    let inputValueName = "";
+    let inputValueYear = "";
     let filteredNames = [];
     let filteredYears = [];
 
-	const nameHandleInput = () => {
-		filteredNames = employeeItems.filter(item => item.toLowerCase().includes(inputValueName.toLowerCase()));
-	};
-    const yearHandleInput = () => {
-		filteredYears = yearItems.filter(item => item.includes(inputValueYear));
-	};
-    function toggleNameMenu() {
-        nameMenuOpen = !nameMenuOpen;
-    }
-    function toggleYearMenu() {
-        yearMenuOpen = !yearMenuOpen;
-    }
+    // Employee and year data for demo purposes -- still need to connect to database
+    const employeeItems = ["Jayme", "Jared", "Angel"];
+    const yearItems = ["2022", "2023", "2024"];
 
-    /* User stuff i didn't touch*/
+    // Initialize filtered names and years with default data
+    filteredNames = employeeItems;
+    filteredYears = yearItems;
+
+    // Functions to update selected user and year
+    const selectUser = (user) => {
+        selectedUser = user;
+        nameMenuOpen = false; 
+    };
+
+    const selectYear = (year) => {
+        selectedYear = year;
+        yearMenuOpen = false; 
+    };
+
+    const nameHandleInput = () => {
+        filteredNames = employeeItems.filter(item => item.toLowerCase().includes(inputValueName.toLowerCase()));
+    };
+
+    const yearHandleInput = () => {
+        filteredYears = yearItems.filter(item => item.includes(inputValueYear));
+    };
+
+    /* User stuff i didnt touch */
     $: users = data.users.map(row => ({
         username: row.username,
         password: row.password
     })) as Array<{ username: string; password: string }>;
 </script>
+
 
 <Sidebar bind:open/>
 <Navbar bind:sidebar={open}/>
@@ -51,42 +66,51 @@
 <div class="dropdown-container">
     <!-- Employee Dropdown Section -->
     <section class="dropdown">
-        <button on:click={toggleNameMenu} class="dropbtn">Search Employees</button>
-        
-        <div id="nameDropdown" class:show={nameMenuOpen} class="dropdown-content">		
-            <Input bind:inputValue={inputValueName} on:input={nameHandleInput} />		
-            <!-- Employee List -->
+        <button on:click={() => nameMenuOpen = !nameMenuOpen} class="dropbtn">
+            {"Select User"} ▼
+        </button>
+
+        <div class:show={nameMenuOpen} class="dropdown-content">
+            <Input bind:inputValue={inputValueName} on:input={nameHandleInput} placeholder="Search Users..." />
             {#if filteredNames.length > 0}
-                {#each filteredNames as item}
-                    <Link link={item} />
+                {#each filteredNames as user}
+                    <a href="#" on:click={() => selectUser(user)}>{user}</a>
                 {/each}
             {:else}
-                {#each employeeItems as item}
-                    <Link link={item} />
-                {/each}
-            {/if}		
-        </div>	
+                <p>No results found</p>
+            {/if}
+        </div>
     </section>
 
     <!-- Year Dropdown Section -->
     <section class="dropdown">
-        <button on:click={toggleYearMenu} class="dropbtn">Search Years</button>
-        
-        <div id="yearDropdown" class:show={yearMenuOpen} class="dropdown-content">		
-            <Input bind:inputValue={inputValueYear} on:input={yearHandleInput} />		
-            <!-- Year List -->
+        <button on:click={() => yearMenuOpen = !yearMenuOpen} class="dropbtn">
+            {"Select Year"} ▼
+        </button>
+
+        <div class:show={yearMenuOpen} class="dropdown-content">
+            <Input bind:inputValue={inputValueYear} on:input={yearHandleInput} placeholder="Search Years..." />
             {#if filteredYears.length > 0}
-                {#each filteredYears as item}
-                    <Link link={item} />
+                {#each filteredYears as year}
+                    <a href="#" on:click={() => selectYear(year)}>{year}</a>
                 {/each}
             {:else}
-                {#each yearItems as item}
-                    <Link link={item} />
-                {/each}
-            {/if}		
-        </div>	
+                <p>No results found</p>
+            {/if}
+        </div>
     </section>
 </div>
+
+<!---------------------- DISPLAY INFO ---------------------->
+<section class="selected-info">
+	<h1>Selected Information:</h1>
+    <p>Year: {selectedYear}</p>
+	<p>User: {selectedUser}</p>
+    <p>Email: ---</p>
+    <p>Date of Birth: ---</p>
+    <p>Age: ---</p>
+    <p>Employment Status: ---</p>
+</section>
 
 <!-- User stuff i didn't touch -->
 <h1>Users</h1>
@@ -100,62 +124,72 @@
 
 <!---------------------- STYLE //had issues on separate page so i out it all here ---------------------->
 <style>
-	:global(body) {
-		padding: 10;
+	/* Center the dropdown buttons container */
+	.dropdown-container {
+		display: flex;
+		justify-content: center; 
+		align-items: center; 
+		height: 100vh; 
+        height: 20vh; 
+        gap: 30px; 
 	}
 
-    /* Dropdown container */
-    .dropdown-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 20vh; /* Adjust as needed */
-        gap: 30px; 
-    }
+	/* Dropdown container */
+	.dropdown {
+		position: relative;
+		display: inline-block;
+		margin: 10px;
+	}
 
-    .dropdown {
-        position: relative;
-        display: inline-block;
-    }
-	
-    .dropbtn {
-        background-color: rgb(229, 229, 250);
-        color: rgb(0, 0, 0);
-        padding: 15px;
-        width: 300px;
-        font-size: 16px;
-        border: none;
-        cursor: pointer;
-        z-index: 10;
-    }
-	
-    .dropdown-content {
-        display: none;
-        position: absolute;
-        background-color: #f6f6f6;
-        min-width: 230px;
-        border: 1px solid #000;
-        z-index: 10;
-        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    }
+	/* Dropdown button */
+	.dropbtn {
+		background-color: rgb(229, 229, 250);
+		color: black;
+		padding: 16px;
+		font-size: 16px;
+		border: none;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		width: 300px; /* Adjust to make the buttons longer */
+	}
 
-    .show {
-        display: block;
-    }
+	/* Dropdown content (hidden by default) */
+	.dropdown-content {
+		display: none;
+		position: absolute;
+		background-color: #f9f9f9;
+		min-width: 300px; /* Make sure dropdown content matches button width */
+		box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+		z-index: 1;
+	}
 
-    /* Sidebar */
-    .sidebar {
-        position: fixed;
-        top: 0;
-        left: -100%;
-        height: 100%;
-        width: 250px;
-        background-color: #111;
-        z-index: 100;
-        transition: left 0.3s ease-in-out;
-    }
+	/* Show the dropdown menu */
+	.show {
+		display: block;
+	}
 
-    .sidebar.open {
-        left: 0;
-    }
+	/* Input field for search in dropdown */
+	input {
+		width: 100%;
+		padding: 8px;
+		box-sizing: border-box;
+	}
+
+	/* Links inside the dropdown */
+	.dropdown-content a {
+		color: black;
+		padding: 12px 16px;
+		text-decoration: none;
+		display: block;
+		cursor: pointer;
+	}
+
+	.selected-info {
+		margin-top: 20px;
+		padding: 20px;
+		border: 1px solid #ccc;
+		background-color: #f4f4f4;
+	}
 </style>

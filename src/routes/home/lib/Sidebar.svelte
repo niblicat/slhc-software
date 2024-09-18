@@ -16,7 +16,8 @@
 
 <style>
 	aside {
-		left: -100%;
+		width: 25%;
+		left: -25%;
 		transition: left 0.3s ease-in-out;
 		z-index: 100;
 	}
