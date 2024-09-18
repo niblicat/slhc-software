@@ -1,17 +1,15 @@
 <script lang="ts">
-    import type { PageData, ActionData } from './$types';
-	
-	// export let data: PageData;
+    import type { ActionData } from './$types';
+
     export let form: ActionData;
 </script>
 
-<h2>login</h2>
-{#if form?.invalidCred == true}
-    Invalid credentials
+<h2>Login</h2>
+{#if form?.invalidCred}
+    <p>Invalid credentials</p>
 {/if}
 <form method="POST">
-    <input name="username">
-    <input name="password" type="password">
-
-    <button>submit</button>
+    <input name="username" placeholder="Username" required>
+    <input name="password" type="password" placeholder="Password" required>
+    <button type="submit">Submit</button>
 </form>

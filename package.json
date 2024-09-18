@@ -30,6 +30,8 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@vercel/postgres": "^0.10.0"
+		"@vercel/postgres": "^0.10.0",
+		"cookie": "^0.6.0",
+		"uuid": "^10.0.0"
 	}
 }
