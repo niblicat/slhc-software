@@ -25,7 +25,7 @@ export const actions = {
                 httpOnly: true,
                 sameSite: 'lax',
                 secure: !dev, // Secure cookies in production
-                maxAge: 6 //60 * 60 // 1 hour
+                maxAge: 60 ///////60 * 60 // 1 hour ////// 60 * 60 * 24 * 7 // one week
             });
 
             throw redirect(302, '/home'); // Redirect to home
