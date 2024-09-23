@@ -101,13 +101,13 @@
       </DropdownHeader>
       <DropdownItem>Account Settings</DropdownItem>
       <DropdownDivider />
-      <DropdownItem href="/"><a class="hover:text-gray-700 hover:no-underline">Log Out</a></DropdownItem>
+      <DropdownItem href="/"><p class="hover:text-gray-700 hover:no-underline">Log Out</p></DropdownItem>
     </Dropdown>
 </Navbar>
 
 <!-- Overlay background for when sidebar is open-->
 {#if sidebarOpen}
-  <div class="fixed inset-0 bg-black opacity-50 z-40" on:click={toggleSidebar}></div>
+  <button class="fixed inset-0 bg-black opacity-50 z-40" on:click={toggleSidebar}></button>
 {/if}
 
 <!-- Sidebar -->
@@ -194,13 +194,6 @@
 	/* Show the dropdown menu */
 	.show {
 		display: block;
-	}
-
-	/* Input field for search in dropdown */
-	input {
-		width: 100%;
-		padding: 8px;
-		box-sizing: border-box;
 	}
 
 	.selected-info {
