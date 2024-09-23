@@ -14,6 +14,7 @@
     import { page } from '$app/stores';
     import { ChartPieSolid, GridSolid, MailBoxSolid, UserSolid, ArrowRightToBracketOutline, EditOutline } from 'flowbite-svelte-icons';
     import { fade } from 'svelte/transition';
+	import CustomAvatar from '../customavatar.svelte';
     let spanClass = 'flex-1 ms-3 whitespace-nowrap';
     $: activeUrl = $page.url.pathname;
     export let data;
@@ -70,6 +71,10 @@
         username: row.username,
         password: row.password
     })) as Array<{ username: string; password: string }>;
+
+    // TODO: get these from google auth
+    let name = "example name";
+    let email = "example email";
 </script>
 
 <Navbar rounded color="form" class="flex justify-between items-center">
@@ -91,18 +96,7 @@
     <NavBrand href="/" class="flex-grow text-center">
         <span class="text-2xl font-semibold dark:text-white">SIUE SLHC Employee Hearing Panel</span>
     </NavBrand>
-    <div class="flex items-center md:order-2">
-      <Avatar border id="avatar-menu" class="hover:border-blue-500 active:bg-gray-200 transition duration-150 ease-in-out cursor-pointer" />
-    </div>
-    <Dropdown placement="bottom" triggeredBy="#avatar-menu">
-      <DropdownHeader>
-        <span class="block text-sm">NAME??</span>
-        <span class="block truncate text-sm font-medium">EMAIL??</span>
-      </DropdownHeader>
-      <DropdownItem>Account Settings</DropdownItem>
-      <DropdownDivider />
-      <DropdownItem href="/"><p class="hover:text-gray-700 hover:no-underline">Log Out</p></DropdownItem>
-    </Dropdown>
+    <CustomAvatar name={name} email={email} />
 </Navbar>
 
 <!-- Overlay background for when sidebar is open-->
