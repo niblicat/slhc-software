@@ -1,14 +1,28 @@
 <svelte:head>
 	<link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.css" rel="stylesheet" />
+
 </svelte:head>
 
-<script lang="ts">
+<script lang="ts"  src="../path/to/flowbite/dist/flowbite.min.js">
+
+    import { Button, Search } from 'flowbite-svelte';
+    import { ChevronDownOutline, UserRemoveSolid } from 'flowbite-svelte-icons';
+    import { Navbar, NavBrand, NavLi, NavUl, NavHamburger, Avatar, Dropdown, DropdownItem, DropdownHeader, DropdownDivider } from 'flowbite-svelte';
+    import { Sidebar, SidebarBrand, SidebarCta, SidebarDropdownItem, SidebarDropdownWrapper, SidebarGroup, SidebarItem, SidebarWrapper } from 'flowbite-svelte';
+
+    import { page } from '$app/stores';
+    import { ChartPieSolid, GridSolid, MailBoxSolid, UserSolid, ArrowRightToBracketOutline, EditOutline } from 'flowbite-svelte-icons';
+    import { fade } from 'svelte/transition';
+    let spanClass = 'flex-1 ms-3 whitespace-nowrap';
+    $: activeUrl = $page.url.pathname;
     export let data;
 
-    import Navbar from './lib/Navbar.svelte';
-    import Sidebar from './lib/Sidebar.svelte';
-    import Link from './lib/Link.svelte';
-    import Input from './lib/DropdownInput.svelte';
+    // sidebar state and visibility 
+    let sidebarOpen = false;
+    const toggleSidebar = () => {
+        sidebarOpen = !sidebarOpen;
+    };
 
     // Dropdown menu state
     let nameMenuOpen = false;
@@ -33,12 +47,12 @@
     filteredYears = yearItems;
 
     // Functions to update selected user and year
-    const selectUser = (user) => {
+    const selectUser = (user: string) => {
         selectedUser = user;
         nameMenuOpen = false; 
     };
 
-    const selectYear = (year) => {
+    const selectYear = (year: string) => {
         selectedYear = year;
         yearMenuOpen = false; 
     };
@@ -58,47 +72,90 @@
     })) as Array<{ username: string; password: string }>;
 </script>
 
+<Navbar rounded color="form" class="flex justify-between items-center">
+    <div class="fixed top-4 left-4 z-50">
+        <button class="relative w-8 h-8" on:click={toggleSidebar}>
+            {#if sidebarOpen}
+                <!-- X icon when sidebar is open -->
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="absolute inset-0 w-full h-full">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            {:else}
+                <!-- Hamburger icon using SVG -->
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="absolute inset-0 w-full h-full">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                </svg>
+            {/if}
+        </button>
+    </div>
+    <NavBrand href="/" class="flex-grow text-center">
+        <span class="text-2xl font-semibold dark:text-white">SIUE SLHC Employee Hearing Panel</span>
+    </NavBrand>
+    <div class="flex items-center md:order-2">
+      <Avatar border id="avatar-menu" class="hover:border-blue-500 active:bg-gray-200 transition duration-150 ease-in-out cursor-pointer" />
+    </div>
+    <Dropdown placement="bottom" triggeredBy="#avatar-menu">
+      <DropdownHeader>
+        <span class="block text-sm">NAME??</span>
+        <span class="block truncate text-sm font-medium">EMAIL??</span>
+      </DropdownHeader>
+      <DropdownItem>Account Settings</DropdownItem>
+      <DropdownDivider />
+      <DropdownItem href="/"><a class="hover:text-gray-700 hover:no-underline">Log Out</a></DropdownItem>
+    </Dropdown>
+</Navbar>
 
-<Sidebar bind:open/>
-<Navbar bind:sidebar={open}/>
+<!-- Overlay background for when sidebar is open-->
+{#if sidebarOpen}
+  <div class="fixed inset-0 bg-black opacity-50 z-40" on:click={toggleSidebar}></div>
+{/if}
 
-<!---------------------- DROP DOWN BUTTONS ---------------------->
+<!-- Sidebar -->
+<div class={`fixed inset-0 z-40 transform transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} w-full h-screen`}>
+    <Sidebar {activeUrl} class="h-full">
+        <!-- Content wrapper inside the sidebar with padding to push content down -->
+        <SidebarWrapper class="h-full overflow-y-auto pt-16"> <!-- Add padding here -->
+            <SidebarGroup>
+                <SidebarItem label="Admin" href="#admin">
+                    <UserSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
+                </SidebarItem>
+                <SidebarItem label="Employees" href="#employees">
+                    <GridSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
+                </SidebarItem>
+                <SidebarItem label="Mailings" href="#mailings">
+                    <MailBoxSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
+                </SidebarItem>
+                <SidebarItem label="Insert Employees" href="#insert">
+                    <ArrowRightToBracketOutline class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
+                </SidebarItem>
+            </SidebarGroup>
+        </SidebarWrapper>
+    </Sidebar>
+</div>
+
 <div class="dropdown-container">
-    <!-- Employee Dropdown Section -->
-    <section class="dropdown">
-        <button on:click={() => nameMenuOpen = !nameMenuOpen} class="dropbtn">
-            {"Select User"} ▼
-        </button>
-
-        <div class:show={nameMenuOpen} class="dropdown-content">
-            <Input bind:inputValue={inputValueName} on:input={nameHandleInput} placeholder="Search Users..." />
-            {#if filteredNames.length > 0}
-                {#each filteredNames as user}
-                    <a href="#" on:click={() => selectUser(user)}>{user}</a>
-                {/each}
-            {:else}
-                <p>No results found</p>
-            {/if}
-        </div>
-    </section>
-
-    <!-- Year Dropdown Section -->
-    <section class="dropdown">
-        <button on:click={() => yearMenuOpen = !yearMenuOpen} class="dropbtn">
-            {"Select Year"} ▼
-        </button>
-
-        <div class:show={yearMenuOpen} class="dropdown-content">
-            <Input bind:inputValue={inputValueYear} on:input={yearHandleInput} placeholder="Search Years..." />
-            {#if filteredYears.length > 0}
-                {#each filteredYears as year}
-                    <a href="#" on:click={() => selectYear(year)}>{year}</a>
-                {/each}
-            {:else}
-                <p>No results found</p>
-            {/if}
-        </div>
-    </section>
+    <Button>{selectedUser}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
+    <Dropdown class="overflow-y-auto px-3 pb-3 text-sm h-44">
+    <div slot="header" class="p-3">
+        <Search size="md" bind:value={inputValueName}/>
+    </div>
+    {#each filteredNames as user}
+        <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+            <button on:click={() => selectUser(user)}>{user}</button>
+        </li>
+    {/each}
+    </Dropdown>
+    <Button>{selectedYear}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
+    <Dropdown class="overflow-y-auto px-3 pb-3 text-sm h-44">
+    <div slot="header" class="p-3">
+        <Search size="md" bind:value={inputValueYear}/>
+    </div>
+    {#each filteredYears as year}
+        <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+            <button on:click={() => selectYear(year)}>{year}</button>
+        </li>
+    {/each}
+    </Dropdown>
 </div>
 
 <!---------------------- DISPLAY INFO ---------------------->
@@ -134,37 +191,6 @@
         gap: 30px; 
 	}
 
-	/* Dropdown container */
-	.dropdown {
-		position: relative;
-		display: inline-block;
-		margin: 10px;
-	}
-
-	/* Dropdown button */
-	.dropbtn {
-		background-color: rgb(229, 229, 250);
-		color: black;
-		padding: 16px;
-		font-size: 16px;
-		border: none;
-		cursor: pointer;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		width: 300px; /* Adjust to make the buttons longer */
-	}
-
-	/* Dropdown content (hidden by default) */
-	.dropdown-content {
-		display: none;
-		position: absolute;
-		background-color: #f9f9f9;
-		min-width: 300px; /* Make sure dropdown content matches button width */
-		box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-		z-index: 1;
-	}
-
 	/* Show the dropdown menu */
 	.show {
 		display: block;
@@ -177,19 +203,41 @@
 		box-sizing: border-box;
 	}
 
-	/* Links inside the dropdown */
-	.dropdown-content a {
-		color: black;
-		padding: 12px 16px;
-		text-decoration: none;
-		display: block;
-		cursor: pointer;
-	}
-
 	.selected-info {
 		margin-top: 20px;
 		padding: 20px;
 		border: 1px solid #ccc;
 		background-color: #f4f4f4;
 	}
+
+    .overlay {
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40; /* Lower than the hamburger and sidebar */
+  }
+
+  /* Sidebar styles */
+  .sidebar-open {
+    transform: translateX(0);
+  }
+
+  .sidebar-closed {
+    transform: translateX(-100%);
+  }
+
+  .sidebar-content {
+    padding-top: 4rem; /* Adjust as needed based on the height of the hamburger */
+  }
+
+  .hamburger-icon, .x-icon {
+    width: 2rem; 
+    height: 2rem;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
 </style>
