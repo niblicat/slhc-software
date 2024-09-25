@@ -28,7 +28,7 @@ export const actions = {
                 maxAge: 60 ///////60 * 60 // 1 hour ////// 60 * 60 * 24 * 7 // one week
             });
 
-            throw redirect(302, '/home'); // Redirect to home
+            throw redirect(302, '/dashboard'); // Redirect to home
         } else {
             return fail(400, { invalidCred: true }); // Handle invalid credentials
         }
