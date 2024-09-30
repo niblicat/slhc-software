@@ -29,16 +29,24 @@
                 TEST {activeURLHash}
                 <SidebarGroup>
                     <SidebarItem label="Admin" href="#admin">
-                        <UserSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
+                        <svelte:fragment slot="icon">
+                            <UserSolid/>
+                        </svelte:fragment>
                     </SidebarItem>
                     <SidebarItem label="Employees" href="#employees">
-                        <GridSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
+                        <svelte:fragment slot="icon">
+                            <GridSolid/>
+                        </svelte:fragment>
                     </SidebarItem>
                     <SidebarItem label="Mailings" href="#mailings">
-                        <MailBoxSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
+                        <svelte:fragment slot="icon">
+                            <MailBoxSolid/>
+                        </svelte:fragment>
                     </SidebarItem>
                     <SidebarItem label="Insert Employees" href="#insert">
-                        <ArrowRightToBracketOutline class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
+                        <svelte:fragment slot="icon">
+                            <ArrowRightToBracketOutline/>
+                        </svelte:fragment>
                     </SidebarItem>
                 </SidebarGroup>
             </SidebarWrapper>
