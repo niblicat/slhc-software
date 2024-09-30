@@ -1,3 +1,9 @@
+<svelte:head>
+    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet"/>
+    <!-- <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.css" rel="stylesheet" /> -->
+</svelte:head>
+
+
 <script lang="ts">
     export let data;
 
