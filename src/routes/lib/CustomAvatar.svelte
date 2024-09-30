@@ -1,5 +1,6 @@
 <script lang="ts">
     import { Navbar, NavBrand, Avatar, Dropdown, DropdownItem, DropdownHeader, DropdownDivider } from 'flowbite-svelte';
+    
     export let name = "Name Missing";
     export let email = "null@example.com";
 

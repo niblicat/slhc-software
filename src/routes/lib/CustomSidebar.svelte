@@ -21,7 +21,7 @@
 
 <!-- Sidebar -->
 {#key sidebarOpen}
-<div out:slide={{ axis: 'x', easing: backIn }} in:slide={{ axis: 'x' }} class="sidebar-wrapper">
+<div out:slide={{ axis: 'x', easing: backIn }} in:slide={{ axis: 'x' }} class="sidebar-wrapper h-full">
     {#if sidebarOpen}
         <Sidebar {activeURLHash} {activeClass} {nonActiveClass} class="h-full pointer-events-auto">
             <!-- Content wrapper inside the sidebar with padding to push content down -->
@@ -59,7 +59,6 @@
     .sidebar-wrapper {
         left: 0px;
         width: 300px;
-        height: 100%;
         position: absolute;
         pointer-events: none;
         z-index: 3;
