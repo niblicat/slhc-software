@@ -35,7 +35,9 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@auth/sveltekit": "^1.5.3",
 		"@popperjs/core": "^2.11.8",
+		"@simplewebauthn/server": "^9.0.3",
 		"@vercel/postgres": "^0.10.0",
 		"cookie": "^0.6.0",
 		"flowbite": "^2.5.1",
