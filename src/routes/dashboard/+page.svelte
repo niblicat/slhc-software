@@ -8,9 +8,9 @@
     export let data;
 
     import { page } from '$app/stores';
-	import CustomNavbar from './lib/CustomNavbar.svelte';
-	import CustomSidebar from './lib/CustomSidebar.svelte';
-	import EmployeesPage from './lib/EmployeesPage.svelte';
+	import CustomNavbar from '../lib/CustomNavbar.svelte';
+	import CustomSidebar from '../lib/CustomSidebar.svelte';
+	import EmployeesPage from '../lib/EmployeesPage.svelte';
 
     $: activeURL = $page.url.pathname;
     $: activeURLHash = $page.url.hash;
