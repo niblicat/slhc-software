@@ -89,7 +89,7 @@
               Google
             </button>
           </div>
-          <div class="or-split">or</div>
+          <!-- <div class="or-split">or</div>
           <div class="wrapper-form">
             <div class="input-wrapper">
               <label for="client-password">Password</label>
@@ -105,7 +105,7 @@
             <button on:click={() => signIn("credentials", { password })}>
               Sign In with Credentials
             </button>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>

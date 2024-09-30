@@ -17,8 +17,8 @@
 	  {#if session} <!-- If a session exists, show user-specific links -->
 		<li><a href="/profile">Profile</a></li>
 		<li><button on:click={handleSignOut}>Sign Out</button></li>
-	  {:else} <!-- If no session, show login/signup links -->
-		<li><a href="/login">Sign In</a></li>
+	  {:else} <!-- If no session, show signin links -->
+		<li><a href="/signin">Sign In</a></li>
 	  {/if}
 	</ul>
   </nav>
