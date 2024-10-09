@@ -5,8 +5,9 @@
     export let email = "null@example.com";
 
     
-    function LogOut() {
-        // TODO: Implement logout functionality
+    function LogOut() { // actual signout page needs to work with google still
+        const form = document.getElementById('logout-form') as HTMLFormElement;
+        form?.submit();
     }
 </script>
 
@@ -23,3 +24,5 @@
     <DropdownDivider />
     <DropdownItem on:click={LogOut}><p class="hover:text-gray-700 hover:no-underline">Log Out</p></DropdownItem>
 </Dropdown>
+
+<form id="logout-form" action="/signout" method="POST" style="display: none;"></form>
