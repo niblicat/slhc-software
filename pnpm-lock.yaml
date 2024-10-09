@@ -23,12 +23,6 @@ importers:
       cookie:
         specifier: ^0.6.0
         version: 0.6.0
-      flowbite:
-        specifier: ^2.5.1
-        version: 2.5.1(rollup@4.21.3)
-      flowbite-svelte:
-        specifier: ^0.46.16
-        version: 0.46.16(rollup@4.21.3)(svelte@4.2.19)
       tailwind-merge:
         specifier: ^2.5.2
         version: 2.5.2
@@ -69,6 +63,12 @@ importers:
       eslint-plugin-svelte:
         specifier: ^2.36.0
         version: 2.44.0(eslint@9.10.0(jiti@1.21.6))(svelte@4.2.19)
+      flowbite:
+        specifier: ^2.5.1
+        version: 2.5.1(rollup@4.21.3)
+      flowbite-svelte:
+        specifier: ^0.46.16
+        version: 0.46.16(rollup@4.21.3)(svelte@4.2.19)
       flowbite-svelte-icons:
         specifier: ^1.6.1
         version: 1.6.1(svelte@4.2.19)(tailwind-merge@2.5.2)(tailwindcss@3.4.12)
