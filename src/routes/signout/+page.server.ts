@@ -22,7 +22,7 @@ export const actions = {
             maxAge: 0
         });
 
-        // Redirect the user to the login page
+        // Redirect the user to the signin page
         throw redirect(303, '/signin');
     }
 };

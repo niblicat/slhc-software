@@ -1,10 +1,16 @@
 <script lang="ts">
     import type { ActionData } from './$types';
+    import { redirect } from '@sveltejs/kit';
     
     export let form: ActionData;
+
+    function Login() {
+        redirect(200, '/signin');
+    }
+
 </script>
 
-<h2>Login</h2>
+<h2>SignIn</h2>
 {#if form?.invalidCred}
     <p>Invalid credentials</p>
 {/if}

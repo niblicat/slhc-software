@@ -11,6 +11,8 @@
 	import { Button } from 'flowbite-svelte';
     import CustomNavbar from './lib/CustomNavbar.svelte';
 	import { redirect } from '@sveltejs/kit';
+	import { signOut } from "@auth/sveltekit/client";
+
 
     $: activeURL = $page.url.pathname;
     $: activeURLHash = $page.url.hash;

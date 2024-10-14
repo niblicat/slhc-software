@@ -1,6 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import { sql } from "@vercel/postgres";
-import { POSTGRES_URL } from '$env/static/private';
+//import { POSTGRES_URL } from '$env/static/private';
 import type { PageServerLoad } from './$types';
 
 // const SESSION_COOKIE_NAME = 'session_id';
