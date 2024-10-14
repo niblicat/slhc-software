@@ -2,9 +2,10 @@
 
     import { Button, Search } from 'flowbite-svelte';
     import { ChevronDownOutline, UserRemoveSolid } from 'flowbite-svelte-icons';
-    import { Navbar, NavBrand, NavLi, NavUl, NavHamburger, Avatar, Dropdown, DropdownItem, DropdownHeader, DropdownDivider } from 'flowbite-svelte';
+    import { Dropdown } from 'flowbite-svelte';
 
     import { ChartPieSolid, GridSolid, MailBoxSolid, UserSolid, ArrowRightToBracketOutline, EditOutline } from 'flowbite-svelte-icons';
+    import { Navbar, NavBrand, NavLi, NavUl, NavHamburger, Avatar, DropdownItem, DropdownHeader, DropdownDivider } from 'flowbite-svelte';
 
     export let data;
 
@@ -69,30 +70,39 @@
     let email = "example email";
 </script>
 
-<div class="dropdown-container">
-    <Button>{selectedUser}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
-    <Dropdown class="overflow-y-auto px-3 pb-3 text-sm h-44">
+
+<div class="dropdown-container flex space-x-4">
+    <!-- User Dropdown -->
+    <Button class="bg-blue-200 hover:bg-blue-300 text-black" >{selectedUser}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
+    <Dropdown bind:open={nameMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
     <div slot="header" class="p-3">
         <Search size="md" bind:value={inputValueName}/>
     </div>
     {#each filteredNames as user}
         <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
-            <button on:click={() => selectUser(user)}>{user}</button>
+            <button type="button" class="w-full text-left" on:click={() => selectUser(user)}>
+                {user}
+            </button>
         </li>
     {/each}
     </Dropdown>
-    <Button>{selectedYear}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
-    <Dropdown class="overflow-y-auto px-3 pb-3 text-sm h-44">
+
+    <!-- Year Dropdown -->
+    <Button class="bg-blue-200 hover:bg-blue-300 text-black" >{selectedYear}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
+    <Dropdown bind:open={yearMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
     <div slot="header" class="p-3">
         <Search size="md" bind:value={inputValueYear}/>
     </div>
     {#each filteredYears as year}
         <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
-            <button on:click={() => selectYear(year)}>{year}</button>
+            <button type="button" class="w-full text-left" on:click={() => selectYear(year)}>
+                {year}
+            </button>
         </li>
     {/each}
     </Dropdown>
 </div>
+
 
 <!---------------------- DISPLAY INFO ---------------------->
 <section class="selected-info">
