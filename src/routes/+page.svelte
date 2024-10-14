@@ -38,7 +38,7 @@ sidebarOpen={sidebarOpen}
 on:toggle={toggleSidebar} 
 />
 
-<p>welcome to the home page :)</p>
+<p>welcome to the home page</p>
 
 <Button color="yellow" on:click={Login}>Login shortcut, don't know why this doesn't work</Button>
 <a href="/signin">login (for real)</a>
