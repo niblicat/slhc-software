@@ -5,14 +5,12 @@
 </svelte:head>
 
 <script lang="ts"  src="../path/to/flowbite/dist/flowbite.min.js">
-    // export let data;
+    export let data;
 
     import { page } from '$app/stores';
-	import { Button } from 'flowbite-svelte';
-    import CustomNavbar from './lib/CustomNavbar.svelte';
-	import { redirect } from '@sveltejs/kit';
-	import { signOut } from "@auth/sveltekit/client";
-
+	import CustomNavbar from '../lib/CustomNavbar.svelte';
+	import CustomSidebar from '../lib/CustomSidebar.svelte';
+	import EmployeesPage from '../lib/EmployeesPage.svelte';
 
     $: activeURL = $page.url.pathname;
     $: activeURLHash = $page.url.hash;
@@ -26,22 +24,34 @@
     // TODO: get these from google auth
     let name = "example name";
     let email = "example email";
-
-    function Login() {
-        redirect(200, '/signin');
-    }
 </script>
 
 <CustomNavbar
 name={name}
 email={email}
-hasSidebar={false} 
+hasSidebar={true} 
 sidebarOpen={sidebarOpen}
 on:toggle={toggleSidebar} 
 />
 
-<p>welcome to the home page :)</p>
+<CustomSidebar
+sidebarOpen={sidebarOpen}
+activeURLHash={activeURLHash}
+on:toggle={toggleSidebar}
+/>
 
-<Button color="yellow" on:click={Login}>Login shortcut, don't know why this doesn't work</Button>
-<a href="/signin">login (for real)</a>
+<p>These are for testing:</p>
+<p>activeURLHash: {activeURLHash}</p>
+<p>activeURL {activeURL}</p>
 
+
+{#if activeURLHash == "#employees"}
+    <EmployeesPage
+    {data}
+    />
+{:else if activeURLHash == "#mailings"}
+    You have mail
+{:else}
+    <!-- User who is not logged in should be redirected to home (no hash) -->
+    <p>You are on the dashboard. Use the sidebar to navigate to a page</p>
+{/if}
