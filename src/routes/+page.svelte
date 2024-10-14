@@ -1,50 +1,47 @@
 <svelte:head>
-    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet"/>
-    <!-- <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.css" rel="stylesheet" /> -->
+	<link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.css" rel="stylesheet" />
+
 </svelte:head>
 
+<script lang="ts"  src="../path/to/flowbite/dist/flowbite.min.js">
+    // export let data;
 
-<script lang="ts">
-    export let data;
+    import { page } from '$app/stores';
+	import { Button } from 'flowbite-svelte';
+    import CustomNavbar from './lib/CustomNavbar.svelte';
+	import { redirect } from '@sveltejs/kit';
+	import { signOut } from "@auth/sveltekit/client";
 
-    $: pets = data.pets.map(row => ({
-        name: row.name,
-        owner: row.owner
-    })) as Array<{ name: string; owner: string }>;
 
-    let checker = false;
-    function DoSomething() {
-        checker = !checker;
+    $: activeURL = $page.url.pathname;
+    $: activeURLHash = $page.url.hash;
+
+    // sidebar state and visibility 
+    let sidebarOpen = false;
+    const toggleSidebar = () => {
+        sidebarOpen = !sidebarOpen;
+    };
+
+    // TODO: get these from google auth
+    let name = "example name";
+    let email = "example email";
+
+    function Login() {
+        redirect(200, '/signin');
     }
-
-
 </script>
-<header class="flex justify-between bg-gray-200 p-2 items-center text-gray-600 border-b-2">
-	<nav class="flex">
-		<a class="block" href="/">Tester Page</a>
-		<a class="block" href="/home">Home</a>
-		<a class="block" href="/login">Login</a>
-	</nav> 
-	
-</header>
 
-<h1>welcome to the jungle</h1>
+<CustomNavbar
+name={name}
+email={email}
+hasSidebar={false} 
+sidebarOpen={sidebarOpen}
+on:toggle={toggleSidebar} 
+/>
 
-<button
-on:click={() => {
-    DoSomething();
-}}>
-do something
-</button>
+<p>welcome to the home page :)</p>
 
-<input type="checkbox" checked={checker}>
+<Button color="yellow" on:click={Login}>Login shortcut, don't know why this doesn't work</Button>
+<a href="/signin">login (for real)</a>
 
-<h2>database test</h2>
-<div>
-    <p>my pets (if you do not see any pets, something is wrong)</p>
-    <ul>
-        {#each pets as { name, owner } (name)}
-            <li><div>{name} - {owner}</div></li>
-        {/each}
-    </ul>
-</div>

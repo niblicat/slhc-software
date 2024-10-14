@@ -19,9 +19,10 @@
 </script>
 
 <!-- Navbar -->
-<Navbar rounded color="form" class="flex justify-between items-center">
+<Navbar rounded color="form" class="bg-blue-200 flex justify-between items-center">
     {#if hasSidebar}
-        <div class="fixed top-4 left-4 z-50">
+    <!-- the button is not aligning to the left for some reason... -->
+        <div class="fixed top-3 left-0 z-50">
             <Button class="relative w-8 h-10" on:click={sidebarToggleDispatch}>
                 {#if sidebarOpen}
                     <!-- X icon when sidebar is open -->
@@ -37,7 +38,7 @@
             </Button>
         </div>
     {/if}
-    <NavBrand href="/" class="flex-grow text-center">
+    <NavBrand href="/dashboard" class="flex-grow text-center">
         <span class="text-2xl font-semibold dark:text-white">SIUE SLHC Employee Hearing Panel</span>
     </NavBrand>
     <CustomAvatar name={name} email={email} />

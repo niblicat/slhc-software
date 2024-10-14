@@ -4,6 +4,8 @@ import cookie from 'cookie';
 
 const SESSION_COOKIE_NAME = 'session_id';
 
+// make this work with google! //
+
 export const actions = {
     default: async ({ cookies }) => {
         // Get session ID from the cookie
@@ -20,7 +22,7 @@ export const actions = {
             maxAge: 0
         });
 
-        // Redirect the user to the login page
-        throw redirect(303, '/login');
+        // Redirect the user to the signin page
+        throw redirect(303, '/signin');
     }
 };

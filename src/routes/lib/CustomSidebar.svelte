@@ -21,7 +21,7 @@
 
 <!-- Sidebar -->
 {#key sidebarOpen}
-<div out:slide={{ axis: 'x', easing: backIn }} in:slide={{ axis: 'x' }} class="sidebar-wrapper">
+<div out:slide={{ axis: 'x', easing: backIn }} in:slide={{ axis: 'x' }} class="sidebar-wrapper h-full">
     {#if sidebarOpen}
         <Sidebar {activeURLHash} {activeClass} {nonActiveClass} class="h-full pointer-events-auto">
             <!-- Content wrapper inside the sidebar with padding to push content down -->
@@ -29,16 +29,24 @@
                 TEST {activeURLHash}
                 <SidebarGroup>
                     <SidebarItem label="Admin" href="#admin">
-                        <UserSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
+                        <svelte:fragment slot="icon">
+                            <UserSolid/>
+                        </svelte:fragment>
                     </SidebarItem>
                     <SidebarItem label="Employees" href="#employees">
-                        <GridSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
+                        <svelte:fragment slot="icon">
+                            <GridSolid/>
+                        </svelte:fragment>
                     </SidebarItem>
                     <SidebarItem label="Mailings" href="#mailings">
-                        <MailBoxSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
+                        <svelte:fragment slot="icon">
+                            <MailBoxSolid/>
+                        </svelte:fragment>
                     </SidebarItem>
                     <SidebarItem label="Insert Employees" href="#insert">
-                        <ArrowRightToBracketOutline class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
+                        <svelte:fragment slot="icon">
+                            <ArrowRightToBracketOutline/>
+                        </svelte:fragment>
                     </SidebarItem>
                 </SidebarGroup>
             </SidebarWrapper>
@@ -51,7 +59,6 @@
     .sidebar-wrapper {
         left: 0px;
         width: 300px;
-        height: 100%;
         position: absolute;
         pointer-events: none;
         z-index: 3;
