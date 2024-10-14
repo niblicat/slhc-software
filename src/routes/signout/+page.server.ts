@@ -23,6 +23,6 @@ export const actions = {
         });
 
         // Redirect the user to the signin page
-        throw redirect(303, '/signin');
+        throw redirect(303, '/');
     }
 };
