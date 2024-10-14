@@ -19,7 +19,7 @@
 </script>
 
 <!-- Navbar -->
-<Navbar rounded color="form" class="bg-blue-200 flex justify-between items-center">
+<Navbar color="form" class="bg-blue-200 flex justify-between items-center">
     {#if hasSidebar}
     <!-- the button is not aligning to the left for some reason... -->
         <div class="fixed top-3 left-0 z-50">
