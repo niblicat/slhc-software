@@ -1,6 +1,7 @@
 // interpret.ts
 // Used to intepret user data and detect if there has been STS
 
+import { base } from "$service-worker";
 import { left } from "@popperjs/core";
 import { error } from "@sveltejs/kit";
 
@@ -15,26 +16,24 @@ function findAverage(...args: number[]) {
 
 // used to identify hearing anomolies for each ear
 enum AnomolyStatus {
-    none,
-    base,
-    same,
-    better,
-    worse,
+    None,
+    Base,
+    Same,
+    Better,
+    Worse,
     STS,
-    warning
+    Warning
 }
 
 class EarAnomolyStatuses {
     leftStatus: AnomolyStatus;
     rightStatus: AnomolyStatus;
-    baseYear: number;
-    comparedYear: number;
+    reportYear: number;
 
-    constructor(leftStatus: AnomolyStatus, rightStatus: AnomolyStatus, baseYear: number, comparedYear: number) {
+    constructor(leftStatus: AnomolyStatus, rightStatus: AnomolyStatus, reportYear: number) {
         this.leftStatus = leftStatus;
         this.rightStatus = rightStatus;
-        this.baseYear = baseYear;
-        this.comparedYear = comparedYear;
+        this.reportYear = reportYear;
     }
 }
 
@@ -85,44 +84,93 @@ class UserHearingScreeningHistory {
      * GetStatusForEar
      * Returns the anomoly status for an ear given data for two years
      */
-    private GetStatusForEar(beforeEarData: HearingDataOneEar, afterEarData: HearingDataOneEar) {
+    private GetStatusForEar(baselineEarData: HearingDataOneEar, beforeEarData: HearingDataOneEar, afterEarData: HearingDataOneEar): AnomolyStatus {
         // Get the status for one ear
         let unweighedAverageChange = this.GetAverageDecibalChangeForOneEar(beforeEarData, afterEarData);
-        let weighedAverageChange = this.GetAverageDecibalChangeForOneEarForMainLevels(beforeEarData, afterEarData);
+        let weighedAverageChange = this.GetAverageDecibalChangeForOneEarForMainLevels(baselineEarData, afterEarData);
 
         // a larger value is worse
         if (weighedAverageChange >= 10) return AnomolyStatus.STS;
-        if (unweighedAverageChange >= 10) return AnomolyStatus.warning;
-        else if (unweighedAverageChange >= 5) return AnomolyStatus.worse;
-        else if (unweighedAverageChange == 0) return AnomolyStatus.same;
-        else return AnomolyStatus.better;
+        if (unweighedAverageChange >= 10) return AnomolyStatus.Warning;
+        else if (unweighedAverageChange >= 5) return AnomolyStatus.Worse;
+        else if (unweighedAverageChange == 0) return AnomolyStatus.Same;
+        else return AnomolyStatus.Better;
     }
 
     /**
      * GenerateHearingReport
+     * Returns an array of EarAnomolyStatuses for each year
      */
-    public GenerateHearingReport() {
+    public GenerateHearingReport(): EarAnomolyStatuses[] {
         let arrayLength = this.screenings.length;
         if (arrayLength == 0) throw error; // TODO: throw specific error
 
         let reportArray: EarAnomolyStatuses[] = [];
-        let bestScreening = this.screenings[0];
+        // Record the average for each each and move the index when the average is Better
+        let bestLeftEarIndex = 0;
+        let bestLeftEarAverage = Infinity;
+        let bestRightEarIndex = 0;
+        let bestRightEarAverage = Infinity;
+
+        bestLeftEarAverage = this.GetAverageDecibalsForSTSRangeForOneEar(this.screenings[0].leftEar);
+        bestRightEarAverage = this.GetAverageDecibalsForSTSRangeForOneEar(this.screenings[0].rightEar);
 
         // push base status for the first hearing screening
-        reportArray.push(new EarAnomolyStatuses(AnomolyStatus.base, AnomolyStatus.base, -1, this.screenings[0].year));
+        reportArray.push(new EarAnomolyStatuses(AnomolyStatus.Base, AnomolyStatus.Base, this.screenings[0].year));
 
         for (var i = 1; i < arrayLength; i++) {
             let beforeYear: HearingScreening = this.screenings[i - 1];
             let afterYear: HearingScreening = this.screenings[i];
 
-            let leftAnomolyStatus = this.GetStatusForEar(beforeYear.leftEar, afterYear.leftEar);
-            let rightAnomolyStatus = this.GetStatusForEar(beforeYear.rightEar, afterYear.rightEar);
+            let newLeftEarAverage = this.GetAverageDecibalsForSTSRangeForOneEar(this.screenings[i].leftEar);
+            let newRightEarAverage = this.GetAverageDecibalsForSTSRangeForOneEar(this.screenings[i].rightEar);
 
-            let currentAnomolyStatuses = new EarAnomolyStatuses(leftAnomolyStatus, rightAnomolyStatus, beforeYear.year, afterYear.year);
+            if (this.ShouldUpdateBaseline(bestLeftEarAverage, newLeftEarAverage)) {
+                bestLeftEarIndex = i;
+                bestLeftEarAverage = newLeftEarAverage;
+            }
+            if (this.ShouldUpdateBaseline(bestRightEarAverage, newRightEarAverage)) {
+                bestRightEarIndex = i;
+                bestRightEarAverage = newRightEarAverage;
+            }
+
+            let baselineLeftScreening = this.screenings[bestLeftEarIndex];
+            let baselineRightScreening = this.screenings[bestRightEarIndex];
+
+            let leftAnomolyStatus = this.GetStatusForEar(baselineLeftScreening.leftEar, beforeYear.leftEar, afterYear.leftEar);
+            let rightAnomolyStatus = this.GetStatusForEar(baselineRightScreening.rightEar, beforeYear.rightEar, afterYear.rightEar);
+
+            let currentAnomolyStatuses = new EarAnomolyStatuses(leftAnomolyStatus, rightAnomolyStatus, afterYear.year);
             reportArray.push(currentAnomolyStatuses);
-
         }
-        // TODO: generate a list of anomoly statuses for each year
+        return reportArray;
+    }
+
+    /**
+     * UpdateBaselineForOneEar
+     * OSHA does not specify a definition of significant
+        improvement. However, an example in Appendix F of the Hearing Conservation
+        Amendment illustrates revision of the baseline after an improvement of 5 dB in
+        the average of hearing thresholds at 2, 3, and 4 kHz.
+     */
+    private ShouldUpdateBaseline(currentAverage: number, newAverage: number): boolean {
+        if (newAverage <= currentAverage - 5) return true;
+        else return false;
+    }
+
+    /**
+     * GetAverageDecibalsForSTSRangeForOneEar
+     * Used to find the average decibals in a specific ear
+     * Useful for changing baseline if average improves
+     */
+    private GetAverageDecibalsForSTSRangeForOneEar(hdata: HearingDataOneEar): number {
+        let hz2000 = hdata.hz2000;
+        let hz3000 = hdata.hz3000;
+        let hz4000 = hdata.hz4000;
+        
+        let average = findAverage(hz2000, hz3000, hz4000);
+        
+        return average;
     }
 
     /**
@@ -141,6 +189,7 @@ class UserHearingScreeningHistory {
 
         return average;
     }
+
     /**
      * GetAverageDecibalChangeSTS
      * Used to find the average decibal change in a specific ear to detect overall hearing changes
