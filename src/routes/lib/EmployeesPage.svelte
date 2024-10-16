@@ -21,6 +21,10 @@
     // Selected user and year
     let selectedUser = "No user selected";
     let selectedYear = "No year selected";
+    let selectedEmail = "No selection made";
+    let selectedDOB = "No selection made";
+    let selectAge = "No selection made";
+    let selectedStatus = "No selection made";
 
     let inputValueName = "";
     let inputValueYear = "";
@@ -104,22 +108,11 @@
 
 
 <!---------------------- DISPLAY INFO ---------------------->
-<section class="selected-info">
-	<h1>Selected Information:</h1>
+<section class="selected-info relative ml-16 text-xl">
     <p>Year: {selectedYear}</p>
 	<p>User: {selectedUser}</p>
-    <p>Email: ---</p>
-    <p>Date of Birth: ---</p>
-    <p>Age: ---</p>
-    <p>Employment Status: ---</p>
+    <p>Email: {selectedEmail}</p>
+    <p>Date of Birth: {selectedDOB}</p>
+    <p>Age: {selectAge}</p>
+    <p>Employment Status: {selectedStatus}</p>
 </section>
-
-<!-- User stuff i didn't touch -->
-<h1>Users</h1>
-<div>
-    <ul>
-        {#each users as { username, password } (username)}
-            <li><div>{username} - {password}</div></li>
-        {/each}
-    </ul>
-</div>
