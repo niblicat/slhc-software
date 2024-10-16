@@ -70,7 +70,7 @@
 </script>
 
 
-<div class="dropdown-container flex space-x-4">
+<div class="relative dropdown-container flex space-x-4 justify-center"> <!-- <div class="relative dropdown-container flex items-center justify-center min-h-screen space-y-4"> -->
     <!-- User Dropdown -->
     <Button class="bg-blue-200 hover:bg-blue-300 text-black" >{selectedUser}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
     <Dropdown bind:open={nameMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
