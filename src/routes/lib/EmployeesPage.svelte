@@ -48,8 +48,7 @@
         selectedYear = year;
         yearMenuOpen = false; 
     };
-
-    // TO DO: NEED TO FIX THE SEARCH FEATURE IN DROP DOWNS!
+    
     const nameHandleInput = () => {
         filteredNames = employeeItems.filter(item => item.toLowerCase().includes(inputValueName.toLowerCase()));
     };
@@ -79,7 +78,7 @@
     <Button class="bg-blue-200 hover:bg-blue-300 text-black" >{selectedUser}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
     <Dropdown bind:open={nameMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
     <div slot="header" class="p-3">
-        <Search size="md" bind:value={inputValueName}/>
+        <Search size="md" bind:value={inputValueName} on:input={nameHandleInput}/>
     </div>
     {#each filteredNames as user}
         <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
@@ -94,7 +93,7 @@
     <Button class="bg-blue-200 hover:bg-blue-300 text-black" >{selectedYear}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
     <Dropdown bind:open={yearMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
     <div slot="header" class="p-3">
-        <Search size="md" bind:value={inputValueYear}/>
+        <Search size="md" bind:value={inputValueYear} on:input={yearHandleInput}/>
     </div>
     {#each filteredYears as year}
         <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
