@@ -2,8 +2,13 @@
 // Used to intepret user data and detect if there has been STS
 
 import { base } from "$service-worker";
-import { left } from "@popperjs/core";
 import { error } from "@sveltejs/kit";
+
+enum PersonSex {
+    Female,
+    Male,
+    Other
+}
 
 function findAverage(...args: number[]) {
     let sum = 0;
@@ -71,23 +76,25 @@ class HearingScreening {
 
 class UserHearingScreeningHistory {
     age: number;
+    sex: PersonSex;
     currentYear: number;
     screenings: Array<HearingScreening>;
 
-    constructor(age: number, currentYear: number, screenings: Array<HearingScreening>) {
+    constructor(age: number, personSex: PersonSex, currentYear: number, screenings: Array<HearingScreening>) {
         this.age = age;
         this.currentYear = currentYear;
         this.screenings = screenings;
+        this.sex = personSex;
     }
 
     /**
      * GetStatusForEar
      * Returns the anomoly status for an ear given data for two years
      */
-    private GetStatusForEar(baselineEarData: HearingDataOneEar, beforeEarData: HearingDataOneEar, afterEarData: HearingDataOneEar): AnomolyStatus {
+    private GetStatusForEar(baselineEarData: HearingDataOneEar, beforeEarData: HearingDataOneEar, afterEarData: HearingDataOneEar, correction: HertzCorrectionForAge): AnomolyStatus {
         // Get the status for one ear
         let unweighedAverageChange = this.GetAverageDecibalChangeForOneEar(beforeEarData, afterEarData);
-        let weighedAverageChange = this.GetAverageDecibalChangeForOneEarForMainLevels(baselineEarData, afterEarData);
+        let weighedAverageChange = this.GetAverageDecibalChangeForOneEarForMainLevels(baselineEarData, afterEarData, correction);
 
         // a larger value is worse
         if (weighedAverageChange >= 10) return AnomolyStatus.STS;
@@ -95,6 +102,48 @@ class UserHearingScreeningHistory {
         else if (unweighedAverageChange >= 5) return AnomolyStatus.Worse;
         else if (unweighedAverageChange == 0) return AnomolyStatus.Same;
         else return AnomolyStatus.Better;
+    }
+
+    /**
+     * GetAgeCorrectiveDecibalAdjustment
+     * Returns the decibal adjustment given a baseline and current age
+     */
+    private GetAgeCorrectiveDecibalAdjustment(baselineAge: number): HertzCorrectionForAge {
+        function GetRowValue(val: number): number {
+            return Math.min(Math.max(val, 20), 60);
+        }
+        let correctionTable: Array<HertzCorrectionForAge>;
+        switch (this.sex) {
+            case PersonSex.Female:
+                correctionTable = AGE_CORRECTION_TABLE_FEMALE;
+                break;
+            case PersonSex.Male:
+                correctionTable = AGE_CORRECTION_TABLE_MALE;
+                break;
+            default:
+                correctionTable = AGE_CORRECTION_TABLE_MALE;
+                break;
+        }
+        // need to clamp values between 20 and 60 because the age table does not
+        // have data for outside that range
+        let baselineAgeRowValue = GetRowValue(baselineAge);
+        let currentAgeRowValue = GetRowValue(this.age);
+
+        let baselineCorrection: HertzCorrectionForAge | undefined = correctionTable.find((i) => i.age == baselineAge);
+        let currentCorrection: HertzCorrectionForAge | undefined = correctionTable.find((i) => i.age == this.age);
+        if (!baselineCorrection) throw error; // TODO: specific error
+        if (!currentCorrection) throw error; // TODO: specific error
+
+        let difference: HertzCorrectionForAge = { 
+            age: 0,
+            hz1000: (currentCorrection.hz1000 - baselineCorrection.hz1000),
+            hz2000: (currentCorrection.hz2000 - baselineCorrection.hz2000),
+            hz3000: (currentCorrection.hz3000 - baselineCorrection.hz3000),
+            hz4000: (currentCorrection.hz4000 - baselineCorrection.hz4000),
+            hz6000: (currentCorrection.hz6000 - baselineCorrection.hz6000)
+        }
+        
+        return difference;
     }
 
     /**
@@ -112,18 +161,18 @@ class UserHearingScreeningHistory {
         let bestRightEarIndex = 0;
         let bestRightEarAverage = Infinity;
 
-        bestLeftEarAverage = this.GetAverageDecibalsForSTSRangeForOneEar(this.screenings[0].leftEar);
-        bestRightEarAverage = this.GetAverageDecibalsForSTSRangeForOneEar(this.screenings[0].rightEar);
+        bestLeftEarAverage = this.GetAverageHertzForSTSRangeForOneEar(this.screenings[0].leftEar);
+        bestRightEarAverage = this.GetAverageHertzForSTSRangeForOneEar(this.screenings[0].rightEar);
 
         // push base status for the first hearing screening
         reportArray.push(new EarAnomolyStatuses(AnomolyStatus.Base, AnomolyStatus.Base, this.screenings[0].year));
 
         for (var i = 1; i < arrayLength; i++) {
-            let beforeYear: HearingScreening = this.screenings[i - 1];
-            let afterYear: HearingScreening = this.screenings[i];
+            let previousScreening: HearingScreening = this.screenings[i - 1];
+            let afterScreening: HearingScreening = this.screenings[i];
 
-            let newLeftEarAverage = this.GetAverageDecibalsForSTSRangeForOneEar(this.screenings[i].leftEar);
-            let newRightEarAverage = this.GetAverageDecibalsForSTSRangeForOneEar(this.screenings[i].rightEar);
+            let newLeftEarAverage = this.GetAverageHertzForSTSRangeForOneEar(this.screenings[i].leftEar);
+            let newRightEarAverage = this.GetAverageHertzForSTSRangeForOneEar(this.screenings[i].rightEar);
 
             if (this.ShouldUpdateBaseline(bestLeftEarAverage, newLeftEarAverage)) {
                 bestLeftEarIndex = i;
@@ -137,10 +186,17 @@ class UserHearingScreeningHistory {
             let baselineLeftScreening = this.screenings[bestLeftEarIndex];
             let baselineRightScreening = this.screenings[bestRightEarIndex];
 
-            let leftAnomolyStatus = this.GetStatusForEar(baselineLeftScreening.leftEar, beforeYear.leftEar, afterYear.leftEar);
-            let rightAnomolyStatus = this.GetStatusForEar(baselineRightScreening.rightEar, beforeYear.rightEar, afterYear.rightEar);
+            // get the age that the user was at during baseline
+            let baselineLeftAge = baselineLeftScreening.year - this.currentYear + this.age;
+            let baselineRightAge = baselineRightScreening.year - this.currentYear + this.age;
 
-            let currentAnomolyStatuses = new EarAnomolyStatuses(leftAnomolyStatus, rightAnomolyStatus, afterYear.year);
+            let ageCorrectionLeft = this.GetAgeCorrectiveDecibalAdjustment(baselineLeftAge);
+            let ageCorrectionRight = this.GetAgeCorrectiveDecibalAdjustment(baselineRightAge);
+
+            let leftAnomolyStatus = this.GetStatusForEar(baselineLeftScreening.leftEar, previousScreening.leftEar, afterScreening.leftEar, ageCorrectionLeft);
+            let rightAnomolyStatus = this.GetStatusForEar(baselineRightScreening.rightEar, previousScreening.rightEar, afterScreening.rightEar, ageCorrectionRight);
+
+            let currentAnomolyStatuses = new EarAnomolyStatuses(leftAnomolyStatus, rightAnomolyStatus, afterScreening.year);
             reportArray.push(currentAnomolyStatuses);
         }
         return reportArray;
@@ -159,11 +215,11 @@ class UserHearingScreeningHistory {
     }
 
     /**
-     * GetAverageDecibalsForSTSRangeForOneEar
-     * Used to find the average decibals in a specific ear
+     * GetAverageHertzForSTSRangeForOneEar
+     * Used to find the average hertz in a specific ear
      * Useful for changing baseline if average improves
      */
-    private GetAverageDecibalsForSTSRangeForOneEar(hdata: HearingDataOneEar): number {
+    private GetAverageHertzForSTSRangeForOneEar(hdata: HearingDataOneEar): number {
         let hz2000 = hdata.hz2000;
         let hz3000 = hdata.hz3000;
         let hz4000 = hdata.hz4000;
@@ -178,12 +234,12 @@ class UserHearingScreeningHistory {
      * Used to find the average decibal change in a specific ear to detect STS
      * STS is detected if there was an average of 10+ dB change
      */
-    private GetAverageDecibalChangeForOneEarForMainLevels(hdata1: HearingDataOneEar, hdata2: HearingDataOneEar): number {
+    private GetAverageDecibalChangeForOneEarForMainLevels(hdata1: HearingDataOneEar, hdata2: HearingDataOneEar, ageCorrection: HertzCorrectionForAge): number {
         // ONLY CHECK 2k, 3k, 4k
         // TODO: use age table?
-        let diff2000 = hdata2.hz2000 - hdata1.hz2000;
-        let diff3000 = hdata2.hz3000 - hdata1.hz3000;
-        let diff4000 = hdata2.hz4000 - hdata1.hz4000;
+        let diff2000 = hdata2.hz2000 - hdata1.hz2000 - ageCorrection.hz2000;
+        let diff3000 = hdata2.hz3000 - hdata1.hz3000 - ageCorrection.hz3000;
+        let diff4000 = hdata2.hz4000 - hdata1.hz4000 - ageCorrection.hz4000;
 
         let average = findAverage(diff2000, diff3000, diff4000);
 
@@ -195,7 +251,6 @@ class UserHearingScreeningHistory {
      * Used to find the average decibal change in a specific ear to detect overall hearing changes
      */
     private GetAverageDecibalChangeForOneEar(hdata1: HearingDataOneEar, hdata2: HearingDataOneEar): number {
-        // ONLY CHECK 2k, 3k, 4k
         // TODO: use age table?
         let diff500 = hdata2.hz500 - hdata1.hz1000;
         let diff1000 = hdata2.hz1000 - hdata1.hz1000;
