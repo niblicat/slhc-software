@@ -1,10 +1,10 @@
 <script lang="ts">
-    import { Navbar, NavBrand, NavLi, NavUl, NavHamburger, Avatar, Dropdown, DropdownItem, DropdownHeader, DropdownDivider } from 'flowbite-svelte';
+    import { Navbar, NavBrand } from 'flowbite-svelte';
+    import { NavLi, NavUl, NavHamburger, Avatar, Dropdown, DropdownItem, DropdownHeader, DropdownDivider } from 'flowbite-svelte'; //we dont need these i don't think
     import { Button } from 'flowbite-svelte';
 
     import CustomAvatar from './CustomAvatar.svelte';
 	import { createEventDispatcher } from 'svelte';
-
 
     const dispatch = createEventDispatcher();
 
@@ -21,7 +21,6 @@
 <!-- Navbar -->
 <Navbar color="form" class="bg-blue-200 flex justify-between items-center">
     {#if hasSidebar}
-    <!-- the button is not aligning to the left for some reason... -->
         <div class="fixed top-3 left-0 z-50">
             <Button class="relative w-8 h-10" on:click={sidebarToggleDispatch}>
                 {#if sidebarOpen}

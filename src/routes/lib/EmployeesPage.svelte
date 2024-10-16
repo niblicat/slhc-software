@@ -3,7 +3,9 @@
     import { Button, Search } from 'flowbite-svelte';
     import { ChevronDownOutline, UserRemoveSolid } from 'flowbite-svelte-icons';
     import { Dropdown } from 'flowbite-svelte';
+    import { sql } from '@vercel/postgres';
 
+    // i dont think we need these below
     import { ChartPieSolid, GridSolid, MailBoxSolid, UserSolid, ArrowRightToBracketOutline, EditOutline } from 'flowbite-svelte-icons';
     import { Navbar, NavBrand, NavLi, NavUl, NavHamburger, Avatar, DropdownItem, DropdownHeader, DropdownDivider } from 'flowbite-svelte';
 
@@ -47,6 +49,7 @@
         yearMenuOpen = false; 
     };
 
+    // TO DO: NEED TO FIX THE SEARCH FEATURE IN DROP DOWNS!
     const nameHandleInput = () => {
         filteredNames = employeeItems.filter(item => item.toLowerCase().includes(inputValueName.toLowerCase()));
     };
