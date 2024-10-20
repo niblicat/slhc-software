@@ -14,9 +14,7 @@
 
     // sidebar state and visibility 
     let sidebarOpen = false;
-    const toggleSidebar = () => {
-        sidebarOpen = !sidebarOpen;
-    };
+    const toggleSidebar = () => { sidebarOpen = !sidebarOpen; };
 
     // Dropdown menu state
     let nameMenuOpen = false;
@@ -25,6 +23,10 @@
     // Selected user and year
     let selectedUser = "No user selected";
     let selectedYear = "No year selected";
+    let selectedEmail = "No selection made";
+    let selectedDOB = "No selection made";
+    let selectAge = "No selection made";
+    let selectedStatus = "No selection made";
 
     let inputValueName = "";
     let inputValueYear = "";
@@ -140,7 +142,7 @@
 </script>
 
 
-<div class="dropdown-container flex space-x-4">
+<div class="relative dropdown-container flex space-x-4 justify-center"> 
     <!-- User Dropdown -->
     <Button class="bg-blue-200 hover:bg-blue-300 text-black" >{selectedUser}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
     <Dropdown bind:open={nameMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
@@ -174,24 +176,42 @@
 
 
 <!---------------------- DISPLAY INFO ---------------------->
-<section class="selected-info">
-	<h1>Selected Information:</h1>
-    <p>Year: {selectedYear}</p>
-	<p>User: {selectedUser}</p>
-    <p>Email: ---</p>
-    <p>Date of Birth: ---</p>
-    <p>Age: ---</p>
-    <p>Employment Status: ---</p>
-</section>
+<div class="flex-container">
+    <!-- Information Section -->
+    <section class="selected-info text-xl">
+        <p>Year: {selectedYear}</p>
+        <p>User: {selectedUser}</p>
+        <p>Email: {selectedEmail}</p>
+        <p>Date of Birth: {selectedDOB}</p>
+        <p>Age: {selectAge}</p>
+        <p>Employment Status: {selectedStatus}</p>
+    </section>
 
-<div class="chart-container">
-    <canvas id="scatterPlot" width="400" height="400"></canvas>
+    <!-- Chart Section -->
+    <div class="chart-container">
+        <canvas id="scatterPlot" width="400" height="400"></canvas>
+    </div>
 </div>
 
+
 <style>
+    .flex-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;  /* Align items to the top */
+        gap: 10px; 
+    }
+
+    .selected-info {
+        flex: 1; 
+        margin-left: 50px; 
+        margin-top: 50px; 
+        max-width: 500px; 
+    }
     .chart-container {
-        position: relative;
-        height: 400px;
-        width: 400px;
+        flex: 1;  
+        margin-right: 50px; 
+        margin-top: 50px; 
+        max-width: 550px; 
     }
 </style>

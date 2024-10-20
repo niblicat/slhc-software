@@ -1,6 +1,5 @@
 <script lang="ts">
-    import { Navbar, NavBrand } from 'flowbite-svelte';
-    import { NavLi, NavUl, NavHamburger, Avatar, Dropdown, DropdownItem, DropdownHeader, DropdownDivider } from 'flowbite-svelte'; //we dont need these i don't think
+    import { Navbar, NavBrand, NavLi, NavUl, NavHamburger, Avatar, Dropdown, DropdownItem, DropdownHeader, DropdownDivider } from 'flowbite-svelte';
     import { Button } from 'flowbite-svelte';
 
     import CustomAvatar from './CustomAvatar.svelte';
@@ -21,7 +20,7 @@
 <!-- Navbar -->
 <Navbar color="form" class="bg-blue-200 flex justify-between items-center">
     {#if hasSidebar}
-        <div class="fixed top-3 left-0 z-50">
+        <div class="absolute top-2.5 left-0 z-50">
             <Button class="relative w-8 h-10" on:click={sidebarToggleDispatch}>
                 {#if sidebarOpen}
                     <!-- X icon when sidebar is open -->
@@ -38,7 +37,7 @@
         </div>
     {/if}
     <NavBrand href="/dashboard" class="flex-grow text-center">
-        <span class="text-2xl font-semibold dark:text-white">SIUE SLHC Employee Hearing Panel</span>
+        <span class="relative flex-1 text-3xl font-bold dark:text-white">SIUE SLHC Employee Hearing Panel</span>
     </NavBrand>
     <CustomAvatar name={name} email={email} />
 </Navbar>
