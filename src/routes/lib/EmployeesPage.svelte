@@ -3,9 +3,8 @@
     import { Button, Search } from 'flowbite-svelte';
     import { ChevronDownOutline, UserRemoveSolid } from 'flowbite-svelte-icons';
     import { Dropdown } from 'flowbite-svelte';
+    import ScatterPlot from './ScatterPlot.svelte';
     import { sql } from '@vercel/postgres';
-    import { onMount } from "svelte";
-    import { Chart, registerables } from 'chart.js';
 
     // chart
     let chart: any;
@@ -15,6 +14,13 @@
     // sidebar state and visibility 
     let sidebarOpen = false;
     const toggleSidebar = () => { sidebarOpen = !sidebarOpen; };
+
+    // Chart Selection
+    let isRightEar = true; // Initially showing the right ear chart
+
+    const toggleChart = (ear: string) => {
+        isRightEar = ear === 'right';
+    };
 
     // Dropdown menu state
     let nameMenuOpen = false;
@@ -27,6 +33,7 @@
     let selectedDOB = "No selection made";
     let selectAge = "No selection made";
     let selectedStatus = "No selection made";
+    let STSstatus = "No data selection";
 
     let inputValueName = "";
     let inputValueYear = "";
@@ -75,70 +82,10 @@
     let email = "example email";
 
     // Data for scatter plot
-    const baselineHearingData = [10,10,15,10,15,20,25];
-    const newHearingData = [15, 20, 25, 30, 35, 40, 45];
-
-    // Custom tick values
-    const customTicksX = [500, 1000, 2000, 3000, 4000, 6000, 8000];
-    const customTicksY = [100, 90, 80, 70, 60, 50, 40, 30, 20, 10, 0, -10];
-
-    // Initialize chart on mount
-    onMount(() => {
-        Chart.register(...registerables); // Register necessary components
-
-        const ctx = document.getElementById("scatterPlot") as HTMLCanvasElement;
-        chart = new Chart(ctx, {
-            type: "scatter", // Scatter plot type
-            data: {
-                datasets: [{
-                        label: 'L/R Baseline',
-                        data: customTicksX.map((p, i) => ({ x: p, y: baselineHearingData[i] })),
-                        backgroundColor: 'rgba(75, 192, 192, 1)',
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        borderWidth: 1,
-                    },
-                    {
-                        label: 'L/R Current Year Data',
-                        data: customTicksX.map((p, i) => ({ x: p, y: newHearingData[i] })),
-                        backgroundColor: 'rgba(255, 99, 132, 1)',
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        borderWidth: 1,
-                    }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    x: {
-                        type: 'linear',
-                        position: 'bottom',
-                        title: {
-                            display: true,
-                            text: 'Frequency (Hz)'
-                        },
-                        min: Math.min(...customTicksX),  // Ensure the x-axis starts from the minimum value of custom ticks
-                        max: Math.max(...customTicksX),  // Ensure the x-axis ends at the maximum value of custom ticks
-                        ticks: {
-                            values: customTicksX,  // Set exact tick values
-                            autoSkip: false,  // Ensure no ticks are skipped
-                        }
-                    },
-                    y: {
-                        title: {
-                            display: true,
-                            text: 'Hearing Level (dB)'
-                        },
-                        min: Math.min(...customTicksY),  // Ensure the y-axis starts from the minimum value of custom ticks
-                        max: Math.max(...customTicksY),  // Ensure the y-axis ends at the maximum value of custom ticks
-                        ticks: {
-                            values: customTicksY,  // Set exact tick values
-                            autoSkip: false,  // Ensure no ticks are skipped
-                        },
-                        reverse: true
-                    }
-                }
-            }
-        });
-    });
+    const RightBaselineHearingData = [10,10,15,10,15,20,25];
+    const RightNewHearingData = [15, 20, 25, 30, 35, 25, 45];
+    const LeftBaselineHearingData = [15, 20, 20, 30, 25, 20, 15];
+    const LeftNewHearingData = [15, 25, 25, 35, 20, 15, 10];
 </script>
 
 
@@ -174,44 +121,62 @@
     </Dropdown>
 </div>
 
-
 <!---------------------- DISPLAY INFO ---------------------->
 <div class="flex-container">
     <!-- Information Section -->
     <section class="selected-info text-xl">
-        <p>Year: {selectedYear}</p>
-        <p>User: {selectedUser}</p>
-        <p>Email: {selectedEmail}</p>
-        <p>Date of Birth: {selectedDOB}</p>
-        <p>Age: {selectAge}</p>
-        <p>Employment Status: {selectedStatus}</p>
+        <br>
+        <p>Year: {selectedYear}</p> <br>
+        <p>User: {selectedUser}</p> <br>
+        <p>Email: {selectedEmail}</p> <br>
+        <p>Date of Birth: {selectedDOB}</p> <br>
+        <p>Age: {selectAge}</p> <br>
+        <p>Employment Status: {selectedStatus}</p> <br>
+        <p class="text-3xl">STS Status: {STSstatus}</p> <br>
     </section>
 
     <!-- Chart Section -->
     <div class="chart-container">
-        <canvas id="scatterPlot" width="400" height="400"></canvas>
+        <div class="LRbuttons">
+            <Button class="bg-blue-200 hover:bg-blue-300 text-black"on:click={() => toggleChart('left')}>Left</Button>
+            <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => toggleChart('right')}>Right</Button> 
+            <!-- on:click={() => ?? -->
+        </div>
+        {#if isRightEar}
+            <ScatterPlot 
+                baselineHearingData={RightBaselineHearingData} 
+                newHearingData={RightNewHearingData} 
+            />
+        {:else}
+            <ScatterPlot 
+                baselineHearingData={LeftBaselineHearingData} 
+                newHearingData={LeftNewHearingData} 
+            />
+        {/if}
     </div>
 </div>
-
 
 <style>
     .flex-container {
         display: flex;
         justify-content: space-between;
-        align-items: flex-start;  /* Align items to the top */
+        align-items: flex-start;
         gap: 10px; 
     }
 
     .selected-info {
         flex: 1; 
-        margin-left: 50px; 
-        margin-top: 50px; 
+        margin-left: 75px; 
+        margin-top: 75px; 
         max-width: 500px; 
     }
     .chart-container {
         flex: 1;  
-        margin-right: 50px; 
+        margin-right: 75px; 
         margin-top: 50px; 
         max-width: 550px; 
+    }
+    .LRbuttons {
+        text-align: center;
     }
 </style>
