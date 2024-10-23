@@ -137,17 +137,19 @@
 
     <!-- Chart Section -->
     <div class="chart-container">
-        <div class="LRbuttons">
+        <div>
             <Button class="bg-blue-200 hover:bg-blue-300 text-black"on:click={() => toggleChart('left')}>Left</Button>
             <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => toggleChart('right')}>Right</Button> 
-            <!-- on:click={() => ?? -->
+            <br><br>
         </div>
         {#if isRightEar}
+            <p class="text-xl">Right Ear</p>
             <ScatterPlot 
                 baselineHearingData={RightBaselineHearingData} 
                 newHearingData={RightNewHearingData} 
             />
         {:else}
+            <p class="text-xl">Left Ear</p>
             <ScatterPlot 
                 baselineHearingData={LeftBaselineHearingData} 
                 newHearingData={LeftNewHearingData} 
@@ -175,8 +177,6 @@
         margin-right: 75px; 
         margin-top: 50px; 
         max-width: 550px; 
-    }
-    .LRbuttons {
         text-align: center;
     }
 </style>
