@@ -1,10 +1,15 @@
 <script lang="ts">
     import type { ActionData } from './$types';
+    import { sql } from '@vercel/postgres';
+    import { redirect } from '@sveltejs/kit';
     
+    // This can be used later to sync the admin table with signins
+    // I do not have it fully integrated yet, so it does nothing
+    // ~ Jared
     export let form: ActionData;
 </script>
 
-<h2>Login</h2>
+<h2>SignIn</h2>
 {#if form?.invalidCred}
     <p>Invalid credentials</p>
 {/if}
@@ -12,9 +17,9 @@
 <div class="signin">
     <div class="card">
         <div class="provider">
-            <form action="http://localhost:5173/auth/signin/google" method="POST">
+            <form action="/auth/signin/google" method="POST">
                 <input type="hidden" name="csrfToken" value={form?.csrfToken}>
-                <input type="hidden" name="callbackUrl" value="/dashboard"> <!-- Redirect to home page after sign-in -->
+                <input type="hidden" name="callbackUrl" value="/dashboard"> <!-- Redirect to home/dashboard page after sign-in -->
                 <button type="submit" class="button" style="--provider-bg: #fff; --provider-bg-hover: color-mix(in srgb, #1a73e8 30%, #fff); --provider-dark-bg: #161b22; --provider-dark-bg-hover: color-mix(in srgb, #1a73e8 30%, #000);" tabindex="0">
                     <span style="filter: invert(1) grayscale(1) brightness(1.3) contrast(9000); mix-blend-mode: luminosity; opacity: 0.95;">
                         Sign in with Google

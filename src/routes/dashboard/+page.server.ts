@@ -29,15 +29,28 @@ import type { PageServerLoad } from './$types';
 // }
 
 export const load: PageServerLoad = async (event) => {
-    // const session = await event.locals.auth();
-    // if (!session) {
-    //     throw redirect(302, '/signin'); // Redirect to login if no session cookie
-    // }
+    const session = await event.locals.auth();
+    if (!session) {
+        throw redirect(302, '/signin'); // Redirect to login if no session cookie
+    }
+
+    const username = session.user.username;
     
-    const users = await sql`SELECT * FROM Admin;`;
+    // Check if the username exists in Admin table
+    const result = await sql`
+        SELECT * FROM Admin WHERE username = ${username};
+    `;
+
+    if (result.rows.length === 0)
+    {
+        throw redirect(302, '/') // Propably should create an 'unauthorized' page
+    }
+
+    const users = await sql`SELECT * FROM Admin`;
     
     return {
         // session: session,
-        users: users.rows
+        users: users.rows,
+        userUsername: username
     }
 }

@@ -20,7 +20,7 @@
     </div>
     <div class="session-code-body">
       <pre>
-{JSON.stringify($page.data.session, null, 2)}
+        {JSON.stringify($page.data.session, null, 2)}
       </pre>
     </div>
   </div>
