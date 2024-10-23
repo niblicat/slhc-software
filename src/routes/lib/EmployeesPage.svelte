@@ -1,9 +1,10 @@
 <script lang="ts"  src="../path/to/flowbite/dist/flowbite.min.js">
 
-    import { Button, Search } from 'flowbite-svelte';
+    import { ButtonGroup, Button, Search } from 'flowbite-svelte';
     import { ChevronDownOutline, UserRemoveSolid } from 'flowbite-svelte-icons';
     import { Dropdown } from 'flowbite-svelte';
     import ScatterPlot from './ScatterPlot.svelte';
+    import { Footer, FooterLinkGroup, FooterLink, ImagePlaceholder, TextPlaceholder, Skeleton, FooterCopyright } from 'flowbite-svelte';
     import { sql } from '@vercel/postgres';
 
     // chart
@@ -88,10 +89,9 @@
     const LeftNewHearingData = [15, 25, 25, 35, 20, 15, 10];
 </script>
 
-
 <div class="relative dropdown-container flex space-x-4 justify-center"> 
     <!-- User Dropdown -->
-    <Button class="bg-blue-200 hover:bg-blue-300 text-black" >{selectedUser}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
+    <Button class="bg-blue-200 hover:bg-blue-300 text-black flex justify-between items-center" style="width:300px">{selectedUser}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
     <Dropdown bind:open={nameMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
     <div slot="header" class="p-3">
         <Search size="md" bind:value={inputValueName} on:input={nameHandleInput}/>
@@ -106,7 +106,7 @@
     </Dropdown>
 
     <!-- Year Dropdown -->
-    <Button class="bg-blue-200 hover:bg-blue-300 text-black" >{selectedYear}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
+    <Button class="bg-blue-200 hover:bg-blue-300 text-black flex justify-between items-center" style="width:300px">{selectedYear}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
     <Dropdown bind:open={yearMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
     <div slot="header" class="p-3">
         <Search size="md" bind:value={inputValueYear} on:input={yearHandleInput}/>
@@ -137,26 +137,39 @@
 
     <!-- Chart Section -->
     <div class="chart-container">
-        <div>
-            <Button class="bg-blue-200 hover:bg-blue-300 text-black"on:click={() => toggleChart('left')}>Left</Button>
-            <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => toggleChart('right')}>Right</Button> 
-            <br><br>
-        </div>
         {#if isRightEar}
-            <p class="text-xl">Right Ear</p>
             <ScatterPlot 
+                plotTitle = "Right Ear"
                 baselineHearingData={RightBaselineHearingData} 
                 newHearingData={RightNewHearingData} 
             />
         {:else}
-            <p class="text-xl">Left Ear</p>
             <ScatterPlot 
+                plotTitle = "Left Ear"
                 baselineHearingData={LeftBaselineHearingData} 
                 newHearingData={LeftNewHearingData} 
             />
         {/if}
+        <div>
+            <br>
+            <ButtonGroup class="*:!ring-primary-700">
+                <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:250px" on:click={() => toggleChart('left')}>Left</Button>
+                <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:250px" on:click={() => toggleChart('right')}>Right</Button> 
+            </ButtonGroup>
+        </div>
     </div>
 </div>
+
+ <Footer class="sticky bottom-0 w-full bg-white dark:bg-gray-900">
+    <hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
+    <div class="sm:flex sm:items-center sm:justify-between">
+        <ButtonGroup class="*:!ring-primary-700" style="width:100%">
+            <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:50%">Print</Button>
+            <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:50%">Send Letter</Button>
+        </ButtonGroup>
+    </div>
+ </Footer>
+
 
 <style>
     .flex-container {

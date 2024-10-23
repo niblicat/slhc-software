@@ -5,6 +5,7 @@
     // Export properties if needed
     export let baselineHearingData: number[];
     export let newHearingData: number[];
+    export let plotTitle: string;
 
     let chart: any;
 
@@ -64,10 +65,23 @@
                         },
                         reverse: true
                     }
+                },
+                plugins: {
+                title: {
+                    display: true,
+                    text: plotTitle,
+                    font: {
+                        size: 20
+                    },
+                    padding: {
+                        top: 20,
+                        bottom: 0
+                    }
                 }
+            }
             }
         });
     });
 </script>
 
-<canvas id="scatterPlot" width="400" height="400"></canvas>
+<canvas id="scatterPlot" width="700" height="700"></canvas>
