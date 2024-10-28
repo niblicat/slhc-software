@@ -11,6 +11,7 @@
 	import CustomNavbar from '../lib/CustomNavbar.svelte';
 	import CustomSidebar from '../lib/CustomSidebar.svelte';
 	import EmployeesPage from '../lib/EmployeesPage.svelte';
+    import OperatorPage from '$lib/OperatorPage.svelte';
 
     $: activeURL = $page.url.pathname;
     $: activeURLHash = $page.url.hash;
@@ -51,6 +52,8 @@ on:toggle={toggleSidebar}
     />
 {:else if activeURLHash == "#mailings"}
     You have mail
+{:else if activeURLHash == "#operator"}
+    <OperatorPage />
 {:else}
     <!-- User who is not logged in should be redirected to home (no hash) -->
     <p>You are on the dashboard. Use the sidebar to navigate to a page</p>
