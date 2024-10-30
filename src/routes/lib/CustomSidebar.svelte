@@ -48,6 +48,11 @@
                             <ArrowRightToBracketOutline/>
                         </svelte:fragment>
                     </SidebarItem>
+                    <SidebarItem on:click={sidebarToggleDispatch} label="Insert Data" href="#data">
+                        <svelte:fragment slot="icon">
+                            <ArrowRightToBracketOutline/>
+                        </svelte:fragment>
+                    </SidebarItem>
                 </SidebarGroup>
             </SidebarWrapper>
         </Sidebar>

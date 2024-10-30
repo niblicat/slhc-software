@@ -4,7 +4,7 @@
     import { ChevronDownOutline, UserRemoveSolid } from 'flowbite-svelte-icons';
     import { Dropdown } from 'flowbite-svelte';
     import ScatterPlot from './ScatterPlot.svelte';
-    import { Footer, FooterLinkGroup, FooterLink, ImagePlaceholder, TextPlaceholder, Skeleton, FooterCopyright } from 'flowbite-svelte';
+    import { Footer } from 'flowbite-svelte';
     import { sql } from '@vercel/postgres';
 
     // chart
@@ -12,7 +12,7 @@
 
     export let data;
 
-    // sidebar state and visibility 
+    // sidebar state and visibility //delete??
     let sidebarOpen = false;
     const toggleSidebar = () => { sidebarOpen = !sidebarOpen; };
 
@@ -89,7 +89,7 @@
     const LeftNewHearingData = [15, 25, 25, 35, 20, 15, 10];
 </script>
 
-<div class="relative dropdown-container flex space-x-4 justify-center"> 
+<div class="relative dropdown-container flex space-x-4 justify-center" style="margin-top: 20px;"> 
     <!-- User Dropdown -->
     <Button class="bg-blue-200 hover:bg-blue-300 text-black flex justify-between items-center" style="width:300px">{selectedUser}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
     <Dropdown bind:open={nameMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
@@ -170,25 +170,22 @@
     </div>
  </Footer>
 
-
 <style>
     .flex-container {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        gap: 10px; 
     }
-
     .selected-info {
         flex: 1; 
         margin-left: 75px; 
-        margin-top: 75px; 
+        margin-top: 55px; 
         max-width: 500px; 
     }
     .chart-container {
         flex: 1;  
         margin-right: 75px; 
-        margin-top: 50px; 
+        margin-top: 15px; 
         max-width: 550px; 
         text-align: center;
     }
