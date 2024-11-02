@@ -6,12 +6,28 @@
     export let baselineHearingData: number[];
     export let newHearingData: number[];
     export let plotTitle: string;
+    export let labels: string[];
 
     let chart: any;
 
     // Custom tick values
     const customTicksX = [500, 1000, 2000, 3000, 4000, 6000, 8000];
     const customTicksY = [100, 90, 80, 70, 60, 50, 40, 30, 20, 10, 0, -10];
+
+    function getPointStyle(label: string) {
+        if (label.includes("Right Baseline")) return "rect";
+        if (label.includes("Left Baseline")) return "rect";
+        if (label.includes("Right New")) return "circle";
+        if (label.includes("Left New")) return "crossRot";
+    }
+    function getColor(label: string) {
+        if (label.includes("Right Baseline")) return 'rgba(166, 5, 39, 1)';
+        if (label.includes("Left Baseline")) return 'rgba(10, 81, 128, 1)';
+        if (label.includes("Right New")) return 'rgba(255, 99, 132, 1)';
+        if (label.includes("Left New")) return 'rgba(54, 162, 235, 1)';
+    }
+    // light blue green: 'rgba(75, 192, 192, 1)', 
+    // darker blue green 'rgba(10, 92, 92, 1)',
 
     onMount(() => {
         Chart.register(...registerables); // Register all necessary components
@@ -21,19 +37,49 @@
             type: "scatter",
             data: {
                 datasets: [{
-                        label: 'Baseline',
+                        label: labels[0],
                         data: customTicksX.map((p, i) => ({ x: p, y: baselineHearingData[i] })),
-                        backgroundColor: 'rgba(75, 192, 192, 1)',
-                        borderColor: 'rgba(75, 192, 192, 1)',
+                        pointStyle: getPointStyle(labels[0]),
+                        backgroundColor: getColor(labels[0]),
+                        borderColor: getColor(labels[0]),
                         borderWidth: 1,
+                        showLine: true,
+                        fill: false,
+                        lineTension: 0
                     },
                     {
-                        label: 'Current Year',
+                        label: labels[1],
                         data: customTicksX.map((p, i) => ({ x: p, y: newHearingData[i] })),
-                        backgroundColor: 'rgba(255, 99, 132, 1)',
-                        borderColor: 'rgba(255, 99, 132, 1)',
+                        pointStyle: getPointStyle(labels[1]),
+                        backgroundColor: getColor(labels[1]),
+                        borderColor: getColor(labels[1]),
                         borderWidth: 1,
-                    }]
+                        showLine: true,
+                        fill: false,
+                        lineTension: 0
+                    },
+                    labels.length > 2 && {
+                        label: labels[2],
+                        data: customTicksX.map((p, i) => ({ x: p, y: baselineHearingData[baselineHearingData.length / 2 + i] })),
+                        pointStyle: getPointStyle(labels[2]),
+                        backgroundColor: getColor(labels[2]),
+                        borderColor: getColor(labels[2]),
+                        borderWidth: 1,
+                        showLine: true,
+                        fill: false,
+                        lineTension: 0
+                    },
+                    labels.length > 2 && {
+                        label: labels[3],
+                        data: customTicksX.map((p, i) => ({ x: p, y: newHearingData[newHearingData.length / 2 + i] })),
+                        pointStyle: getPointStyle(labels[3]),
+                        backgroundColor: getColor(labels[3]),
+                        borderColor: getColor(labels[3]),
+                        borderWidth: 1,
+                        showLine: true,
+                        fill: false,
+                        lineTension: 0
+                    }].filter(Boolean)
             },
             options: {
                 responsive: true,

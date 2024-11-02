@@ -12,15 +12,25 @@
 
     export let data;
 
-    // sidebar state and visibility //delete??
-    let sidebarOpen = false;
-    const toggleSidebar = () => { sidebarOpen = !sidebarOpen; };
+    // // sidebar state and visibility //delete??
+    // let sidebarOpen = false;
+    // const toggleSidebar = () => { sidebarOpen = !sidebarOpen; };
 
     // Chart Selection
-    let isRightEar = true; // Initially showing the right ear chart
+    let isRightEar = false;
+    let showBoth = true;
 
+    // const toggleChart = (ear: string) => {
+    //     isRightEar = ear === 'right';
+    // };
+    
     const toggleChart = (ear: string) => {
-        isRightEar = ear === 'right';
+        if (ear === 'both') {
+            showBoth = true;
+        } else {
+            isRightEar = ear === 'right';
+            showBoth = false;
+        }
     };
 
     // Dropdown menu state
@@ -137,26 +147,33 @@
 
     <!-- Chart Section -->
     <div class="chart-container">
-        {#if isRightEar}
+        {#if showBoth}
             <ScatterPlot 
-                plotTitle = "Right Ear"
+                plotTitle="Overlay: Both Ears"
+                baselineHearingData={RightBaselineHearingData.concat(LeftBaselineHearingData)}
+                newHearingData={RightNewHearingData.concat(LeftNewHearingData)}
+                labels={['Right Baseline', 'Right New', 'Left Baseline', 'Left New']}
+            />
+        {:else if isRightEar}
+            <ScatterPlot 
+                plotTitle="Right Ear"
                 baselineHearingData={RightBaselineHearingData} 
                 newHearingData={RightNewHearingData} 
+                labels={['Right Baseline', 'Right New']}
             />
         {:else}
             <ScatterPlot 
-                plotTitle = "Left Ear"
+                plotTitle="Left Ear"
                 baselineHearingData={LeftBaselineHearingData} 
                 newHearingData={LeftNewHearingData} 
+                labels={['Left Baseline', 'Left New']}
             />
         {/if}
-        <div>
-            <br>
-            <ButtonGroup class="*:!ring-primary-700">
-                <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:250px" on:click={() => toggleChart('left')}>Left</Button>
-                <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:250px" on:click={() => toggleChart('right')}>Right</Button> 
-            </ButtonGroup>
-        </div>
+        <ButtonGroup class="*:!ring-primary-700">
+            <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:175px" on:click={() => toggleChart('left')}>Left</Button>
+            <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:175px" on:click={() => toggleChart('right')}>Right</Button> 
+            <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:175px" on:click={() => toggleChart('both')}>Both</Button> 
+        </ButtonGroup>
     </div>
 </div>
 
