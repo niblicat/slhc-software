@@ -6,23 +6,16 @@
     import ScatterPlot from './ScatterPlot.svelte';
     import { Footer } from 'flowbite-svelte';
     import { sql } from '@vercel/postgres';
+    // import ".app.css";
 
     // chart
     let chart: any;
 
     export let data;
 
-    // // sidebar state and visibility //delete??
-    // let sidebarOpen = false;
-    // const toggleSidebar = () => { sidebarOpen = !sidebarOpen; };
-
     // Chart Selection
     let isRightEar = false;
     let showBoth = true;
-
-    // const toggleChart = (ear: string) => {
-    //     isRightEar = ear === 'right';
-    // };
     
     const toggleChart = (ear: string) => {
         if (ear === 'both') {
