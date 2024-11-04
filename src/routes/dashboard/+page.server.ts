@@ -27,30 +27,39 @@ import type { PageServerLoad } from './$types';
 //         users: users.rows
 //     };
 // }
+ 
+// export const load: PageServerLoad = async (event) => {
+//     const session = await event.locals.auth();
+//     if (!session) {
+//         throw redirect(302, '/signin'); // Redirect to login if no session cookie
+//     }
 
-export const load: PageServerLoad = async (event) => {
-    const session = await event.locals.auth();
-    if (!session) {
-        throw redirect(302, '/signin'); // Redirect to login if no session cookie
-    }
-
-    const username = session.user.username;
+//     const username = session.user.username;
     
-    // Check if the username exists in Admin table
-    const result = await sql`
-        SELECT * FROM Admin WHERE username = ${username};
-    `;
+//     // Check if the username exists in Admin table
+//     const result = await sql`
+//         SELECT * FROM Admin WHERE username = ${username};
+//     `;
 
-    if (result.rows.length === 0)
-    {
-        throw redirect(302, '/') // Propably should create an 'unauthorized' page
-    }
+//     if (result.rows.length === 0)
+//     {
+//         throw redirect(302, '/') // Propably should create an 'unauthorized' page
+//     }
 
-    const users = await sql`SELECT * FROM Admin`;
+//     const users = await sql`SELECT * FROM Admin`;
     
-    return {
-        // session: session,
-        users: users.rows,
-        userUsername: username
-    }
-}
+//     return {
+//         // session: session,
+//         users: users.rows,
+//         userUsername: username
+//     }
+// }
+
+export const load = async ({ parent }) => {
+  const parentData = await parent();
+
+  // If not logged in, redirect to landing page
+  if (!parentData.loggedIn) {
+    throw redirect(302, "/");
+  }
+};

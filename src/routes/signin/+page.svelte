@@ -10,9 +10,9 @@
 </script>
 
 <h2>SignIn</h2>
-{#if form?.invalidCred}
+<!-- {#if form?.invalidCred}
     <p>Invalid credentials</p>
-{/if}
+{/if} -->
 
 <div class="signin">
     <div class="card">

@@ -3,11 +3,17 @@
 </svelte:head>
 
 <script lang="ts">
+    import type { ActionData } from './$types';
     import { page } from '$app/stores';
     import { goto } from '$app/navigation'; // Import goto for navigation
     import CustomNavbar from './lib/CustomNavbar.svelte';
     import { Button } from 'flowbite-svelte';
     import "../app.css";
+    import type { PageData } from './$types';
+    import { signIn, signOut } from '@auth/sveltekit/client';
+  
+    export let data: PageData;
+    $: loggedIn = data.loggedIn;
 
     // Store the current page URL and hash
     $: activeURL = $page.url.pathname;
@@ -49,19 +55,18 @@
         <!-- Correct Image Reference -->
         <img src="landingpage/SIUE_logo_2024.png" alt="SIUE Logo">
 
-        <!-- Login Button -->
+        {#if loggedIn}
+        <div>Welcome!</div>
+        <!-- <a href="/signin">Go to logged in area</a> -->
+        <br />
+        <br />
+        <button class="bg-funky text-white font-bold py-2 px-8 rounded hover:bg-red-600 transition-all duration-300 mb-4" on:click={() => signOut()}>Log Out</button>
+        {:else}
         <Button class="bg-funky text-white font-bold py-2 px-8 rounded hover:bg-red-600 transition-all duration-300 mb-4" on:click={Login}>
             <img class="pr-4" loading="lazy" height="36" src="https://authjs.dev/img/providers/google.svg" alt="Google SignIn">
             <p>Login&nbsp;with&nbsp;Google</p>
         </Button>
-
-        <!--------- We can probably implment the Google OAuth2 on the landing page here  ----------->
-        <!-- <button type="submit" class="button" style="--provider-bg: #fff; --provider-bg-hover: color-mix(in srgb, #1a73e8 30%, #fff); --provider-dark-bg: #161b22; --provider-dark-bg-hover: color-mix(in srgb, #1a73e8 30%, #000);" tabindex="0">
-            <span style="filter: invert(1) grayscale(1) brightness(1.3) contrast(9000); mix-blend-mode: luminosity; opacity: 0.95;">
-                Sign in with Google
-            </span>
-            <img loading="lazy" height="24" src="https://authjs.dev/img/providers/google.svg" alt="Google SignIn">
-        </button> -->
+        {/if}
 
     </div>
 </section>

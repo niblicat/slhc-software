@@ -1,7 +1,7 @@
-import { redirect } from '@sveltejs/kit';
-import { sql } from "@vercel/postgres";
+// import { redirect } from '@sveltejs/kit';
+// import { sql } from "@vercel/postgres";
 
-export { handle } from "./auth"
+// export { handle } from "./auth"
 
 // const SESSION_COOKIE_NAME = 'session_id';
 
@@ -23,3 +23,26 @@ export { handle } from "./auth"
 
 //     return resolve(event);
 // }
+
+import { SvelteKitAuth } from "@auth/sveltekit";
+// import { AUTH_SECRET } from "$env/static/private";
+import GoogleProvider from "@auth/core/providers/google"
+import { AUTH_SECRET, AUTH_GOOGLE_CLIENT_ID, AUTH_GOOGLE_SECRET } from "$env/static/private";
+// import { sequence } from "@sveltejs/kit/hooks"; // This can be used if we have other handlers that we want SvelteKit to run.
+
+const auth = SvelteKitAuth({
+  providers: [
+    GoogleProvider({
+        clientId: AUTH_GOOGLE_CLIENT_ID,
+        clientSecret: AUTH_GOOGLE_SECRET
+    })
+  ],
+  session: {
+    maxAge: 60 * 60 * 24 * 365,
+    strategy: "jwt",
+  },
+
+  secret: AUTH_SECRET,
+});
+
+export const handle = auth.handle;
