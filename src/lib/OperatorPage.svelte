@@ -2,6 +2,9 @@
     // TODO: export users and their statuses
     // TODO: make svelte store writables
     import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Checkbox } from 'flowbite-svelte';
+    import EditIcon from './EditIcon.svelte';
+	import { createEventDispatcher } from 'svelte';
+	import { error } from '@sveltejs/kit';
 
     type Operator = {
         name: string,
@@ -24,10 +27,53 @@
     $: selectedOperators = operators.filter((e) => e.selected == true)
 
     // TODO: add indicator showing that people cannot change their email after it has been set. They must switch to a different Google account
+
+    let success = true;
+    let errorMessage = "";
+
+    function displayError(message: string) {
+        errorMessage = message;
+        success = false;
+    }
+
+    async function modifyOperatorPermissions(operator: Operator): Promise<void> {
+        const formData = new FormData();
+        formData.append('operatorID', operator.googleID);
+        formData.append('isOp', operator.isOP.toString());
+
+        const response = await fetch('/dashboard', {
+            method: 'POST',
+            body: formData,
+        });
+
+        try {
+            const result = await response.json();
+    
+            if (result.success) {
+                success = true;
+                let id = operator.googleID;
+                operator.isOP = !operator.isOP;
+                operators = operators; // update the DOM
+            }
+            else {
+                displayError(result.message);
+            }
+        }
+        catch (error: any) {
+            let errorMessage = error.message;
+            displayError(errorMessage);
+        }
+
+    }
+
+    const disptatch = createEventDispatcher();
 </script>
 
 <!-- figure out if this should be main -->
 <div class="h-screen flex justify-center">
+    {#if !success}
+        <span>{errorMessage}</span>
+    {/if}
     <Table hoverable={true}>
         <TableHead>
             <TableHeadCell class="!p-4">
@@ -49,6 +95,7 @@
                     </TableBodyCell>
                     <TableBodyCell>
                         {operator.name}
+                        <EditIcon on:click />
                     </TableBodyCell>
                     <TableBodyCell>
                         {operator.email}
@@ -57,7 +104,8 @@
                         {operator.googleID}
                     </TableBodyCell>
                     <TableBodyCell>
-                        <Checkbox checked={operator.isOP} />
+                        {operator.isOP} <!-- is not changing -->
+                        <EditIcon on:edit={() => modifyOperatorPermissions(operator)} />
                     </TableBodyCell>
                     <TableBodyCell>
                         <a href="/tables" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Edit</a>
