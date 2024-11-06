@@ -3,10 +3,11 @@
     import { Button, Search } from 'flowbite-svelte';
     import { ChevronDownOutline, UserRemoveSolid } from 'flowbite-svelte-icons';
     import { Dropdown } from 'flowbite-svelte';
-    import { sql } from '@vercel/postgres';
+    import "$lib/app.css";
+    // import { sql } from '@vercel/postgres';
 
-    import { ChartPieSolid, GridSolid, MailBoxSolid, UserSolid, ArrowRightToBracketOutline, EditOutline } from 'flowbite-svelte-icons';
-    import { Navbar, NavBrand, NavLi, NavUl, NavHamburger, Avatar, DropdownItem, DropdownHeader, DropdownDivider } from 'flowbite-svelte';
+    // import { ChartPieSolid, GridSolid, MailBoxSolid, UserSolid, ArrowRightToBracketOutline, EditOutline } from 'flowbite-svelte-icons';
+    // import { Navbar, NavBrand, NavLi, NavUl, NavHamburger, Avatar, DropdownItem, DropdownHeader, DropdownDivider } from 'flowbite-svelte';
 
     export let data;
 
@@ -59,10 +60,15 @@
         password: string;
     }
 
-    const users = data.users.map((row: User) => ({
-        username: row.username,
-        password: row.password
-    })) as Array<User>;
+    // const users = data.users.map((row: User) => ({
+    //     username: row.username,
+    //     password: row.password
+    // })) as Array<User>;
+
+    const users = [
+        {username: "testname", password: "testpassword"}
+    ]
+
 
     // TODO: get these from google auth
     let name = "example name";

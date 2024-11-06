@@ -1,4 +1,4 @@
-import { redirect } from '@sveltejs/kit';
+import { redirect, type Actions } from '@sveltejs/kit';
 import { sql } from "@vercel/postgres";
 import { POSTGRES_URL } from '$env/static/private';
 import type { PageServerLoad } from './$types';
@@ -35,31 +35,31 @@ import type { PageServerLoad } from './$types';
 //     }
 
 //     const username = session.user.username;
-    
-//     // Check if the username exists in Admin table
-//     const result = await sql`
-//         SELECT * FROM Admin WHERE username = ${username};
-//     `;
 
-//     if (result.rows.length === 0)
-//     {
-//         throw redirect(302, '/') // Propably should create an 'unauthorized' page
-//     }
-
-//     const users = await sql`SELECT * FROM Admin`;
-    
-//     return {
-//         // session: session,
-//         users: users.rows,
-//         userUsername: username
-//     }
 // }
 
-export const load = async ({ parent }) => {
-  const parentData = await parent();
+// format we need
+export const actions = {
+    load: async ({ parent }) => {
+        const parentData = await parent();
 
-  // If not logged in, redirect to landing page
-  if (!parentData.loggedIn) {
-    throw redirect(302, "/");
-  }
-};
+        // If not logged in, redirect to landing page
+        if (!parentData.loggedIn) {
+            throw redirect(302, "/");
+        }
+
+        const users = await sql`
+            SELECT * FROM Admin;`;
+
+        return {
+            // session: session,
+            users: users.rows,
+        }
+    },
+	login: async (event) => {
+		// TODO log the user in
+	},
+	register: async (event) => {
+		// TODO register the user
+	}
+} satisfies Actions;

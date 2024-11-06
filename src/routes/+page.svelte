@@ -8,7 +8,7 @@
     import { goto } from '$app/navigation'; // Import goto for navigation
     import CustomNavbar from './lib/CustomNavbar.svelte';
     import { Button } from 'flowbite-svelte';
-    import "../app.css";
+    import "$lib/app.css";
     import type { PageData } from './$types';
     import { signIn, signOut } from '@auth/sveltekit/client';
   
