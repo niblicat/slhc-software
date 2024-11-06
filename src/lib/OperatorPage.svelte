@@ -1,7 +1,7 @@
 <script lang="ts">
     // TODO: export users and their statuses
     // TODO: make svelte store writables
-    import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Checkbox } from 'flowbite-svelte';
+    import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Checkbox, Modal, Button } from 'flowbite-svelte';
     import EditIcon from './EditIcon.svelte';
 	import { createEventDispatcher } from 'svelte';
 	import { error } from '@sveltejs/kit';
@@ -21,10 +21,12 @@
         {name: "sage", email: "sage@2", googleID: "sagegoogle", isOP: true, selected: false},
     ]
 
-    // use selectedOperators to modify user selected operators
+    // use selectedOperators to modify multiple user-selected operators
     let selectedOperators: Array<Operator> = [];
 
-    $: selectedOperators = operators.filter((e) => e.selected == true)
+    let selectedOperator: Operator;
+
+    $: selectedOperators = operators.filter((e) => e.selected == true);
 
     // TODO: add indicator showing that people cannot change their email after it has been set. They must switch to a different Google account
 
@@ -63,16 +65,38 @@
             let errorMessage = error.message;
             displayError(errorMessage);
         }
+    }
 
+    function showOperatorPermissionsModal(operator: Operator) {
+        selectedOperator = operator
+        operatorModel = true;
     }
 
     const disptatch = createEventDispatcher();
+
+    let operatorModel = false; // controls the appearance of the popup operator confirmation window
 </script>
 
+<Modal title="Notice for Granting Operator Permissions" bind:open={operatorModel} autoclose>
+    <p>
+
+        <span>Giving a user operator status allows them to view and modify all employees in the system. Only do this if you know and trust this person.</span>
+        <br>
+        <br>
+        <span class="text-red-600">Are you sure you want to make {selectedOperator.name} ({selectedOperator.email}) an operator?</span>
+    </p>
+    
+    <svelte:fragment slot="footer">
+        <!-- TODO: CHANGE THESE COLOURS -->
+        <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => modifyOperatorPermissions(selectedOperator)}>Yes</Button>
+        <Button class="bg-red-200 hover:bg-red-300 text-black">No</Button>
+    </svelte:fragment>
+</Modal>
+
 <!-- figure out if this should be main -->
-<div class="h-screen flex justify-center">
+<div class="h-screen flex-column justify-center">
     {#if !success}
-        <span>{errorMessage}</span>
+        <span class="text-red-600">{errorMessage}</span>
     {/if}
     <Table hoverable={true}>
         <TableHead>
@@ -105,7 +129,7 @@
                     </TableBodyCell>
                     <TableBodyCell>
                         {operator.isOP} <!-- is not changing -->
-                        <EditIcon on:edit={() => modifyOperatorPermissions(operator)} />
+                        <EditIcon on:edit={() => showOperatorPermissionsModal(operator)} />
                     </TableBodyCell>
                     <TableBodyCell>
                         <a href="/tables" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Edit</a>
@@ -117,62 +141,3 @@
     {#each selectedOperators as op}{op.name}.{/each}
     
 </div>
-
-<!-- 
-<script>
-    import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Checkbox } from 'flowbite-svelte';
-  </script>
-  
-  <Table hoverable={true}>
-    <TableHead>
-      <TableHeadCell class="!p-4">
-        <Checkbox />
-      </TableHeadCell>
-      <TableHeadCell>Product name</TableHeadCell>
-      <TableHeadCell>Color</TableHeadCell>
-      <TableHeadCell>Category</TableHeadCell>
-      <TableHeadCell>Price</TableHeadCell>
-      <TableHeadCell>
-        <span class="sr-only">Edit</span>
-      </TableHeadCell>
-    </TableHead>
-    <TableBody tableBodyClass="divide-y">
-      <TableBodyRow>
-        <TableBodyCell class="!p-4">
-          <Checkbox />
-        </TableBodyCell>
-        <TableBodyCell>Apple MacBook Pro 17"</TableBodyCell>
-        <TableBodyCell>Sliver</TableBodyCell>
-        <TableBodyCell>Laptop</TableBodyCell>
-        <TableBodyCell>$2999</TableBodyCell>
-        <TableBodyCell>
-          <a href="/tables" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Edit</a>
-        </TableBodyCell>
-      </TableBodyRow>
-      <TableBodyRow>
-        <TableBodyCell class="!p-4">
-          <Checkbox />
-        </TableBodyCell>
-        <TableBodyCell>Microsoft Surface Pro</TableBodyCell>
-        <TableBodyCell>White</TableBodyCell>
-        <TableBodyCell>Laptop PC</TableBodyCell>
-        <TableBodyCell>$1999</TableBodyCell>
-        <TableBodyCell>
-          <a href="/tables" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Edit</a>
-        </TableBodyCell>
-      </TableBodyRow>
-      <TableBodyRow>
-        <TableBodyCell class="!p-4">
-          <Checkbox />
-        </TableBodyCell>
-        <TableBodyCell>Magic Mouse 2</TableBodyCell>
-        <TableBodyCell>Black</TableBodyCell>
-        <TableBodyCell>Accessories</TableBodyCell>
-        <TableBodyCell>$99</TableBodyCell>
-        <TableBodyCell>
-          <a href="/tables" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Edit</a>
-        </TableBodyCell>
-      </TableBodyRow>
-    </TableBody>
-  </Table>
--->
