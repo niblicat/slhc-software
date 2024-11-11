@@ -3,8 +3,11 @@
     // TODO: make svelte store writables
     import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Checkbox, Modal, Button } from 'flowbite-svelte';
     import EditIcon from './EditIcon.svelte';
-	import { createEventDispatcher } from 'svelte';
-	import { error } from '@sveltejs/kit';
+    import { createEventDispatcher } from 'svelte';
+    import { error } from '@sveltejs/kit';
+
+    import { Input, Label, Helper } from 'flowbite-svelte';
+
 
     type Operator = {
         name: string,
@@ -32,6 +35,7 @@
 
     let success = true;
     let errorMessage = "";
+    let newName = "";
 
     function displayError(message: string) {
         errorMessage = message;
@@ -53,9 +57,36 @@
     
             if (result.success) {
                 success = true;
-                let id = operator.googleID;
+                // let id = operator.googleID;
                 operator.isOP = !operator.isOP;
                 operators = operators; // update the DOM
+            }
+            else {
+                displayError(result.message);
+            }
+        }
+        catch (error: any) {
+            let errorMessage = error.message;
+            displayError(errorMessage);
+        }
+    }
+    async function modifyOperatorName(operator: Operator): Promise<void> {
+        const formData = new FormData();
+        formData.append('operatorID', operator.googleID);
+        formData.append('newName', newName);
+
+        const response = await fetch('/dashboard', {
+            method: 'POST',
+            body: formData,
+        });
+        try {
+            const result = await response.json();
+
+            if (result.success) {
+                success = true;
+
+                operator.name = newName;
+                operators = operators;
             }
             else {
                 displayError(result.message);
@@ -72,14 +103,36 @@
         operatorModel = true;
     }
 
+    function showNameChangeModal(operator: Operator) {
+        newName = operator.name;
+        selectedOperator = operator
+        nameModal = true;
+    }
+
     const disptatch = createEventDispatcher();
 
     let operatorModel = false; // controls the appearance of the popup operator confirmation window
+    let nameModal = false; // controls the appearance of the operator name change window
 </script>
+
+<Modal title="Change Operator Username" bind:open={nameModal} autoclose>
+    <p>
+        <span>Please provide an updated name for {selectedOperator.name} ({selectedOperator.email})</span>
+        <br>
+        <br>
+        <Label for="name" class="mb-2">First name</Label>
+        <Input type="text" id="name" placeholder={selectedOperator.name} bind:value={newName} required />
+    </p>
+    
+    <svelte:fragment slot="footer">
+        <!-- TODO: CHANGE THESE COLOURS -->
+        <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => modifyOperatorName(selectedOperator)}>Confirm</Button>
+        <Button class="bg-red-200 hover:bg-red-300 text-black">Cancel</Button>
+    </svelte:fragment>
+</Modal>
 
 <Modal title="Notice for Granting Operator Permissions" bind:open={operatorModel} autoclose>
     <p>
-
         <span>Giving a user operator status allows them to view and modify all employees in the system. Only do this if you know and trust this person.</span>
         <br>
         <br>
@@ -119,7 +172,7 @@
                     </TableBodyCell>
                     <TableBodyCell>
                         {operator.name}
-                        <EditIcon on:click />
+                        <EditIcon on:edit={() => showNameChangeModal(operator)} />
                     </TableBodyCell>
                     <TableBodyCell>
                         {operator.email}
@@ -128,7 +181,7 @@
                         {operator.googleID}
                     </TableBodyCell>
                     <TableBodyCell>
-                        {operator.isOP} <!-- is not changing -->
+                        {operator.isOP}
                         <EditIcon on:edit={() => showOperatorPermissionsModal(operator)} />
                     </TableBodyCell>
                     <TableBodyCell>
@@ -138,6 +191,12 @@
             {/each}
         </TableBody>
     </Table>
+    <!-- ! FOR TESTING, REMOVE LATER -->
     {#each selectedOperators as op}{op.name}.{/each}
+
+    <!-- TODO: ADD OPTION TO DELETE SELECTED USERS -->
+    <div>
+        <button class="bg-red-200 hover:bg-red-300 text-black">Delete selected users</button>
+    </div>
     
 </div>
