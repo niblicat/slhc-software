@@ -1,6 +1,5 @@
 <script lang="ts"  src="../path/to/flowbite/dist/flowbite.min.js">
 import { Button } from 'flowbite-svelte';
-import '$lib/app.css';
 
 </script>
 
