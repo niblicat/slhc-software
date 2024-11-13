@@ -1,20 +1,30 @@
 <script lang="ts"  src="../path/to/flowbite/dist/flowbite.min.js">
 
-    import { Button, Search } from 'flowbite-svelte';
+    import { ButtonGroup, Button, Search } from 'flowbite-svelte';
     import { ChevronDownOutline, UserRemoveSolid } from 'flowbite-svelte-icons';
     import { Dropdown } from 'flowbite-svelte';
+    import ScatterPlot from './ScatterPlot.svelte';
+    import { Footer } from 'flowbite-svelte';
     import { sql } from '@vercel/postgres';
-    import { onMount } from "svelte";
-    import { Chart, registerables } from 'chart.js';
+    import '$lib/app.css';
 
     // chart
     let chart: any;
 
     export let data;
 
-    // sidebar state and visibility 
-    let sidebarOpen = false;
-    const toggleSidebar = () => { sidebarOpen = !sidebarOpen; };
+    // Chart Selection
+    let isRightEar = false;
+    let showBoth = true;
+    
+    const toggleChart = (ear: string) => {
+        if (ear === 'both') {
+            showBoth = true;
+        } else {
+            isRightEar = ear === 'right';
+            showBoth = false;
+        }
+    };
 
     // Dropdown menu state
     let nameMenuOpen = false;
@@ -27,6 +37,7 @@
     let selectedDOB = "No selection made";
     let selectAge = "No selection made";
     let selectedStatus = "No selection made";
+    let STSstatus = "No data selection";
 
     let inputValueName = "";
     let inputValueYear = "";
@@ -75,76 +86,15 @@
     let email = "example email";
 
     // Data for scatter plot
-    const baselineHearingData = [10,10,15,10,15,20,25];
-    const newHearingData = [15, 20, 25, 30, 35, 40, 45];
-
-    // Custom tick values
-    const customTicksX = [500, 1000, 2000, 3000, 4000, 6000, 8000];
-    const customTicksY = [100, 90, 80, 70, 60, 50, 40, 30, 20, 10, 0, -10];
-
-    // Initialize chart on mount
-    onMount(() => {
-        Chart.register(...registerables); // Register necessary components
-
-        const ctx = document.getElementById("scatterPlot") as HTMLCanvasElement;
-        chart = new Chart(ctx, {
-            type: "scatter", // Scatter plot type
-            data: {
-                datasets: [{
-                        label: 'L/R Baseline',
-                        data: customTicksX.map((p, i) => ({ x: p, y: baselineHearingData[i] })),
-                        backgroundColor: 'rgba(75, 192, 192, 1)',
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        borderWidth: 1,
-                    },
-                    {
-                        label: 'L/R Current Year Data',
-                        data: customTicksX.map((p, i) => ({ x: p, y: newHearingData[i] })),
-                        backgroundColor: 'rgba(255, 99, 132, 1)',
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        borderWidth: 1,
-                    }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    x: {
-                        type: 'linear',
-                        position: 'bottom',
-                        title: {
-                            display: true,
-                            text: 'Frequency (Hz)'
-                        },
-                        min: Math.min(...customTicksX),  // Ensure the x-axis starts from the minimum value of custom ticks
-                        max: Math.max(...customTicksX),  // Ensure the x-axis ends at the maximum value of custom ticks
-                        ticks: {
-                            values: customTicksX,  // Set exact tick values
-                            autoSkip: false,  // Ensure no ticks are skipped
-                        }
-                    },
-                    y: {
-                        title: {
-                            display: true,
-                            text: 'Hearing Level (dB)'
-                        },
-                        min: Math.min(...customTicksY),  // Ensure the y-axis starts from the minimum value of custom ticks
-                        max: Math.max(...customTicksY),  // Ensure the y-axis ends at the maximum value of custom ticks
-                        ticks: {
-                            values: customTicksY,  // Set exact tick values
-                            autoSkip: false,  // Ensure no ticks are skipped
-                        },
-                        reverse: true
-                    }
-                }
-            }
-        });
-    });
+    const RightBaselineHearingData = [10,10,15,10,15,20,25];
+    const RightNewHearingData = [15, 20, 25, 30, 35, 25, 45];
+    const LeftBaselineHearingData = [15, 20, 20, 30, 25, 20, 15];
+    const LeftNewHearingData = [15, 25, 25, 35, 20, 15, 10];
 </script>
 
-
-<div class="relative dropdown-container flex space-x-4 justify-center"> 
+<div class="relative dropdown-container flex space-x-4 justify-center" style="margin-top: 20px;"> 
     <!-- User Dropdown -->
-    <Button class="bg-blue-200 hover:bg-blue-300 text-black" >{selectedUser}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
+    <Button class="bg-blue-200 hover:bg-blue-300 text-black flex justify-between items-center" style="width:300px">{selectedUser}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
     <Dropdown bind:open={nameMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
     <div slot="header" class="p-3">
         <Search size="md" bind:value={inputValueName} on:input={nameHandleInput}/>
@@ -159,7 +109,7 @@
     </Dropdown>
 
     <!-- Year Dropdown -->
-    <Button class="bg-blue-200 hover:bg-blue-300 text-black" >{selectedYear}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
+    <Button class="bg-blue-200 hover:bg-blue-300 text-black flex justify-between items-center" style="width:300px">{selectedYear}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
     <Dropdown bind:open={yearMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
     <div slot="header" class="p-3">
         <Search size="md" bind:value={inputValueYear} on:input={yearHandleInput}/>
@@ -174,44 +124,79 @@
     </Dropdown>
 </div>
 
-
 <!---------------------- DISPLAY INFO ---------------------->
 <div class="flex-container">
     <!-- Information Section -->
     <section class="selected-info text-xl">
-        <p>Year: {selectedYear}</p>
-        <p>User: {selectedUser}</p>
-        <p>Email: {selectedEmail}</p>
-        <p>Date of Birth: {selectedDOB}</p>
-        <p>Age: {selectAge}</p>
-        <p>Employment Status: {selectedStatus}</p>
+        <br>
+        <p>Year: {selectedYear}</p> <br>
+        <p>User: {selectedUser}</p> <br>
+        <p>Email: {selectedEmail}</p> <br>
+        <p>Date of Birth: {selectedDOB}</p> <br>
+        <p>Age: {selectAge}</p> <br>
+        <p>Employment Status: {selectedStatus}</p> <br>
+        <p class="text-3xl">STS Status: {STSstatus}</p> <br>
     </section>
 
     <!-- Chart Section -->
     <div class="chart-container">
-        <canvas id="scatterPlot" width="400" height="400"></canvas>
+        {#if showBoth}
+            <ScatterPlot 
+                plotTitle="Both Ears"
+                baselineHearingData={RightBaselineHearingData.concat(LeftBaselineHearingData)}
+                newHearingData={RightNewHearingData.concat(LeftNewHearingData)}
+                labels={['Right Baseline', 'Right New', 'Left Baseline', 'Left New']}
+            />
+        {:else if isRightEar}
+            <ScatterPlot 
+                plotTitle="Right Ear"
+                baselineHearingData={RightBaselineHearingData} 
+                newHearingData={RightNewHearingData} 
+                labels={['Right Baseline', 'Right New']}
+            />
+        {:else}
+            <ScatterPlot 
+                plotTitle="Left Ear"
+                baselineHearingData={LeftBaselineHearingData} 
+                newHearingData={LeftNewHearingData} 
+                labels={['Left Baseline', 'Left New']}
+            />
+        {/if}
+        <ButtonGroup class="*:!ring-primary-700">
+            <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:175px" on:click={() => toggleChart('left')}>Left</Button>
+            <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:175px" on:click={() => toggleChart('right')}>Right</Button> 
+            <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:175px" on:click={() => toggleChart('both')}>Both</Button> 
+        </ButtonGroup>
     </div>
 </div>
 
+ <Footer class="sticky bottom-0 w-full bg-white dark:bg-gray-900">
+    <hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
+    <div class="sm:flex sm:items-center sm:justify-between">
+        <ButtonGroup class="*:!ring-primary-700" style="width:100%">
+            <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:50%">Print</Button>
+            <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:50%">Send Letter</Button>
+        </ButtonGroup>
+    </div>
+ </Footer>
 
 <style>
     .flex-container {
         display: flex;
         justify-content: space-between;
-        align-items: flex-start;  /* Align items to the top */
-        gap: 10px; 
+        align-items: flex-start;
     }
-
     .selected-info {
         flex: 1; 
-        margin-left: 50px; 
-        margin-top: 50px; 
+        margin-left: 75px; 
+        margin-top: 55px; 
         max-width: 500px; 
     }
     .chart-container {
         flex: 1;  
-        margin-right: 50px; 
-        margin-top: 50px; 
+        margin-right: 75px; 
+        margin-top: 15px; 
         max-width: 550px; 
+        text-align: center;
     }
 </style>

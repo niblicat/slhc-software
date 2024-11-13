@@ -1,29 +1,32 @@
-import flowbitePlugin from 'flowbite/plugin'
+/** @type {import('tailwindcss').Config} */
+const flowbitePlugin = require('flowbite/plugin');
 
-import type { Config } from 'tailwindcss';
-
-export default {
-	content: ['./src/**/*.{html,js,svelte,ts}', './node_modules/flowbite-svelte/**/*.{html,js,svelte,ts}'],
+module.exports = {
+  content: [
+    './src/**/*.{html,js,svelte,ts}',
+    './node_modules/flowbite-svelte/**/*.{html,js,svelte,ts}'
+  ],
   darkMode: 'selector',
-	theme: {
-		extend: {
-      colors: {
-        // flowbite-svelte
-        primary: {
-          50: '#FFF5F2',
-          100: '#FFF1EE',
-          200: '#FFE4DE',
-          300: '#FFD5CC',
-          400: '#FFBCAD',
-          500: '#FE795D',
-          600: '#EF562F',
-          700: '#EB4F27',
-          800: '#CC4522',
-          900: '#A5371B'
-        }
-      }
+  theme: {
+    screens: {
+      sm: '480px',
+      md: '768px',
+      lg: '976px',
+      xl: '1440px',
+    },
+    colors: {
+      'funky': '#FF5500',
+      'dark-red': '#a60528',
+      'dark-blue': '#0a5180',
+      'light-red': '#ff6385',
+      'light-blue': '#36a3eb',
+      'light-bluegreen': '#4bc0c0',
+      'dark-bluegreen': '#0a5c5c',
+    },
+    fontFamily: {
+      sans: ['Graphik', 'sans-serif'],
+      serif: ['Merriweather', 'serif'],
     }
-	},
-
-	plugins: [flowbitePlugin]
-} as Config;
+  },
+  plugins: [flowbitePlugin],
+};
