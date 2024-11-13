@@ -9,7 +9,7 @@
     import { Input, Label, Helper } from 'flowbite-svelte';
 
 
-    type Operator = {
+    type Admin = {
         name: string,
         email: string,
         googleID: string,
@@ -17,19 +17,19 @@
         selected: boolean
     };
 
-    let operators: Array<Operator> = [
+    let admins: Array<Admin> = [
         {name: "e", email: "e2", googleID: "e3", isOP: true, selected: false},
         {name: "fabian", email: "fabian@2", googleID: "fabiangoogle", isOP: true, selected: false},
         {name: "rosie", email: "rosie@2", googleID: "rosiegoogle", isOP: false, selected: false},
         {name: "sage", email: "sage@2", googleID: "sagegoogle", isOP: true, selected: false},
     ]
 
-    // use selectedOperators to modify multiple user-selected operators
-    let selectedOperators: Array<Operator> = [];
+    // use selectedAdmins to modify multiple user-selected admins
+    let selectedAdmins: Array<Admin> = [];
 
-    let selectedOperator: Operator;
+    let selectedAdmin: Admin;
 
-    $: selectedOperators = operators.filter((e) => e.selected == true);
+    $: selectedAdmins = admins.filter((e) => e.selected == true);
 
     // TODO: add indicator showing that people cannot change their email after it has been set. They must switch to a different Google account
 
@@ -42,10 +42,10 @@
         success = false;
     }
 
-    async function modifyOperatorPermissions(operator: Operator): Promise<void> {
+    async function modifyAdminPermissions(admin: Admin): Promise<void> {
         const formData = new FormData();
-        formData.append('operatorID', operator.googleID);
-        formData.append('isOp', operator.isOP.toString());
+        formData.append('adminID', admin.googleID);
+        formData.append('isOp', admin.isOP.toString());
 
         const response = await fetch('/dashboard', {
             method: 'POST',
@@ -57,9 +57,9 @@
     
             if (result.success) {
                 success = true;
-                // let id = operator.googleID;
-                operator.isOP = !operator.isOP;
-                operators = operators; // update the DOM
+                // let id = admin.googleID;
+                admin.isOP = !admin.isOP;
+                admins = admins; // update the DOM
             }
             else {
                 displayError(result.message);
@@ -70,9 +70,9 @@
             displayError(errorMessage);
         }
     }
-    async function modifyOperatorName(operator: Operator): Promise<void> {
+    async function modifyAdminName(admin: Admin): Promise<void> {
         const formData = new FormData();
-        formData.append('operatorID', operator.googleID);
+        formData.append('adminID', admin.googleID);
         formData.append('newName', newName);
 
         const response = await fetch('/dashboard', {
@@ -85,8 +85,8 @@
             if (result.success) {
                 success = true;
 
-                operator.name = newName;
-                operators = operators;
+                admin.name = newName;
+                admins = admins;
             }
             else {
                 displayError(result.message);
@@ -98,50 +98,50 @@
         }
     }
 
-    function showOperatorPermissionsModal(operator: Operator) {
-        selectedOperator = operator
-        operatorModel = true;
+    function showAdminPermissionsModal(admin: Admin) {
+        selectedAdmin = admin
+        adminModel = true;
     }
 
-    function showNameChangeModal(operator: Operator) {
-        newName = operator.name;
-        selectedOperator = operator
+    function showNameChangeModal(admin: Admin) {
+        newName = admin.name;
+        selectedAdmin = admin
         nameModal = true;
     }
 
     const disptatch = createEventDispatcher();
 
-    let operatorModel = false; // controls the appearance of the popup operator confirmation window
-    let nameModal = false; // controls the appearance of the operator name change window
+    let adminModel = false; // controls the appearance of the popup admin confirmation window
+    let nameModal = false; // controls the appearance of the admin name change window
 </script>
 
-<Modal title="Change Operator Username" bind:open={nameModal} autoclose>
+<Modal title="Change Admin Username" bind:open={nameModal} autoclose>
     <p>
-        <span>Please provide an updated name for {selectedOperator.name} ({selectedOperator.email})</span>
+        <span>Please provide an updated name for {selectedAdmin.name} ({selectedAdmin.email})</span>
         <br>
         <br>
         <Label for="name" class="mb-2">First name</Label>
-        <Input type="text" id="name" placeholder={selectedOperator.name} bind:value={newName} required />
+        <Input type="text" id="name" placeholder={selectedAdmin.name} bind:value={newName} required />
     </p>
     
     <svelte:fragment slot="footer">
         <!-- TODO: CHANGE THESE COLOURS -->
-        <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => modifyOperatorName(selectedOperator)}>Confirm</Button>
+        <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => modifyAdminName(selectedAdmin)}>Confirm</Button>
         <Button class="bg-red-200 hover:bg-red-300 text-black">Cancel</Button>
     </svelte:fragment>
 </Modal>
 
-<Modal title="Notice for Granting Operator Permissions" bind:open={operatorModel} autoclose>
+<Modal title="Notice for Granting Admin Permissions" bind:open={adminModel} autoclose>
     <p>
-        <span>Giving a user operator status allows them to view and modify all employees in the system. Only do this if you know and trust this person.</span>
+        <span>Giving a user admin status allows them to view and modify all employees in the system. Only do this if you know and trust this person.</span>
         <br>
         <br>
-        <span class="text-red-600">Are you sure you want to make {selectedOperator.name} ({selectedOperator.email}) an operator?</span>
+        <span class="text-red-600">Are you sure you want to make {selectedAdmin.name} ({selectedAdmin.email}) an admin?</span>
     </p>
     
     <svelte:fragment slot="footer">
         <!-- TODO: CHANGE THESE COLOURS -->
-        <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => modifyOperatorPermissions(selectedOperator)}>Yes</Button>
+        <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => modifyAdminPermissions(selectedAdmin)}>Yes</Button>
         <Button class="bg-red-200 hover:bg-red-300 text-black">No</Button>
     </svelte:fragment>
 </Modal>
@@ -159,30 +159,30 @@
             <TableHeadCell>Name</TableHeadCell>
             <TableHeadCell>Email</TableHeadCell>
             <TableHeadCell>Google ID</TableHeadCell>
-            <TableHeadCell>Is Operator</TableHeadCell>
+            <TableHeadCell>Is Admin</TableHeadCell>
             <TableHeadCell>
                 <span class="sr-only">Edit</span>
             </TableHeadCell>
         </TableHead>
         <TableBody tableBodyClass="divide-y">
-            {#each operators as operator}
+            {#each admins as admin}
                 <TableBodyRow>
                     <TableBodyCell class="!p-4">
-                        <Checkbox bind:checked={operator.selected} />
+                        <Checkbox bind:checked={admin.selected} />
                     </TableBodyCell>
                     <TableBodyCell>
-                        {operator.name}
-                        <EditIcon on:edit={() => showNameChangeModal(operator)} />
+                        {admin.name}
+                        <EditIcon on:edit={() => showNameChangeModal(admin)} />
                     </TableBodyCell>
                     <TableBodyCell>
-                        {operator.email}
+                        {admin.email}
                     </TableBodyCell>
                     <TableBodyCell>
-                        {operator.googleID}
+                        {admin.googleID}
                     </TableBodyCell>
                     <TableBodyCell>
-                        {operator.isOP}
-                        <EditIcon on:edit={() => showOperatorPermissionsModal(operator)} />
+                        {admin.isOP}
+                        <EditIcon on:edit={() => showAdminPermissionsModal(admin)} />
                     </TableBodyCell>
                     <TableBodyCell>
                         <a href="/tables" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Edit</a>
@@ -192,7 +192,7 @@
         </TableBody>
     </Table>
     <!-- ! FOR TESTING, REMOVE LATER -->
-    {#each selectedOperators as op}{op.name}.{/each}
+    {#each selectedAdmins as op}{op.name}.{/each}
 
     <!-- TODO: ADD OPTION TO DELETE SELECTED USERS -->
     <div>
