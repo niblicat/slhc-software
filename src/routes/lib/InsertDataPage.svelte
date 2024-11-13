@@ -75,23 +75,23 @@
     <TableBody tableBodyClass="divide-y">
       <TableBodyRow>
         <TableBodyCell>Left Ear</TableBodyCell>
-        <TableBodyCell><Input id="hz_500" placeholder="500 Hz" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_1000" placeholder="1000 Hz" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_2000" placeholder="2000 Hz" required/> </TableBodyCell>
-        <TableBodyCell><Input id="hz_3000" placeholder="3000 Hz" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_4000" placeholder="4000 Hz" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_6000" placeholder="6000 Hz" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_8000" placeholder="8000 Hz" required/></TableBodyCell>
+        <TableBodyCell><Input id="hz_500" placeholder="500" required/></TableBodyCell>
+        <TableBodyCell><Input id="hz_1000" placeholder="1000" required/></TableBodyCell>
+        <TableBodyCell><Input id="hz_2000" placeholder="2000" required/> </TableBodyCell>
+        <TableBodyCell><Input id="hz_3000" placeholder="3000" required/></TableBodyCell>
+        <TableBodyCell><Input id="hz_4000" placeholder="4000" required/></TableBodyCell>
+        <TableBodyCell><Input id="hz_6000" placeholder="6000" required/></TableBodyCell>
+        <TableBodyCell><Input id="hz_8000" placeholder="8000" required/></TableBodyCell>
       </TableBodyRow>
       <TableBodyRow>
         <TableBodyCell>Right Ear</TableBodyCell>
-        <TableBodyCell><Input id="hz_500" placeholder="500 Hz" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_1000" placeholder="1000 Hz" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_2000" placeholder="2000 Hz" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_3000" placeholder="3000 Hz" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_4000" placeholder="4000 Hz" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_6000" placeholder="6000 Hz" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_8000" placeholder="8000 Hz" required/></TableBodyCell>
+        <TableBodyCell><Input id="hz_500" placeholder="500" required/></TableBodyCell>
+        <TableBodyCell><Input id="hz_1000" placeholder="1000" required/></TableBodyCell>
+        <TableBodyCell><Input id="hz_2000" placeholder="2000" required/></TableBodyCell>
+        <TableBodyCell><Input id="hz_3000" placeholder="3000" required/></TableBodyCell>
+        <TableBodyCell><Input id="hz_4000" placeholder="4000" required/></TableBodyCell>
+        <TableBodyCell><Input id="hz_6000" placeholder="6000" required/></TableBodyCell>
+        <TableBodyCell><Input id="hz_8000" placeholder="8000" required/></TableBodyCell>
       </TableBodyRow>
     </TableBody>
   </Table>

@@ -6,7 +6,7 @@
     import ScatterPlot from './ScatterPlot.svelte';
     import { Footer } from 'flowbite-svelte';
     import { sql } from '@vercel/postgres';
-    // import ".app.css";
+    import '$lib/app.css';
 
     // chart
     let chart: any;
@@ -142,7 +142,7 @@
     <div class="chart-container">
         {#if showBoth}
             <ScatterPlot 
-                plotTitle="Overlay: Both Ears"
+                plotTitle="Both Ears"
                 baselineHearingData={RightBaselineHearingData.concat(LeftBaselineHearingData)}
                 newHearingData={RightNewHearingData.concat(LeftNewHearingData)}
                 labels={['Right Baseline', 'Right New', 'Left Baseline', 'Left New']}

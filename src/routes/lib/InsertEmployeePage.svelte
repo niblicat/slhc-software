@@ -27,7 +27,7 @@
 </div>
 <div class="mb-6 form">
   <Label for="email" class="block mb-2">Employee Email</Label>
-  <Input type="email" id="email" placeholder="email" required/>
+  <Input type="email" id="email" placeholder="email@siue.edu" required/>
   <!-- <Helper class="mt-2" color="green">
     <span class="font-medium">Well done!</span>
     Some success message.
