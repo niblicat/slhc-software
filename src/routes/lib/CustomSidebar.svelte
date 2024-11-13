@@ -28,7 +28,7 @@
             <SidebarWrapper class="h-full overflow-y-auto pt-16"> <!-- Add padding here -->
                 TEST {activeURLHash}
                 <SidebarGroup>
-                    <SidebarItem on:click={sidebarToggleDispatch} label="Admin" href="#admin">
+                    <SidebarItem on:click={sidebarToggleDispatch} label="Operators" href="#operator">
                         <svelte:fragment slot="icon">
                             <UserSolid/>
                         </svelte:fragment>

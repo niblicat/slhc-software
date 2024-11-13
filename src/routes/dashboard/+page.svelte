@@ -15,6 +15,7 @@
     import InsertEmployeePage from '../lib/InsertEmployeePage.svelte';
     import InsertDataPage from '../lib/InsertDataPage.svelte';
     import AdminPage from '../lib/AdminPage.svelte';
+    import OperatorPage from '$lib/OperatorPage.svelte';
 
     $: activeURL = $page.url.pathname;
     $: activeURLHash = $page.url.hash;
@@ -61,6 +62,9 @@ on:toggle={toggleSidebar}
     <InsertEmployeePage/>
 {:else if activeURLHash == "#data"}
     <InsertDataPage/>
+    You have mail
+{:else if activeURLHash == "#operator"}
+    <OperatorPage />
 {:else}
     <!-- User who is not logged in should be redirected to home (no hash) -->
     <p>You are on the dashboard. Use the sidebar to navigate to a page</p>
