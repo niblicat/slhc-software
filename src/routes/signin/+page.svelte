@@ -1,18 +1,22 @@
 <script lang="ts">
     import type { ActionData } from './$types';
-    import { sql } from '@vercel/postgres';
     import { redirect } from '@sveltejs/kit';
     
     // This can be used later to sync the admin table with signins
     // I do not have it fully integrated yet, so it does nothing
     // ~ Jared
     export let form: ActionData;
+
+    function Login() {
+        redirect(200, '/signin');
+    }
+
 </script>
 
 <h2>SignIn</h2>
-<!-- {#if form?.invalidCred}
+{#if form?.invalidCred}
     <p>Invalid credentials</p>
-{/if} -->
+{/if}
 
 <div class="signin">
     <div class="card">

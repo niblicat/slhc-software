@@ -5,7 +5,6 @@
     import CustomAvatar from './CustomAvatar.svelte';
 	import { createEventDispatcher } from 'svelte';
 
-
     const dispatch = createEventDispatcher();
 
     function sidebarToggleDispatch() {
