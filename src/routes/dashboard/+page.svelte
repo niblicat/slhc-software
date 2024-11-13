@@ -62,7 +62,6 @@ on:toggle={toggleSidebar}
     <InsertEmployeePage/>
 {:else if activeURLHash == "#data"}
     <InsertDataPage/>
-    You have mail
 {:else if activeURLHash == "#operator"}
     <OperatorPage />
 {:else}
