@@ -61,7 +61,6 @@ on:toggle={toggleSidebar}
     <InsertEmployeePage/>
 {:else if activeURLHash == "#data"}
     <InsertDataPage/>
-    You have mail
 {:else}
     <!-- User who is not logged in should be redirected to home (no hash) -->
     <p>You are on the dashboard. Use the sidebar to navigate to a page</p>
