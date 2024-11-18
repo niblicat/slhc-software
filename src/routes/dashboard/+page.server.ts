@@ -34,7 +34,7 @@ export const load: PageServerLoad = async (event) => {
     //     throw redirect(302, '/signin'); // Redirect to login if no session cookie
     // }
     
-    const users = await sql`SELECT * FROM Admin;`;
+    const users = await sql`SELECT * FROM Administrator;`;
     
     return {
         // session: session,
