@@ -91,6 +91,14 @@
             },
             options: {
                 responsive: true,
+                // tooltips: {
+                //     mode: 'nearest',
+                //     intersect: false
+                // },
+                hover: {
+                    mode: 'nearest',
+                    intersect: false
+                },
                 scales: {
                     x: {
                         type: 'linear',
