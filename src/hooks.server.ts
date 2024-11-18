@@ -26,7 +26,7 @@
 
 import { SvelteKitAuth } from "@auth/sveltekit";
 // import { AUTH_SECRET } from "$env/static/private";
-import GoogleProvider from "@auth/core/providers/google"
+import GoogleProvider from "@auth/core/providers/google";
 import { AUTH_SECRET, AUTH_GOOGLE_CLIENT_ID, AUTH_GOOGLE_SECRET } from "$env/static/private";
 // import { sequence } from "@sveltejs/kit/hooks"; // This can be used if we have other handlers that we want SvelteKit to run.
 
@@ -38,7 +38,7 @@ const auth = SvelteKitAuth({
     })
   ],
   session: {
-    maxAge: 60 * 60 * 24 * 365,
+    maxAge: 5, //864000,      // Session must be set to 10 days (60 * 60 * 24 * 10) 864,000 seconds
     strategy: "jwt",
   },
 
