@@ -39,7 +39,7 @@
     <!-- Select Employee Dropdown -->
     <div style="width: 300px;">
         <Label for="employee" class="block mb-2">Select Employee</Label>
-        <Button class="bg-blue-200 hover:bg-blue-300 text-black flex justify-between items-center" style="width: 100%">{selectedUser}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
+        <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black flex justify-between items-center" style="width: 100%">{selectedUser}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
         <Dropdown bind:open={nameMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
             <div slot="header" class="p-3">
                 <Search size="md" bind:value={inputValueName} on:input={nameHandleInput} />
@@ -57,7 +57,7 @@
     <!-- Add Year Input -->
     <div style="width: 300px; margin-left: 16px;">
         <Label for="year" class="block mb-2">Add Year</Label>
-        <Input id="year" placeholder="year" />
+        <Input id="year" placeholder="xxxx" />
     </div>
 </div>
 	
@@ -75,29 +75,29 @@
     <TableBody tableBodyClass="divide-y">
       <TableBodyRow>
         <TableBodyCell>Left Ear</TableBodyCell>
-        <TableBodyCell><Input id="hz_500" placeholder="500" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_1000" placeholder="1000" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_2000" placeholder="2000" required/> </TableBodyCell>
-        <TableBodyCell><Input id="hz_3000" placeholder="3000" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_4000" placeholder="4000" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_6000" placeholder="6000" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_8000" placeholder="8000" required/></TableBodyCell>
+        <TableBodyCell><Input id="hz_500" required/></TableBodyCell>
+        <TableBodyCell><Input id="hz_1000" required/></TableBodyCell>
+        <TableBodyCell><Input id="hz_2000" required/> </TableBodyCell>
+        <TableBodyCell><Input id="hz_3000" required/></TableBodyCell>
+        <TableBodyCell><Input id="hz_4000" required/></TableBodyCell>
+        <TableBodyCell><Input id="hz_6000" required/></TableBodyCell>
+        <TableBodyCell><Input id="hz_8000" required/></TableBodyCell>
       </TableBodyRow>
       <TableBodyRow>
         <TableBodyCell>Right Ear</TableBodyCell>
-        <TableBodyCell><Input id="hz_500" placeholder="500" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_1000" placeholder="1000" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_2000" placeholder="2000" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_3000" placeholder="3000" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_4000" placeholder="4000" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_6000" placeholder="6000" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_8000" placeholder="8000" required/></TableBodyCell>
+        <TableBodyCell><Input id="hz_500" required/></TableBodyCell>
+        <TableBodyCell><Input id="hz_1000" required/></TableBodyCell>
+        <TableBodyCell><Input id="hz_2000" required/></TableBodyCell>
+        <TableBodyCell><Input id="hz_3000" required/></TableBodyCell>
+        <TableBodyCell><Input id="hz_4000" required/></TableBodyCell>
+        <TableBodyCell><Input id="hz_6000" required/></TableBodyCell>
+        <TableBodyCell><Input id="hz_8000" required/></TableBodyCell>
       </TableBodyRow>
     </TableBody>
   </Table>
 
 <div class="form">
-    <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:200px">Submit</Button>
+    <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black" style="width:200px">Submit</Button>
 </div>
 
 <style>

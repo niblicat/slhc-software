@@ -93,7 +93,7 @@
 
 <div class="relative dropdown-container flex space-x-4 justify-center" style="margin-top: 20px;"> 
     <!-- User Dropdown -->
-    <Button class="bg-dark-red hover:bg-blue-300 text-black flex justify-between items-center" style="width:300px">{selectedUser}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
+    <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base flex justify-between items-center" style="width:300px">{selectedUser}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
     <Dropdown bind:open={nameMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
     <div slot="header" class="p-3">
         <Search size="md" bind:value={inputValueName} on:input={nameHandleInput}/>
@@ -108,7 +108,7 @@
     </Dropdown>
 
     <!-- Year Dropdown -->
-    <Button class="bg-blue-200 hover:bg-blue-300 text-black flex justify-between items-center" style="width:300px">{selectedYear}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
+    <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base flex justify-between items-center" style="width:300px">{selectedYear}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
     <Dropdown bind:open={yearMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
     <div slot="header" class="p-3">
         <Search size="md" bind:value={inputValueYear} on:input={yearHandleInput}/>
@@ -162,9 +162,9 @@
             />
         {/if}
         <ButtonGroup class="*:!ring-primary-700">
-            <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:175px" on:click={() => toggleChart('left')}>Left</Button>
-            <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:175px" on:click={() => toggleChart('right')}>Right</Button> 
-            <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:175px" on:click={() => toggleChart('both')}>Both</Button> 
+            <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base" style="width:175px" on:click={() => toggleChart('left')}>Left</Button>
+            <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base" style="width:175px" on:click={() => toggleChart('right')}>Right</Button> 
+            <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base" style="width:175px" on:click={() => toggleChart('both')}>Both</Button> 
         </ButtonGroup>
     </div>
 </div>
@@ -173,8 +173,8 @@
     <hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
     <div class="sm:flex sm:items-center sm:justify-between">
         <ButtonGroup class="*:!ring-primary-700" style="width:100%">
-            <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:50%">Print</Button>
-            <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:50%">Send Letter</Button>
+            <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-lg" style="width:50%">Print</Button>
+            <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-lg" style="width:50%">Send Letter</Button>
         </ButtonGroup>
     </div>
  </Footer>

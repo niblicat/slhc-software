@@ -55,7 +55,7 @@
 {/if}
 
 <div class="form">
-  <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:200px">Submit</Button>
+  <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black" style="width:200px">Submit</Button>
 </div>
 
 <style>

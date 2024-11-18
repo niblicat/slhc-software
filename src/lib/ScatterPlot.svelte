@@ -97,7 +97,10 @@
                         position: 'bottom',
                         title: {
                             display: true,
-                            text: 'Frequency (Hz)'
+                            text: 'Frequency (Hz)',
+                            font: {
+                                size: 16
+                            }
                         },
                         min: Math.min(...customTicksX),  // Ensure the x-axis starts from the minimum value of custom ticks
                         max: Math.max(...customTicksX),  // Ensure the x-axis ends at the maximum value of custom ticks
@@ -109,7 +112,10 @@
                     y: {
                         title: {
                             display: true,
-                            text: 'Hearing Level (dB)'
+                            text: 'Hearing Level (dB)',
+                            font: {
+                                size: 16
+                            }
                         },
                         min: Math.min(...customTicksY),
                         max: Math.max(...customTicksY),
@@ -130,6 +136,13 @@
                     padding: {
                         top: 20,
                         bottom: 0
+                    }
+                },
+                legend: {
+                    labels: {
+                        font: {
+                            size: 14
+                        }
                     }
                 }
             }

@@ -18,7 +18,7 @@
 </script>
 
 <!-- Navbar -->
-<Navbar color="form" class="bg-blue-200 flex justify-between items-center">
+<Navbar color="form" class="bg-light-bluegreen flex justify-between items-center">
     {#if hasSidebar}
         <div class="absolute top-2.5 left-0 z-50">
             <Button class="relative w-8 h-10" on:click={sidebarToggleDispatch}>
