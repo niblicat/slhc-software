@@ -8,12 +8,12 @@
     export let data;
 
     import { page } from '$app/stores';
-	import CustomNavbar from '../lib/CustomNavbar.svelte';
-	import CustomSidebar from '../lib/CustomSidebar.svelte';
-	import EmployeesPage from '../lib/EmployeesPage.svelte';
-    import MailingPage from '../lib/MailingPage.svelte';
-    import InsertEmployeePage from '../lib/InsertEmployeePage.svelte';
-    import InsertDataPage from '../lib/InsertDataPage.svelte';
+	import CustomNavbar from '$lib/CustomNavbar.svelte';
+	import CustomSidebar from '$lib/CustomSidebar.svelte';
+	import EmployeesPage from '$lib/EmployeesPage.svelte';
+    import MailingPage from '$lib/MailingPage.svelte';
+    import InsertEmployeePage from '$lib/InsertEmployeePage.svelte';
+    import InsertDataPage from '$lib/InsertDataPage.svelte';
     import AdminPage from '$lib/AdminPage.svelte';
 
     $: activeURL = $page.url.pathname;

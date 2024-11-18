@@ -6,7 +6,6 @@
     import ScatterPlot from './ScatterPlot.svelte';
     import { Footer } from 'flowbite-svelte';
     import { sql } from '@vercel/postgres';
-    import '$lib/app.css';
 
     // chart
     let chart: any;
@@ -94,7 +93,7 @@
 
 <div class="relative dropdown-container flex space-x-4 justify-center" style="margin-top: 20px;"> 
     <!-- User Dropdown -->
-    <Button class="bg-blue-200 hover:bg-blue-300 text-black flex justify-between items-center" style="width:300px">{selectedUser}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
+    <Button class="bg-dark-red hover:bg-blue-300 text-black flex justify-between items-center" style="width:300px">{selectedUser}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
     <Dropdown bind:open={nameMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
     <div slot="header" class="p-3">
         <Search size="md" bind:value={inputValueName} on:input={nameHandleInput}/>

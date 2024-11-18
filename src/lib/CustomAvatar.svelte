@@ -9,6 +9,7 @@
 
     const SESSION_COOKIE_NAME = 'session_id';
 
+    // ! is this the correct way to implement this?
     export const actions = {
         default: async ({ cookies }) => {
             // Get session ID from the cookie
