@@ -9,7 +9,7 @@
 
     import { page } from '$app/stores';
 	import { Button } from 'flowbite-svelte';
-    import CustomNavbar from './lib/CustomNavbar.svelte';
+    import CustomNavbar from '$lib/CustomNavbar.svelte';
 	import { redirect } from '@sveltejs/kit';
 	import { signOut } from "@auth/sveltekit/client";
 
