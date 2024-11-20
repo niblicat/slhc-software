@@ -64,7 +64,6 @@ on:toggle={toggleSidebar}
     <InsertDataPage/>
 {:else}
     <!-- User who is not logged in should be redirected to home (no hash) -->
-    
     <div class="center text-2xl">Welcome to the dashboard</div>
       
         <Accordion>
@@ -82,7 +81,8 @@ on:toggle={toggleSidebar}
             <Li>Employee information is displayed on the left and the hearing data graph is displayed on the right</Li>
             <Li>Select the "Print" button to print out this information</Li>
             <Li>Select the "Send Letter" button to print out this information</Li>
-            <Accordion>
+            <br>
+            <Accordion class="bg-gray-100">
                 <AccordionItem>
                     <span slot="header">Learn more about the graph</span>
                     <p class="text-gray-500 dark:text-gray-400"></p>
@@ -120,11 +120,7 @@ on:toggle={toggleSidebar}
     .center {
         margin: auto;
         width: 50%;
-        padding: 10px;
-        text-align: center;
-    }
-    .format {
-        margin: auto;
         padding: 30px;
+        text-align: center;
     }
   </style>
