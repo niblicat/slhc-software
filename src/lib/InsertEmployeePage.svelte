@@ -7,7 +7,7 @@
 
 </script>
 
-<div class="center text-2xl">Add a New Employee  </div>
+<div class="center text-2xl">Add a New Employee</div>
 
 <div class="mb-6 form">
   <Label for="firstName" class="block mb-2">Employee First Name</Label>
