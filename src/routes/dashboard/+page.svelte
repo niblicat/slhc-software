@@ -19,6 +19,9 @@
     $: activeURL = $page.url.pathname;
     $: activeURLHash = $page.url.hash;
 
+    $: admins = data.admins;
+    $: employees = data.employees;
+
     // sidebar state and visibility 
     let sidebarOpen = false;
     const toggleSidebar = () => {
@@ -50,13 +53,11 @@ on:toggle={toggleSidebar}
 
 
 {#if activeURLHash == "#employees"}
-    <EmployeesPage
-    {data}
-    />
+    <EmployeesPage {employees} />
 {:else if activeURLHash == "#mailings"}
     <MailingPage/>
 {:else if activeURLHash == "#admin"}
-    <AdminPage/>
+    <AdminPage {admins} />
 {:else if activeURLHash == "#insert"}
     <InsertEmployeePage/>
 {:else if activeURLHash == "#data"}

@@ -10,7 +10,7 @@
     // chart
     let chart: any;
 
-    export let data;
+    export let employees;
 
     // Chart Selection
     let isRightEar = false;
@@ -29,8 +29,8 @@
     let nameMenuOpen = false;
     let yearMenuOpen = false;
 
-    // Selected user and year
-    let selectedUser = "No user selected";
+    // Selected employee and year
+    let selectedEmployee = "No employee selected";
     let selectedYear = "No year selected";
     let selectedEmail = "No selection made";
     let selectedDOB = "No selection made";
@@ -51,9 +51,9 @@
     filteredNames = employeeItems;
     filteredYears = yearItems;
 
-    // Functions to update selected user and year
-    const selectUser = (user: string) => {
-        selectedUser = user;
+    // Functions to update selected employee and year
+    const selectEmployee = (employee: string) => {
+        selectedEmployee = employee;
         nameMenuOpen = false; 
     };
 
@@ -70,15 +70,15 @@
         filteredYears = yearItems.filter(item => item.includes(inputValueYear));
     };
 
-    interface User {
-        username: string;
+    interface Employee {
+        employeename: string;
         password: string;
     }
 
-    const users = data.users.map((row: User) => ({
-        username: row.username,
+    const employeesMap = employees.map((row: Employee) => ({
+        employeename: row.employeename,
         password: row.password
-    })) as Array<User>;
+    })) as Array<Employee>;
 
     // TODO: get these from google auth
     let name = "example name";
@@ -92,16 +92,16 @@
 </script>
 
 <div class="relative dropdown-container flex space-x-4 justify-center" style="margin-top: 20px;"> 
-    <!-- User Dropdown -->
-    <Button class="bg-dark-red hover:bg-blue-300 text-black flex justify-between items-center" style="width:300px">{selectedUser}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
+    <!-- Employee Dropdown -->
+    <Button class="bg-dark-red hover:bg-blue-300 text-black flex justify-between items-center" style="width:300px">{selectedEmployee}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
     <Dropdown bind:open={nameMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
     <div slot="header" class="p-3">
         <Search size="md" bind:value={inputValueName} on:input={nameHandleInput}/>
     </div>
-    {#each filteredNames as user}
+    {#each filteredNames as employee}
         <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
-            <button type="button" class="w-full text-left" on:click={() => selectUser(user)}>
-                {user}
+            <button type="button" class="w-full text-left" on:click={() => selectEmployee(employee)}>
+                {employee}
             </button>
         </li>
     {/each}
@@ -129,7 +129,7 @@
     <section class="selected-info text-xl">
         <br>
         <p>Year: {selectedYear}</p> <br>
-        <p>User: {selectedUser}</p> <br>
+        <p>Employee: {selectedEmployee}</p> <br>
         <p>Email: {selectedEmail}</p> <br>
         <p>Date of Birth: {selectedDOB}</p> <br>
         <p>Age: {selectAge}</p> <br>

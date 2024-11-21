@@ -1,43 +1,77 @@
 import { redirect } from '@sveltejs/kit';
-import { sql } from "@vercel/postgres";
-//import { POSTGRES_URL } from '$env/static/private';
-import type { PageServerLoad } from './$types';
+import { sql } from '@vercel/postgres';
+import type { Actions, PageServerLoad } from './$types';
+import { json } from '@sveltejs/kit';
 
-// const SESSION_COOKIE_NAME = 'session_id';
+// Load function to get parent data and fetch users
+export const load: PageServerLoad = async ({ parent }) => {
+    const parentData = await parent();
 
-// export async function load({ request, cookies }) {
-//     const sessionId = cookies.get(SESSION_COOKIE_NAME);
-
-//     if (!sessionId) {
-//         throw redirect(302, '/signin'); // Redirect to login if no session cookie
-//     }
-
-//     // Check if the session ID exists in the database
-//     const { rows } = await sql`SELECT username FROM sessions WHERE session_id = ${sessionId};`;
-
-//     if (rows.length === 0) {
-//         throw redirect(302, '/signin'); // Redirect to login if session ID is invalid
-//     }
-
-//     // Fetch user data or other data for the home page
-//     // Example: Fetch users from the database
-//     const users = await sql`SELECT * FROM Admin;`;
-
-//     return {
-//         users: users.rows
-//     };
-// }
-
-export const load: PageServerLoad = async (event) => {
-    // const session = await event.locals.auth();
-    // if (!session) {
-    //     throw redirect(302, '/signin'); // Redirect to login if no session cookie
-    // }
-    
-    const users = await sql`SELECT * FROM Administrator;`;
-    
-    return {
-        // session: session,
-        users: users.rows
+    if (!parentData.loggedIn) {
+        // throw redirect(302, '/');
     }
-}
+
+    const employee = await sql`SELECT * FROM Employee;`;
+    const admins = await sql`SELECT * FROM Administrator;`;
+
+    console.log("This has changed...");
+
+    return {
+        employees: employee.rows,
+        admins: admins.rows
+    };
+};
+
+// Actions for login and registration
+export const actions: Actions = {
+    login: async (event) => {
+        // TODO: log the user in
+    },
+    register: async (event) => {
+        // TODO: register the user
+    },
+    modifyAdminPermissions: async ({request}) => {
+        const formData = await request.formData();
+        const adminID = formData.get('adminID') as string;
+        const isOp = formData.get('isOp') === 'true';
+
+        try {
+            const result = await sql`UPDATE Administrator SET isop = ${isOp} WHERE id=${adminID};`
+            
+            if (result.rowCount === 0) {
+                return { success: false, message: 'No rows were updated. Admin ID might be incorrect.' };
+            }
+
+        } catch (error: any) {
+            console.log(error.message);
+            console.log('Failed to update admin permissions');
+            return { success: false, message: 'Failed to update admin permissions' };
+        }
+        
+        return JSON.stringify({
+            success: true,
+        });
+    },
+    modifyAdminName: async ({request}) => {
+        const formData = await request.formData();
+        const adminID = formData.get('adminID') as string;
+        const newName = formData.get('newName');
+
+        try {
+            const result = await sql`UPDATE Administrator SET name = ${newName} WHERE id=${adminID};`
+            
+            if (result.rowCount === 0) {
+                return { success: false, message: 'No rows were updated. Admin ID might be incorrect.' };
+            }
+
+        } catch (error: any) {
+            console.log(error.message);
+            console.log('Failed to update admin name');
+            return { success: false, message: 'Failed to update admin name' };
+        }
+
+        return JSON.stringify({
+            success: true,
+        });
+    }
+};
