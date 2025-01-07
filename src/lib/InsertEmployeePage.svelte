@@ -1,9 +1,58 @@
 <script lang="ts"  src="../path/to/flowbite/dist/flowbite.min.js">
 
-  import { Label, Input, Helper, Radio} from 'flowbite-svelte';
-  import { Button } from 'flowbite-svelte';
+  import { Label, Input, Helper, Radio, Button } from 'flowbite-svelte';
+  import { invalidateAll } from '$app/navigation';
 
+  let firstName = '';
+  let lastName = '';
+  let email = '';
+  let dateOfBirth = '';
   let isInactive = false;
+  let lastActive = '';
+
+  let success = true;
+  let errorMessage = '';
+
+  function displayError(message: string) {
+    errorMessage = message;
+    success = false;
+  }
+
+  async function addEmployee() {
+    const formData = new FormData();
+    formData.append('firstName', firstName);
+    formData.append('lastName', lastName);
+    formData.append('email', email);
+    formData.append('dateOfBirth', dateOfBirth);
+    formData.append('isInactive', isInactive.toString());
+    if (isInactive) {
+      formData.append('lastActive', lastActive);
+    }
+
+    const response = await fetch('/dashboard?/addEmployee', {
+      method: 'POST',
+      body: formData,
+    });
+
+    try {
+      const serverResponse = await response.json();
+
+      if (serverResponse.success) {
+        success = true;
+        await invalidateAll(); // Invalidate the cache and refresh the table.
+        firstName = '';
+        lastName = '';
+        email = '';
+        dateOfBirth = '';
+        lastActive = '';
+        isInactive = false;
+      } else {
+        displayError(serverResponse.message);
+      }
+    } catch (error: any) {
+      displayError(error.message);
+    }
+  }
 
 </script>
 
@@ -57,6 +106,13 @@
 <div class="form">
   <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black" style="width:200px">Submit</Button>
 </div>
+
+<div class="form">
+  <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black" style="width:200px" on:click={addEmployee}>Submit</Button>
+</div>
+{#if !success}
+<span class="text-red-600">{errorMessage}</span>
+{/if}
 
 <style>
   .center {
