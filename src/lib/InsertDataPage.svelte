@@ -1,10 +1,10 @@
 <script lang="ts"  src="../path/to/flowbite/dist/flowbite.min.js">
 
-    import { Label, Input, Helper} from 'flowbite-svelte';
+    import { Label, Input} from 'flowbite-svelte';
     import { Button } from 'flowbite-svelte';
     import { Dropdown, Search } from 'flowbite-svelte';
-    import { ChevronDownOutline, UserRemoveSolid } from 'flowbite-svelte-icons';
-    import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Checkbox, TableSearch } from 'flowbite-svelte';
+    import { ChevronDownOutline } from 'flowbite-svelte-icons';
+    import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
 
     let nameMenuOpen = false;
     let selectedUser = "No user selected";
@@ -17,6 +17,27 @@
 
     filteredNames = employeeItems;
 
+    // Form input values
+    let year = "";
+    let leftEarFrequencies = {
+        hz500: "",
+        hz1000: "",
+        hz2000: "",
+        hz3000: "",
+        hz4000: "",
+        hz6000: "",
+        hz8000: "",
+    };
+    let rightEarFrequencies = {
+        hz500: "",
+        hz1000: "",
+        hz2000: "",
+        hz3000: "",
+        hz4000: "",
+        hz6000: "",
+        hz8000: "",
+    };
+
     // Functions to update selected user 
     const selectUser = (user: string) => {
         selectedUser = user;
@@ -27,14 +48,54 @@
         filteredNames = employeeItems.filter(item => item.toLowerCase().includes(inputValueName.toLowerCase()));
     };
 
-    interface User {
-        username: string;
-        password: string;
+    // interface User {
+    //     username: string;
+    //     password: string;
+    // }
+
+    async function submitData() {
+        if (!selectedUser || !year || Object.values(leftEarFrequencies).some(v => !v) || Object.values(rightEarFrequencies).some(v => !v)) {
+            alert("Please fill in all fields.");
+            return;
+        }
+
+        const payload = {
+            user: selectedUser,
+            year,
+            leftEarFrequencies,
+            rightEarFrequencies,
+        };
+
+        try {
+            const response = await fetch('/api/insert-data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                alert("Data submitted successfully!");
+                // Clear the form
+                resetForm();
+            } else {
+                alert(`Error: ${result.message}`);
+            }
+        } catch (error) {
+            alert(`Error submitting data: ${error}`);
+        }
+    }
+
+    function resetForm() {
+        selectedUser = "No user selected";
+        year = "";
+        Object.keys(leftEarFrequencies).forEach(key => (leftEarFrequencies[key] = ""));
+        Object.keys(rightEarFrequencies).forEach(key => (rightEarFrequencies[key] = ""));
     }
 </script>
 
 <div class="center text-2xl">Add New Data</div>
-
 <div class="dropdown-container flex-container form"> 
     <!-- Select Employee Dropdown -->
     <div style="width: 300px;">
@@ -72,32 +133,28 @@
         <TableHeadCell>6000 Hz</TableHeadCell>
         <TableHeadCell>8000 Hz</TableHeadCell>
     </TableHead>
-    <TableBody tableBodyClass="divide-y">
-      <TableBodyRow>
-        <TableBodyCell>Left Ear</TableBodyCell>
-        <TableBodyCell><Input id="hz_500" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_1000" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_2000" required/> </TableBodyCell>
-        <TableBodyCell><Input id="hz_3000" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_4000" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_6000" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_8000" required/></TableBodyCell>
-      </TableBodyRow>
-      <TableBodyRow>
-        <TableBodyCell>Right Ear</TableBodyCell>
-        <TableBodyCell><Input id="hz_500" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_1000" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_2000" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_3000" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_4000" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_6000" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_8000" required/></TableBodyCell>
-      </TableBodyRow>
+    <TableBody>
+        <TableBodyRow>
+            <TableBodyCell>Left Ear</TableBodyCell>
+            {#each Object.keys(leftEarFrequencies) as freq}
+                <TableBodyCell>
+                    <Input bind:value={leftEarFrequencies[freq]} />
+                </TableBodyCell>
+            {/each}
+        </TableBodyRow>
+        <TableBodyRow>
+            <TableBodyCell>Right Ear</TableBodyCell>
+            {#each Object.keys(rightEarFrequencies) as freq}
+                <TableBodyCell>
+                    <Input bind:value={rightEarFrequencies[freq]} />
+                </TableBodyCell>
+            {/each}
+        </TableBodyRow>
     </TableBody>
   </Table>
 
 <div class="form">
-    <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black" style="width:200px">Submit</Button>
+    <Button on:click={submitData} class="bg-light-bluegreen hover:bg-dark-bluegreen text-black" style="width:200px">Submit</Button>
 </div>
 
 <style>
@@ -121,3 +178,5 @@
         margin: auto;
     }
 </style>
+
+
