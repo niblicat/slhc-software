@@ -1,3 +1,4 @@
+
 import { redirect } from '@sveltejs/kit';
 import { sql } from '@vercel/postgres';
 import type { Actions, PageServerLoad } from './$types';
@@ -68,6 +69,37 @@ export const actions: Actions = {
             console.log(error.message);
             console.log('Failed to update admin name');
             return { success: false, message: 'Failed to update admin name' };
+        }
+
+        return JSON.stringify({
+            success: true,
+        });
+    },
+
+    addEmployee: async ({ request }) => {
+        const formData = await request.formData();
+        const firstName = formData.get('firstName') as string;
+        const lastName = formData.get('lastName') as string;
+        const email = formData.get('email') as string;
+        const dateOfBirth = formData.get('dateOfBirth') as string;
+        const isInactive = formData.get('isInactive') === 'true';
+        const lastActive = isInactive ? formData.get('lastActive') as string : null;
+
+        try {
+          // Insert new employee into the database (adjust as needed for your DB schema)
+          const result = await sql`
+            INSERT INTO Employee (first_name, last_name, email, date_of_birth, last_active)
+            VALUES (${firstName}, ${lastName}, ${email}, ${dateOfBirth}, ${lastActive});
+          `;
+    
+          if (result.rowCount === 0) {
+            return { success: false, message: 'Failed to add employee' };
+          }
+    
+        } 
+        catch (error: any) {
+          console.log('Error adding employee:', error.message);
+          return { success: false, message: 'Failed to add employee due to error' };
         }
 
         return JSON.stringify({
