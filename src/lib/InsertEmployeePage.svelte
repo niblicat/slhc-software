@@ -13,6 +13,7 @@
 
   let success = true;
   let errorMessage = '';
+  let successMessage = '';
 
   // Employee type
   type Employee = {
@@ -32,6 +33,22 @@
     success = false;
   }
 
+  async function handleSubmit(event: Event) {
+    event.preventDefault(); // Prevent the default form submission behavior
+    successMessage = '';  
+    errorMessage = '';  
+
+    await addEmployee();
+
+    if (success) {
+      successMessage = 'Successfully added employee! Refreshing page...';
+      setTimeout(() => location.reload(), 2000);    // Refresh the page after 2 secs
+    }
+    else {
+      console.error('Error occurred:', errorMessage);
+    }
+  }
+
   async function addEmployee() {
     const formData = new FormData();
     formData.append('firstName', firstName);
@@ -43,29 +60,35 @@
       formData.append('lastActive', lastActive);
     }
 
-    const response = await fetch('/dashboard?/addEmployee', {
-      method: 'POST',
-      body: formData,
-    });
+    // Debug: Log form data
+    console.log('Form data to be sent:', Object.fromEntries(formData.entries()));
 
     try {
-      const serverResponse = await response.json();
-      console.log('Server Response:', serverResponse);
+      const response = await fetch('/dashboard?/addEmployee', {
+        method: 'POST',
+        body: formData,
+      });
+  
+      // Debug: Log raw response
+      console.log('Raw server response:', response);
 
-      if (serverResponse.success) {
-        success = true;
-        await invalidateAll(); // Invalidate the cache and refresh the table.
-        window.location.reload();
-        firstName = '';
-        lastName = '';
-        email = '';
-        dateOfBirth = '';
-        lastActive = '';
-        isInactive = false;
-      } else {
-        displayError(serverResponse.message || 'Unknown error');
+      if (!response.ok) {
+        throw new Error(`Server returned error: ${response.statusText}`);
       }
-    } catch (error: any) {
+
+      let serverResponse;
+      try {
+        serverResponse = await response.json();
+      } 
+      catch (e) {
+        console.error('Failed to parse JSON:', e);
+        throw new Error('Invalid JSON response from server');
+      }
+
+      console.log('Server Response:', serverResponse);
+    } 
+    catch (error: any) {
+      console.error('Error during fetch or JSON parsing:', error);
       displayError(error.message || 'An error occurred');
     }
   }
@@ -73,8 +96,6 @@
 </script>
 
 <div class="center text-2xl">Add a New Employee</div>
-
-<form on:submit|preventDefault={addEmployee}>
 
 <div class="mb-6 form">
   <Label for="firstName" class="block mb-2">Employee First Name</Label>
@@ -109,15 +130,29 @@
   </div>
 {/if}
 
+
 <div class="form">
-  <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black" style="width:200px" type="submit">Submit</Button>
+<Button 
+  class="bg-light-bluegreen hover:bg-dark-bluegreen text-black" 
+  style="width:200px" 
+  on:click={handleSubmit}
+>Submit</Button>
 </div>
 
-{#if !success}
-<span class="text-red-600">{errorMessage}</span>
-{/if}
+<div>
+  {#if successMessage}
+    <div class="text-green-600 mt-4">
+      {successMessage}
+    </div>
+  {/if}
 
-</form>
+  {#if !success && errorMessage}
+    <div class="text-red-600 mt-4">
+      {errorMessage}
+    </div>
+  {/if}
+</div>
+
 
 
 <style>

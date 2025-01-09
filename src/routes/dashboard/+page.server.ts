@@ -75,6 +75,7 @@ export const actions: Actions = {
             success: true,
         });
     },
+
     addEmployee: async ({ request }) => {
         const formData = await request.formData();
         const firstName = formData.get('firstName') as string;
@@ -83,7 +84,7 @@ export const actions: Actions = {
         const dateOfBirth = formData.get('dateOfBirth') as string;
         const isInactive = formData.get('isInactive') === 'true';
         const lastActive = isInactive ? formData.get('lastActive') as string : null;
-    
+
         try {
           // Insert new employee into the database (adjust as needed for your DB schema)
           const result = await sql`
@@ -95,11 +96,14 @@ export const actions: Actions = {
             return { success: false, message: 'Failed to add employee' };
           }
     
-          return { success: true };
-    
-        } catch (error: any) {
+        } 
+        catch (error: any) {
           console.log('Error adding employee:', error.message);
           return { success: false, message: 'Failed to add employee due to error' };
         }
+
+        return JSON.stringify({
+            success: true,
+        });
     }
 };
