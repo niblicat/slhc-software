@@ -42,8 +42,11 @@
 		"@auth/sveltekit": "^1.5.3",
 		"@popperjs/core": "^2.11.8",
 		"@simplewebauthn/server": "^9.0.3",
+		"@types/chart.js": "^2.9.41",
 		"@vercel/postgres": "^0.10.0",
+		"chart.js": "^4.4.5",
 		"cookie": "^0.6.0",
+		"matplotlib": "^1.0.0",
 		"tailwind-merge": "^2.5.2",
 		"uuid": "^10.0.0"
 	}

@@ -5,7 +5,6 @@
     import CustomAvatar from './CustomAvatar.svelte';
 	import { createEventDispatcher } from 'svelte';
 
-
     const dispatch = createEventDispatcher();
 
     function sidebarToggleDispatch() {
@@ -19,10 +18,9 @@
 </script>
 
 <!-- Navbar -->
-<Navbar rounded color="form" class="flex justify-between items-center">
+<Navbar color="form" class="bg-blue-200 flex justify-between items-center">
     {#if hasSidebar}
-    <!-- the button is not aligning to the left for some reason... -->
-        <div class="fixed top-4 left-4 z-50">
+        <div class="absolute top-2.5 left-0 z-50">
             <Button class="relative w-8 h-10" on:click={sidebarToggleDispatch}>
                 {#if sidebarOpen}
                     <!-- X icon when sidebar is open -->
@@ -39,7 +37,7 @@
         </div>
     {/if}
     <NavBrand href="/dashboard" class="flex-grow text-center">
-        <span class="text-2xl font-semibold dark:text-white">SIUE SLHC Employee Hearing Panel</span>
+        <span class="relative flex-1 text-3xl font-bold dark:text-white">SIUE SLHC Employee Hearing Panel</span>
     </NavBrand>
     <CustomAvatar name={name} email={email} />
 </Navbar>

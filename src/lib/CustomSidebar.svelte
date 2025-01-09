@@ -28,22 +28,27 @@
             <SidebarWrapper class="h-full overflow-y-auto pt-16"> <!-- Add padding here -->
                 TEST {activeURLHash}
                 <SidebarGroup>
-                    <SidebarItem label="Admin" href="#admin">
+                    <SidebarItem on:click={sidebarToggleDispatch} label="Admins" href="#admin">
                         <svelte:fragment slot="icon">
                             <UserSolid/>
                         </svelte:fragment>
                     </SidebarItem>
-                    <SidebarItem label="Employees" href="#employees">
+                    <SidebarItem on:click={sidebarToggleDispatch} label="Employees" href="#employees">
                         <svelte:fragment slot="icon">
                             <GridSolid/>
                         </svelte:fragment>
                     </SidebarItem>
-                    <SidebarItem label="Mailings" href="#mailings">
+                    <SidebarItem on:click={sidebarToggleDispatch} label="Mailings" href="#mailings">
                         <svelte:fragment slot="icon">
                             <MailBoxSolid/>
                         </svelte:fragment>
                     </SidebarItem>
-                    <SidebarItem label="Insert Employees" href="#insert">
+                    <SidebarItem on:click={sidebarToggleDispatch} label="Insert Employees" href="#insert">
+                        <svelte:fragment slot="icon">
+                            <ArrowRightToBracketOutline/>
+                        </svelte:fragment>
+                    </SidebarItem>
+                    <SidebarItem on:click={sidebarToggleDispatch} label="Insert Data" href="#data">
                         <svelte:fragment slot="icon">
                             <ArrowRightToBracketOutline/>
                         </svelte:fragment>

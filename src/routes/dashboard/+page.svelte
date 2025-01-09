@@ -8,12 +8,19 @@
     export let data;
 
     import { page } from '$app/stores';
-	import CustomNavbar from '../lib/CustomNavbar.svelte';
-	import CustomSidebar from '../lib/CustomSidebar.svelte';
-	import EmployeesPage from '../lib/EmployeesPage.svelte';
+	import CustomNavbar from '$lib/CustomNavbar.svelte';
+	import CustomSidebar from '$lib/CustomSidebar.svelte';
+	import EmployeesPage from '$lib/EmployeesPage.svelte';
+    import MailingPage from '$lib/MailingPage.svelte';
+    import InsertEmployeePage from '$lib/InsertEmployeePage.svelte';
+    import InsertDataPage from '$lib/InsertDataPage.svelte';
+    import AdminPage from '$lib/AdminPage.svelte';
 
     $: activeURL = $page.url.pathname;
     $: activeURLHash = $page.url.hash;
+
+    $: admins = data.admins;
+    $: employees = data.employees;
 
     // sidebar state and visibility 
     let sidebarOpen = false;
@@ -40,17 +47,21 @@ activeURLHash={activeURLHash}
 on:toggle={toggleSidebar}
 />
 
-<p>These are for testing:</p>
+<!-- <p>These are for testing:</p>
 <p>activeURLHash: {activeURLHash}</p>
-<p>activeURL {activeURL}</p>
+<p>activeURL {activeURL}</p> -->
 
 
 {#if activeURLHash == "#employees"}
-    <EmployeesPage
-    {data}
-    />
+    <EmployeesPage {employees} />
 {:else if activeURLHash == "#mailings"}
-    You have mail
+    <MailingPage/>
+{:else if activeURLHash == "#admin"}
+    <AdminPage {admins} />
+{:else if activeURLHash == "#insert"}
+    <InsertEmployeePage/>
+{:else if activeURLHash == "#data"}
+    <InsertDataPage/>
 {:else}
     <!-- User who is not logged in should be redirected to home (no hash) -->
     <p>You are on the dashboard. Use the sidebar to navigate to a page</p>

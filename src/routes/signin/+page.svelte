@@ -1,10 +1,16 @@
 <script lang="ts">
     import type { ActionData } from './$types';
+    import { redirect } from '@sveltejs/kit';
     
     export let form: ActionData;
+
+    function Login() {
+        redirect(200, '/signin');
+    }
+
 </script>
 
-<h2>Login</h2>
+<h2>SignIn</h2>
 {#if form?.invalidCred}
     <p>Invalid credentials</p>
 {/if}
@@ -12,7 +18,7 @@
 <div class="signin">
     <div class="card">
         <div class="provider">
-            <form action="http://localhost:5173/auth/signin/google" method="POST">
+            <form action="/auth/signin/google" method="POST">
                 <input type="hidden" name="csrfToken" value={form?.csrfToken}>
                 <input type="hidden" name="callbackUrl" value="/dashboard"> <!-- Redirect to home page after sign-in -->
                 <button type="submit" class="button" style="--provider-bg: #fff; --provider-bg-hover: color-mix(in srgb, #1a73e8 30%, #fff); --provider-dark-bg: #161b22; --provider-dark-bg-hover: color-mix(in srgb, #1a73e8 30%, #000);" tabindex="0">
