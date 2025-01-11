@@ -8,12 +8,44 @@
     import { sql } from '@vercel/postgres';
 
     import type { Employee } from './MyTypes';
+	import AdminPage from './AdminPage.svelte';
 
     let chart: any;
 
     export let employees: Array<Employee>;
 
-    let selectedUser: Employee;
+    const undefinedEmployee: Employee = {
+        employeeID: "-1",
+        firstName: "Undefined",
+        lastName: "Undefined",
+        email: "Undefined",
+        dob: "Undefined"
+    };
+
+    // used to make it easier to access employees from their full name
+    type EmployeeSearchable = {
+        name: string, // full name
+        data: Employee
+    }
+
+    // employee dictionary
+    // name is key, value is employee data
+    $: employee_dict = employees.map((employee) => ({
+        name: `${employee.firstName} ${employee.lastName}`,
+        data: employee
+    })) as Array<EmployeeSearchable>;
+
+    let selectedEmployee: EmployeeSearchable = {
+        name: "Select an employee", 
+        data: undefinedEmployee
+    };
+
+    let inputValueName: string = "";
+    let inputValueYear = "";
+    let filteredNames: Array<string> = [];
+    let filteredYears: Array<string> = [];
+
+    $: filtered_employees = employee_dict.filter(item => item.name.toLowerCase().includes(inputValueName.toLowerCase()));
 
     // Chart Selection
     let isRightEar = false;
@@ -33,7 +65,7 @@
     let yearMenuOpen = false;
 
     // Selected employee and year
-    let selectedEmployee = "No employee selected";
+    // ! Some of these could be accessed from the selected employee data
     let selectedYear = "No year selected";
     let selectedEmail = "No selection made";
     let selectedDOB = "No selection made";
@@ -41,10 +73,7 @@
     let selectedStatus = "No selection made";
     let STSstatus = "No data selection";
 
-    let inputValueName = "";
-    let inputValueYear = "";
-    let filteredNames: Array<string> = [];
-    let filteredYears: Array<string> = [];
+
 
     // Employee and year data for demo purposes -- still need to connect to database
     const employeeItems = ["Jayme", "Jared", "Angel"];
@@ -55,9 +84,11 @@
     filteredYears = yearItems;
 
     // Functions to update selected employee and year
-    const selectEmployee = (employee: string) => {
+    const selectEmployee = (employee: EmployeeSearchable) => {
         selectedEmployee = employee;
         nameMenuOpen = false; 
+
+        // TODO: When employee is selected, populate relevant data fields with the employee's specific data
     };
 
     const selectYear = (year: string) => {
@@ -65,23 +96,23 @@
         yearMenuOpen = false; 
     };
     
-    const nameHandleInput = () => {
-        filteredNames = employeeItems.filter(item => item.toLowerCase().includes(inputValueName.toLowerCase()));
-    };
+    // const nameHandleInput = () => {
+    //     filteredNames = employeeItems.filter(item => item.toLowerCase().includes(inputValueName.toLowerCase()));
+    // };
 
     const yearHandleInput = () => {
         filteredYears = yearItems.filter(item => item.includes(inputValueYear));
     };
 
-    interface Employee {
-        employeename: string;
-        password: string;
-    }
+    // interface Employee {
+    //     employeename: string;
+    //     password: string;
+    // }
 
-    const employeesMap = employees.map((row: Employee) => ({
-        employeename: row.employeename,
-        password: row.password
-    })) as Array<Employee>;
+    // const employeesMap = employees.map((row: Employee) => ({
+    //     employeename: row.employeename,
+    //     password: row.password
+    // })) as Array<Employee>;
 
     // TODO: get these from google auth
     let name = "example name";
@@ -96,15 +127,15 @@
 
 <div class="relative dropdown-container flex space-x-4 justify-center" style="margin-top: 20px;"> 
     <!-- User Dropdown -->
-    <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base flex justify-between items-center" style="width:300px">{selectedUser}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
+    <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base flex justify-between items-center" style="width:300px">{selectedEmployee.name}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
     <Dropdown bind:open={nameMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
     <div slot="header" class="p-3">
-        <Search size="md" bind:value={inputValueName} on:input={nameHandleInput}/>
+        <Search size="md" bind:value={inputValueName}/>
     </div>
-    {#each filteredNames as employee}
+    {#each filtered_employees as employee}
         <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
             <button type="button" class="w-full text-left" on:click={() => selectEmployee(employee)}>
-                {employee}
+                {employee.name}
             </button>
         </li>
     {/each}
