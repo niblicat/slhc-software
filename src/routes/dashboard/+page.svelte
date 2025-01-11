@@ -8,7 +8,7 @@
     export let data;
     import { Li, List, Heading } from 'flowbite-svelte';
     import { AccordionItem, Accordion } from 'flowbite-svelte';
-    import { page } from '$app/stores';
+    import { page } from '$app/stores'; // ! page is deprecated...?
 	import CustomNavbar from '$lib/CustomNavbar.svelte';
 	import CustomSidebar from '$lib/CustomSidebar.svelte';
 	import EmployeesPage from '$lib/EmployeesPage.svelte';

@@ -9,40 +9,19 @@
     import { Input, Label, Helper } from 'flowbite-svelte';
 	import { invalidateAll } from '$app/navigation';
 
-    export let admins: Array<AdminDB>;
+    import type { Admin } from './MyTypes.ts';
 
-    type Admin = {
-        name: string,
-        email: string,
-        googleID: string,
-        isOP: boolean
-        selected: boolean
-    };
-
-    type AdminDB = {
-        id: string,
-        userstring: string,
-        name: string,
-        isop: boolean
-    };
-
-
-    // let adminsMap: Array<Admin> = [
-    //     {name: "e", email: "e2", googleID: "e3", isOP: true, selected: false},
-    //     {name: "fabian", email: "fabian@2", googleID: "fabiangoogle", isOP: true, selected: false},
-    //     {name: "rosie", email: "rosie@2", googleID: "rosiegoogle", isOP: false, selected: false},
-    //     {name: "sage", email: "sage@2", googleID: "sagegoogle", isOP: true, selected: false},
-    // ]
+    export let admins: Array<Admin>;
 
     console.log("ADMINS:");
     console.log(admins);
 
     $: adminsMap = admins
-        .map((row: AdminDB) => ({
+        .map((row: Admin) => ({
             name: row.name,
-            email: row.userstring,
-            googleID: row.id,
-            isOP: row.isop,
+            email: row.email,
+            googleID: row.googleID,
+            isOP: row.isOP,
             selected: false,
         }))
         .sort((a, b) => a.name.localeCompare(b.name));
@@ -127,6 +106,43 @@
         }
     }
 
+    async function deleteSelectedUsers() {
+        if (selectedAdmins.length === 0) {
+            displayError("No users selected for deletion.");
+            return;
+        }
+
+        // Get google IDs of admins to delete
+        const adminIDsToDelete = selectedAdmins.map(admin => admin.googleID);
+
+        // Prepare the request payload
+        const formData = new FormData();
+        formData.append('adminIDs', JSON.stringify(adminIDsToDelete));
+
+        try {
+            const response = await fetch('/dashboard?/deleteAdmins', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const serverResponse = await response.json();
+            console.log(response);
+
+            const result = JSON.parse(JSON.parse(serverResponse.data)[0]);
+
+            if (result["success"]) {
+                // Remove deleted admins from local view
+                success = true;
+                await invalidateAll(); // Refresh the page or data
+                adminsMap = adminsMap;
+            } else {
+                displayError(serverResponse.message || "Failed to delete selected users.");
+            }
+        } catch (error: any) {
+            displayError("An error occurred while deleting users: " + error.message);
+        }
+    }
+    
     function showAdminPermissionsModal(admin: Admin) {
         selectedAdmin = admin
         if (admin.isOP) adminFalseModal = true;
@@ -211,7 +227,7 @@
             {#each adminsMap as admin (admin.googleID)}
                 <TableBodyRow>
                     <TableBodyCell class="!p-4">
-                        <Checkbox bind:checked={admin.selected} />
+                        <Checkbox on:click={() => admin.selected = !admin.selected}/>
                     </TableBodyCell>
                     <TableBodyCell>
                         {admin.name}
@@ -239,7 +255,7 @@
 
     <!-- TODO: ADD OPTION TO DELETE SELECTED USERS -->
     <div>
-        <button class="bg-red-200 hover:bg-red-300 text-black">Delete selected users</button>
+        <button on:click={deleteSelectedUsers} class="bg-red-200 hover:bg-red-300 text-black">Delete selected users</button>
     </div>
     
 </div>

@@ -7,10 +7,13 @@
     import { Footer } from 'flowbite-svelte';
     import { sql } from '@vercel/postgres';
 
-    // chart
+    import type { Employee } from './MyTypes';
+
     let chart: any;
 
-    export let employees;
+    export let employees: Array<Employee>;
+
+    let selectedUser: Employee;
 
     // Chart Selection
     let isRightEar = false;

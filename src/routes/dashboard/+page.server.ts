@@ -3,23 +3,42 @@ import { redirect } from '@sveltejs/kit';
 import { sql } from '@vercel/postgres';
 import type { Actions, PageServerLoad } from './$types';
 import { json } from '@sveltejs/kit';
+import type { Employee } from '$lib/MyTypes';
+import type { Admin } from '$lib/MyTypes';
 
 // Load function to get parent data and fetch users
 export const load: PageServerLoad = async ({ parent }) => {
     const parentData = await parent();
 
-    if (!parentData.loggedIn) {
-        // throw redirect(302, '/');
-    }
+    // ! This has not been implemented properly
+    // if (!parentData.loggedIn) {
+    //     // throw redirect(302, '/');
+    // }
 
     const employee = await sql`SELECT * FROM Employee;`;
-    const admins = await sql`SELECT * FROM Administrator;`;
+    const administrator = await sql`SELECT * FROM Administrator;`;
 
     console.log("This has changed...");
 
+    const employees: Employee[] = employee.rows.map(row => ({
+        employeeID: row.employeeID,
+        firstName: row.first_name,
+        lastName: row.last_name,
+        email: row.email,
+        dob: row.date_of_birth
+    }));
+
+    const admins: Admin[] = administrator.rows.map(row => ({
+        name: row.name,
+        email: row.email,
+        googleID: row.id,
+        isOP: row.isop,
+        selected: false
+    }));
+
     return {
-        employees: employee.rows,
-        admins: admins.rows
+        employees: employees,
+        admins: admins
     };
 };
 
@@ -56,7 +75,7 @@ export const actions: Actions = {
     modifyAdminName: async ({request}) => {
         const formData = await request.formData();
         const adminID = formData.get('adminID') as string;
-        const newName = formData.get('newName');
+        const newName = formData.get('newName') as string;
 
         try {
             const result = await sql`UPDATE Administrator SET name = ${newName} WHERE id=${adminID};`
@@ -69,6 +88,33 @@ export const actions: Actions = {
             console.log(error.message);
             console.log('Failed to update admin name');
             return { success: false, message: 'Failed to update admin name' };
+        }
+
+        return JSON.stringify({
+            success: true,
+        });
+    },
+    deleteAdmins: async ({ request }) => {
+        console.log("deleteAdmins");
+        // Retrieve the admin IDs from the form data
+        const formData = await request.formData();
+        const adminIDs: string = JSON.parse(formData.get('adminIDs') as string) as string;
+
+        try {
+            // DELETE!!!!
+            const result = await sql`
+                DELETE FROM Administrator
+                WHERE id = ANY(${adminIDs});
+            `;
+
+            // Check if any rows were deleted
+            if (result.rowCount === 0) {
+                return { success: false, message: 'No admins were deleted. Admin IDs might be incorrect.' };
+            }
+
+        } catch (error: any) {
+            console.error('Failed to delete admins:', error.message);
+            return { success: false, message: 'Failed to delete selected admins.' };
         }
 
         return JSON.stringify({
