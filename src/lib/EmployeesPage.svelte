@@ -28,8 +28,9 @@
         data: Employee
     }
 
-    // employee dictionary
-    // name is key, value is employee data
+    // employee map that is search friendly
+    // name will hold first and last so it's easier to search
+    // actual employee data (id and stuff) is in employee_dict.data
     $: employee_dict = employees.map((employee) => ({
         name: `${employee.firstName} ${employee.lastName}`,
         data: employee
@@ -42,9 +43,9 @@
 
     let inputValueName: string = "";
     let inputValueYear = "";
-    let filteredNames: Array<string> = [];
     let filteredYears: Array<string> = [];
 
+    // When the user types into the selection text box, the employees list should filter
     $: filtered_employees = employee_dict.filter(item => item.name.toLowerCase().includes(inputValueName.toLowerCase()));
 
     // Chart Selection
@@ -73,15 +74,7 @@
     let selectedStatus = "No selection made";
     let STSstatus = "No data selection";
 
-
-
-    // Employee and year data for demo purposes -- still need to connect to database
-    const employeeItems = ["Jayme", "Jared", "Angel"];
     const yearItems = ["2022", "2023", "2024"];
-
-    // Initialize filtered names and years with default data
-    filteredNames = employeeItems;
-    filteredYears = yearItems;
 
     // Functions to update selected employee and year
     const selectEmployee = (employee: EmployeeSearchable) => {
@@ -95,24 +88,10 @@
         selectedYear = year;
         yearMenuOpen = false; 
     };
-    
-    // const nameHandleInput = () => {
-    //     filteredNames = employeeItems.filter(item => item.toLowerCase().includes(inputValueName.toLowerCase()));
-    // };
 
     const yearHandleInput = () => {
         filteredYears = yearItems.filter(item => item.includes(inputValueYear));
     };
-
-    // interface Employee {
-    //     employeename: string;
-    //     password: string;
-    // }
-
-    // const employeesMap = employees.map((row: Employee) => ({
-    //     employeename: row.employeename,
-    //     password: row.password
-    // })) as Array<Employee>;
 
     // TODO: get these from google auth
     let name = "example name";
