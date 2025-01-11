@@ -38,7 +38,7 @@ const auth = SvelteKitAuth({
     })
   ],
   session: {
-    maxAge: 5, //864000,      // Session must be set to 10 days (60 * 60 * 24 * 10) 864,000 seconds
+    maxAge: 10, //864000,      // Session must be set to 10 days (60 * 60 * 24 * 10) 864,000 seconds
     strategy: "jwt",
   },
 

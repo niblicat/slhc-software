@@ -47,7 +47,7 @@
 		"@vercel/postgres": "^0.10.0",
 		"chart.js": "^4.4.6",
 		"cookie": "^0.6.0",
-		"google-auth-library": "^9.15.0",
+		"google-auth-library": "^8.8.0",
 		"matplotlib": "^1.0.0",
 		"tailwind-merge": "^2.5.4",
 		"uuid": "^10.0.0"

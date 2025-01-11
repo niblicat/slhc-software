@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	// $page.data.session -> will extract the users {username, image, etc.} for their current AUTH session 
 	import { signOut } from "@auth/sveltekit/client";
-	
+	console.log($page.data.session)
 	// Reactive session store from SvelteKit, page provides session details if the user is logged in.
 	let session = $page.data.session;
   
