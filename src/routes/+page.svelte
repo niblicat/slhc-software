@@ -11,8 +11,9 @@
 	import { Button } from 'flowbite-svelte';
     import CustomNavbar from '$lib/CustomNavbar.svelte';
 	import { redirect } from '@sveltejs/kit';
-	import { signOut } from "@auth/sveltekit/client";
+	import { signIn, signOut } from "@auth/sveltekit/client";
 
+    console.log($page.data.session) // Display the user's data in console
 
     $: activeURL = $page.url.pathname;
     $: activeURLHash = $page.url.hash;
@@ -28,7 +29,7 @@
     let email = "example email";
 
     function Login() {
-        redirect(200, '/signin');
+        redirect(200, '/login');
     }
 </script>
 
@@ -43,5 +44,4 @@ on:toggle={toggleSidebar}
 <p>welcome to the home page :)</p>
 
 <Button color="yellow" on:click={Login}>Login shortcut, don't know why this doesn't work</Button>
-<a href="/signin">login (for real)</a>
-
+<a href="/login">login (for real)</a>

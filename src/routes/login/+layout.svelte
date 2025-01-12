@@ -29,7 +29,7 @@
   </main>
   
   <footer>
-	<p>© 2024 My SvelteKit App</p>
+	<p>© 2025 My SvelteKit App</p>
   </footer>
   
   <style>
