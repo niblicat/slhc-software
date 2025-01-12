@@ -41,6 +41,7 @@
 	"dependencies": {
 		"@auth/sveltekit": "^1.5.3",
 		"@popperjs/core": "^2.11.8",
+		"@rollup/rollup-darwin-arm64": "^4.30.1",
 		"@simplewebauthn/server": "^9.0.3",
 		"@types/chart.js": "^2.9.41",
 		"@vercel/postgres": "^0.10.0",
