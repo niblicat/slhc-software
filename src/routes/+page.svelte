@@ -11,6 +11,8 @@
     import "$lib/app.css";
     import type { PageData } from './$types';
     import { signIn, signOut } from '@auth/sveltekit/client';
+
+    console.log($page.data.session)
   
     export let data: PageData;
     $: loggedIn = data.loggedIn;
@@ -26,13 +28,9 @@
     };
 
     // TODO: Replace these with actual user data from Google Auth
-    let name = "example name";
-    let email = "example email";
+    let name = $page.data.session?.user?.name;
+    let email = $page.data.session?.user?.email;
 
-    // Fix the Login function using goto
-    function Login() {
-        goto('/login'); // Client-side navigation to the signin page
-    }
 </script>
 
 <!-- Custom Navbar -->
@@ -55,22 +53,23 @@
         <!-- Correct Image Reference -->
         <img src="landingpage/SIUE_logo_2024.png" alt="SIUE Logo">
 
-        {#if loggedIn}
-        <div>Welcome!</div>
-        <!-- <a href="/signin">Go to logged in area</a> -->
-        <br />
-        <br />
-        <button class="bg-funky text-white font-bold py-2 px-8 rounded hover:bg-red-600 transition-all duration-300 mb-4" on:click={() => signOut()}>Log Out</button>
-        {:else}
-        <Button class="bg-funky text-white font-bold py-2 px-8 rounded hover:bg-red-600 transition-all duration-300 mb-4" on:click={Login}>
-            <img class="pr-4" loading="lazy" height="36" src="https://authjs.dev/img/providers/google.svg" alt="Google SignIn">
-            <p>Login&nbsp;with&nbsp;Google</p>
-        </Button>
+        {#if $page.data.session}
+            <h1>You are logged in</h1>
+        {#if $page.data.session.user?.image}
+          <!-- <img
+            src={$page.data.session.user.image}
+            alt="User Profile"
+            class="w-12 h-12"
+          /> -->
         {/if}
-
+            <p>Signed in as {$page.data.session.user?.name}</p>
+            <button on:click={() => signOut()} class="bg-funky text-black font-bold py-2 px-8 rounded hover:bg-red-600 transition-all duration-300 mb-4" on:click={Login}>Sign Out</button>
+        {:else}
+            <h1>You are not logged in</h1>
+            <button on:click={() => signIn("google")} class="bg-funky text-black font-bold py-2 px-8 rounded hover:bg-red-600 transition-all duration-300 mb-4">
+                <img class="pr-4" loading="lazy" height="36" src="https://authjs.dev/img/providers/google.svg" alt="Google SignIn">
+                <p>Sign In with Google</p>
+            </button>
+        {/if}
     </div>
 </section>
-
-<style>
-    /* Add whatever styling you want ~ Jared */
-</style>
