@@ -12,8 +12,10 @@
     import "$lib/app.css";
     import type { PageData } from './$types';
     import { signIn, signOut } from '@auth/sveltekit/client';
+	import { onMount } from 'svelte';
 
     console.log($page.data.session)
+    console.log($page.data)
   
     // Store the current page URL and hash
     $: activeURL = $page.url.pathname;
@@ -28,6 +30,25 @@
     // TODO: Replace these with actual user data from Google Auth
     let name = $page.data.session?.user?.name;
     let email = $page.data.session?.user?.email;
+
+    onMount(() => {
+        // alert("Peanut butter");
+
+        // check if we HAVE an expiry date
+        if ($page.data.session?.expires) {
+            const userExpire = new Date($page.data.session?.expires);
+            const now = new Date();
+
+            // check if session hasn't expired yet
+            if (userExpire > now) {
+                alert("Hasn't expired...");
+                // Do some sort of validation check
+                if ($page.data.session.access_token) {
+                    const sessionID = $page.data.session.access_token;
+                }
+            }
+        }
+    });
 
 </script>
 

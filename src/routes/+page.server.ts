@@ -1,81 +1,71 @@
-// import { sql } from '@vercel/postgres'
-// import { page } from '$app/stores';
-// import { goto } from '$app/navigation';
-// import { redirect } from '@sveltejs/kit'
-
-// // Function to check if a user is an administrator
-// export async function checkAdminStatus(email: string) {
-//     console.log('Verifying if user is an administrator');
-
-//     try {
-//         // Query the administrators table to find a user with the specified email
-//         const result = await sql`
-//             SELECT isop 
-//             FROM administrators 
-//             WHERE userstring = ${email}
-//         `;
-
-//         const isAdmin = result.rows.length > 0 && result.rows[0].isop === true;
-//         console.log('Query result:', result.rows);
-//         console.log('Admin status:', isAdmin);
-
-//         if ($page.data.session) {
-//             goto('/dashboard')
-//         }
-//         return {
-//             isAdmin
-//         }
-//     } catch (error) {
-//         console.error('Error verifying administrator status:', error);
-//         return { 
-//             isAdmin: false 
-//         }
-//     }
-// }
-
 import { sql } from '@vercel/postgres'
 import { page } from '$app/stores';
 import { goto } from '$app/navigation';
 import { redirect } from '@sveltejs/kit'
+import type { Session } from '@auth/sveltekit';
 
 export const load = async (event) => {
-    const session = await event.locals.auth()
+    const session = await event.locals.auth();
 
     if (session) {
+
         const adminStatus = await checkAdminStatus(session)
-        if (checkAdminStatus.isAdmin) {
-            return
+        switch (adminStatus) {
+            case AdminStatus.HasPerms:
+                alert("Has perms");
+                redirect(303, '/dashboard');
+            case AdminStatus.NoPerms:
+                alert("No Perms");
+                // TODO: REDIRECT TO UNAUTHENTICATED PAGE
+                break;
+            case AdminStatus.NotListed:
+                alert("Not Listed");
+                // TODO: Add them to the admin database with isOP as false
+                break;
         }
     }
 }
 
-export async function checkAdminStatus(session) {
+enum AdminStatus {
+    NotListed,
+    NoPerms,
+    HasPerms
+}
+
+async function checkAdminStatus(session: Session): Promise<AdminStatus> {
     console.log('Verifying if user is an administrator')
 
     try {
         if (!session) {
-            throw new Error('No active session')
+            throw new Error('No active session');
         }
 
-        const userEmail = session.user?.email
+        const userEmail = session.user?.email;
 
         const result = await sql`
             SELECT isop
-            FROM administrators
+            FROM administrator
             WHERE userstring = ${userEmail}
-        `
+        `;
 
-        const isAdmin = result.rows.length > 0 && result.rows[0].isop === true
-        console.log("Query result:", result.rows)
-        console.log("Admin status:", isAdmin)
+        if (result.rowCount == 0) {
+            // They're not yet in the database, we need to add them
+            return AdminStatus.NotListed
+        }
 
-        return {
-            isAdmin
+        const isAdmin = result.rows.length > 0 && result.rows[0].isop === true;
+        console.log("Query result:", result.rows);
+        console.log("Admin status:", isAdmin);
+
+        if (isAdmin) {
+            return AdminStatus.HasPerms;
         }
-    } catch (error) {
-        console.error("Error verifying administrator status", error)
-        return {
-            isAdmin: false
+        else {
+            return AdminStatus.NoPerms;
         }
+    } 
+    catch (error) {
+        console.error("Error verifying administrator status", error);
+        return AdminStatus.NotListed;
     }
 }
