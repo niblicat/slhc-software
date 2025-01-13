@@ -14,9 +14,6 @@
 
     console.log($page.data.session)
   
-    export let data: PageData;
-    $: loggedIn = data.loggedIn;
-
     // Store the current page URL and hash
     $: activeURL = $page.url.pathname;
     $: activeURLHash = $page.url.hash;
@@ -63,7 +60,7 @@
           /> -->
         {/if}
             <p>Signed in as {$page.data.session.user?.name}</p>
-            <button on:click={() => signOut()} class="bg-funky text-black font-bold py-2 px-8 rounded hover:bg-red-600 transition-all duration-300 mb-4" on:click={Login}>Sign Out</button>
+            <button on:click={() => signOut()} class="bg-funky text-black font-bold py-2 px-8 rounded hover:bg-red-600 transition-all duration-300 mb-4">Sign Out</button>
         {:else}
             <h1>You are not logged in</h1>
             <button on:click={() => signIn("google")} class="bg-funky text-black font-bold py-2 px-8 rounded hover:bg-red-600 transition-all duration-300 mb-4">
