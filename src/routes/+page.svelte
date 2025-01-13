@@ -31,7 +31,7 @@
 
     // Fix the Login function using goto
     function Login() {
-        goto('/signin'); // Client-side navigation to the signin page
+        goto('/login'); // Client-side navigation to the signin page
     }
 </script>
 
