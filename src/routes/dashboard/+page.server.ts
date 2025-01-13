@@ -1,4 +1,3 @@
-
 import { redirect } from '@sveltejs/kit';
 import { sql } from '@vercel/postgres';
 import type { Actions, PageServerLoad } from './$types';
@@ -146,6 +145,74 @@ export const actions: Actions = {
         catch (error: any) {
           console.log('Error adding employee:', error.message);
           return { success: false, message: 'Failed to add employee due to error' };
+        }
+
+        return JSON.stringify({
+            success: true,
+        });
+    },
+
+    addHearingData: async ({ request }) => {
+        const formData = await request.formData();
+        const user = formData.get('user') as string;
+        const year = parseInt(formData.get('year') as string, 10);
+        const leftEarFrequencies = JSON.parse(formData.get('leftEarFrequencies') as string);
+        const rightEarFrequencies = JSON.parse(formData.get('rightEarFrequencies') as string);
+
+        const validateFrequencies = (frequencies: Record<string, string | number>) =>
+            Object.values(frequencies).every(value => !isNaN(parseInt(value as string, 10)));
+    
+        if (!validateFrequencies(leftEarFrequencies) || !validateFrequencies(rightEarFrequencies)) {
+            throw new Error('Invalid frequency data');
+        }
+
+        try {
+            // Fetch employee_id for the selected user
+            const userIdQuery = await sql`SELECT employee_id FROM Employee WHERE CONCAT(first_name, ' ', last_name) = ${user};`;
+            if (userIdQuery.rows.length === 0) {
+                throw new Error("User not found");
+            }
+
+            const employeeId = userIdQuery.rows[0].employee_id;
+
+            // Insert left ear data into Data table
+            const leftEarDataResult = await sql`
+                INSERT INTO Data (Hz_500, Hz_1000, Hz_2000, Hz_3000, Hz_4000, Hz_6000, Hz_8000)
+                VALUES (${leftEarFrequencies.hz500}, ${leftEarFrequencies.hz1000}, ${leftEarFrequencies.hz2000}, 
+                        ${leftEarFrequencies.hz3000}, ${leftEarFrequencies.hz4000}, ${leftEarFrequencies.hz6000}, ${leftEarFrequencies.hz8000})
+                RETURNING data_id;
+            `;
+
+            const leftEarDataId = leftEarDataResult.rows[0].data_id;
+
+
+            // Insert right ear data into Data table
+            const rightEarDataResult = await sql`
+                INSERT INTO Data (Hz_500, Hz_1000, Hz_2000, Hz_3000, Hz_4000, Hz_6000, Hz_8000)
+                VALUES (${rightEarFrequencies.hz500}, ${rightEarFrequencies.hz1000}, ${rightEarFrequencies.hz2000}, 
+                        ${rightEarFrequencies.hz3000}, ${rightEarFrequencies.hz4000}, ${rightEarFrequencies.hz6000}, ${rightEarFrequencies.hz8000})
+                RETURNING data_id;
+            `;
+
+            const rightEarDataId = rightEarDataResult.rows[0].data_id;
+
+            console.log(`Inserting into Has for Employee ID: ${employeeId}, Year: ${year}, Left Ear Data ID: ${leftEarDataId}, Right Ear Data ID: ${rightEarDataId}`);
+
+            // Insert into Has table for right ear
+            await sql`
+                INSERT INTO Has (employee_id, data_id, year, ear)
+                VALUES (${employeeId}, ${rightEarDataId}, ${year}, 'right');
+            `;
+
+            // Insert into Has table for left ear
+            await sql`
+                INSERT INTO Has (employee_id, data_id, year, ear)
+                VALUES (${employeeId}, ${leftEarDataId}, ${year}, 'left');
+            `;
+        } 
+        catch (error: any) {
+            console.log("Error adding employee's hearing data:", error.message);
+            return { success: false, message: "Failed to add employee's hearing data due to error" };
         }
 
         return JSON.stringify({

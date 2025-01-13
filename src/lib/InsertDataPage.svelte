@@ -1,109 +1,151 @@
 <script lang="ts"  src="../path/to/flowbite/dist/flowbite.min.js">
 
     import { Label, Input} from 'flowbite-svelte';
-    import { Button } from 'flowbite-svelte';
-    import { Dropdown, Search } from 'flowbite-svelte';
+    import { Dropdown, Search, Button } from 'flowbite-svelte';
     import { ChevronDownOutline } from 'flowbite-svelte-icons';
     import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
+    import { sql } from '@vercel/postgres';
 
-    let nameMenuOpen = false;
+    import type { Employee } from './MyTypes';
+	import AdminPage from './AdminPage.svelte';
+
+    export let employees: Array<Employee> = [];
+    
+    const undefinedEmployee: Employee = {
+        employeeID: "-1",
+        firstName: "Undefined",
+        lastName: "Undefined",
+        email: "Undefined",
+        dob: "Undefined"
+    };
+
+    // used to make it easier to access employees from their full name
+    type EmployeeSearchable = {
+        name: string, // full name
+        data: Employee
+    }
+
+    // employee map that is search friendly
+    // name will hold first and last so it's easier to search
+    // actual employee data (id and stuff) is in employee_dict.data
+    $: employee_dict = employees.map((employee) => ({
+        name: `${employee.firstName} ${employee.lastName}`,
+        data: employee
+    })) as Array<EmployeeSearchable>;
+
+    let selectedEmployee: EmployeeSearchable = {
+        name: "Select an employee", 
+        data: undefinedEmployee
+    };
+
     let inputValueName: string = "";
-    // let filteredNames: Array<string> = [];
-
-    let inputValueYear = "";
-    let filteredYears: Array<string> = [];
 
     // When the user types into the selection text box, the employees list should filter
-    // $: filtered_employees = employee_dict.filter(item => item.name.toLowerCase().includes(inputValueName.toLowerCase()));
+    $: filtered_employees = employee_dict.filter(item => item.name.toLowerCase().includes(inputValueName.toLowerCase()));
 
-
-    // Form input values
-    let year = "";
-    let leftEarFrequencies = {
-        hz500: "",
-        hz1000: "",
-        hz2000: "",
-        hz3000: "",
-        hz4000: "",
-        hz6000: "",
-        hz8000: "",
-    };
-    let rightEarFrequencies = {
-        hz500: "",
-        hz1000: "",
-        hz2000: "",
-        hz3000: "",
-        hz4000: "",
-        hz6000: "",
-        hz8000: "",
-    };
-
-    // Functions to update selected user 
+    // Functions to update selected employee and year
     const selectEmployee = (employee: EmployeeSearchable) => {
         selectedEmployee = employee;
         nameMenuOpen = false; 
     };
 
-<<<<<<< HEAD
-=======
-    // interface User {
-    //     username: string;
-    //     password: string;
-    // }
+    let nameMenuOpen = false;
 
-    async function submitData() {
-        if (!selectedUser || !year || Object.values(leftEarFrequencies).some(v => !v) || Object.values(rightEarFrequencies).some(v => !v)) {
-            alert("Please fill in all fields.");
-            return;
+    let inputValueYear = "";
+    let ear_side = "";
+    let leftFrequencies = {
+        hz500: '',
+        hz1000: '',
+        hz2000: '',
+        hz3000: '',
+        hz4000: '',
+        hz6000: '',
+        hz8000: ''
+    };
+    let rightFrequencies = {
+        hz500: '',
+        hz1000: '',
+        hz2000: '',
+        hz3000: '',
+        hz4000: '',
+        hz6000: '',
+        hz8000: ''
+    };
+
+    let success = true;
+    let errorMessage = '';
+    let successMessage = '';
+
+    function displayError(message: string) {
+        errorMessage = message;
+        success = false;
+    }
+
+    async function handleSubmit(event: Event) {
+        event.preventDefault(); // Prevent the default form submission behavior
+        successMessage = '';  
+        errorMessage = '';  
+
+        await addHearingData();
+
+        if (success) {
+        successMessage = 'Successfully added employee hearing data! Refreshing page...';
+        setTimeout(() => location.reload(), 2000);    // Refresh the page after 2 secs
         }
-
-        const payload = {
-            user: selectedUser,
-            year,
-            leftEarFrequencies,
-            rightEarFrequencies,
-        };
-
-        try {
-            const response = await fetch('/api/insert-data', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                alert("Data submitted successfully!");
-                // Clear the form
-                resetForm();
-            } else {
-                alert(`Error: ${result.message}`);
-            }
-        } catch (error) {
-            alert(`Error submitting data: ${error}`);
+        else {
+        console.error('Error occurred:', errorMessage);
         }
     }
 
-    function resetForm() {
-        selectedUser = "No user selected";
-        year = "";
-        Object.keys(leftEarFrequencies).forEach(key => (leftEarFrequencies[key] = ""));
-        Object.keys(rightEarFrequencies).forEach(key => (rightEarFrequencies[key] = ""));
+    async function addHearingData() {
+    const formData = new FormData();
+    formData.append('user', selectedEmployee.name); // Pass full name
+    formData.append('year', inputValueYear); // Year of data
+    formData.append('leftEarFrequencies', JSON.stringify(leftFrequencies)); // Left ear data
+    formData.append('rightEarFrequencies', JSON.stringify(rightFrequencies)); // Right ear data
+
+    // Debug: Log form data
+    console.log('Form data to be sent:', Object.fromEntries(formData.entries()));
+
+    try {
+      const response = await fetch('/dashboard?/addHearingData', {
+        method: 'POST',
+        body: formData,
+      });
+  
+      // Debug: Log raw response
+      console.log('Raw server response:', response);
+
+      if (!response.ok) {
+        throw new Error(`Server returned error: ${response.statusText}`);
+      }
+
+      let serverResponse;
+      try {
+        serverResponse = await response.json();
+      } 
+      catch (e) {
+        console.error('Failed to parse JSON:', e);
+        throw new Error('Invalid JSON response from server');
+      }
+
+      console.log('Server Response:', serverResponse);
+    } 
+    catch (error: any) {
+      console.error('Error during fetch or JSON parsing:', error);
+      displayError(error.message || 'An error occurred');
     }
->>>>>>> 4d8c4196d46a526beb1719b9ab64d66765dceaac
+  }
+
 </script>
 
 <div class="center text-2xl">Add New Data</div>
+
 <div class="dropdown-container flex-container form"> 
     <!-- Select Employee Dropdown -->
     <div style="width: 300px;">
         <Label for="employee" class="block mb-2">Select Employee</Label>
-<<<<<<< HEAD
         <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base flex justify-between items-center" style="width:300px">{selectedEmployee.name}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
-=======
-        <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black flex justify-between items-center" style="width: 100%">{selectedUser}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
->>>>>>> 4d8c4196d46a526beb1719b9ab64d66765dceaac
         <Dropdown bind:open={nameMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
         <div slot="header" class="p-3">
             <Search size="md" bind:value={inputValueName}/>
@@ -121,7 +163,7 @@
     <!-- Add Year Input -->
     <div style="width: 300px; margin-left: 16px;">
         <Label for="year" class="block mb-2">Add Year</Label>
-        <Input id="year" placeholder="xxxx" />
+        <Input id="year" placeholder="year" bind:value={inputValueYear} />
     </div>
 </div>
 	
@@ -136,33 +178,50 @@
         <TableHeadCell>6000 Hz</TableHeadCell>
         <TableHeadCell>8000 Hz</TableHeadCell>
     </TableHead>
-    <TableBody>
-        <TableBodyRow>
-            <TableBodyCell>Left Ear</TableBodyCell>
-            {#each Object.keys(leftEarFrequencies) as freq}
-                <TableBodyCell>
-                    <Input bind:value={leftEarFrequencies[freq]} />
-                </TableBodyCell>
-            {/each}
-        </TableBodyRow>
-        <TableBodyRow>
-            <TableBodyCell>Right Ear</TableBodyCell>
-            {#each Object.keys(rightEarFrequencies) as freq}
-                <TableBodyCell>
-                    <Input bind:value={rightEarFrequencies[freq]} />
-                </TableBodyCell>
-            {/each}
-        </TableBodyRow>
+    <TableBody tableBodyClass="divide-y">
+      <TableBodyRow>
+        <TableBodyCell>Left Ear</TableBodyCell>
+        <TableBodyCell><Input bind:value={leftFrequencies.hz500} placeholder="500" required /></TableBodyCell>
+        <TableBodyCell><Input bind:value={leftFrequencies.hz1000} placeholder="1000" required /></TableBodyCell>
+        <TableBodyCell><Input bind:value={leftFrequencies.hz2000} placeholder="2000" required /></TableBodyCell>
+        <TableBodyCell><Input bind:value={leftFrequencies.hz3000} placeholder="3000" required /></TableBodyCell>
+        <TableBodyCell><Input bind:value={leftFrequencies.hz4000} placeholder="4000" required /></TableBodyCell>
+        <TableBodyCell><Input bind:value={leftFrequencies.hz6000} placeholder="6000" required /></TableBodyCell>
+        <TableBodyCell><Input bind:value={leftFrequencies.hz8000} placeholder="8000" required /></TableBodyCell>
+    </TableBodyRow>
+      <TableBodyRow>
+        <TableBodyCell>Right Ear</TableBodyCell>
+        <TableBodyCell><Input bind:value={rightFrequencies.hz500} placeholder="500" required /></TableBodyCell>
+        <TableBodyCell><Input bind:value={rightFrequencies.hz1000} placeholder="1000" required /></TableBodyCell>
+        <TableBodyCell><Input bind:value={rightFrequencies.hz2000} placeholder="2000" required /></TableBodyCell>
+        <TableBodyCell><Input bind:value={rightFrequencies.hz3000} placeholder="3000" required /></TableBodyCell>
+        <TableBodyCell><Input bind:value={rightFrequencies.hz4000} placeholder="4000" required /></TableBodyCell>
+        <TableBodyCell><Input bind:value={rightFrequencies.hz6000} placeholder="6000" required /></TableBodyCell>
+        <TableBodyCell><Input bind:value={rightFrequencies.hz8000} placeholder="8000" required /></TableBodyCell>
+      </TableBodyRow>
     </TableBody>
   </Table>
 
-<<<<<<< HEAD
   <div class="form">
-    <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black" style="width:200px">Submit</Button>
-=======
-<div class="form">
-    <Button on:click={submitData} class="bg-light-bluegreen hover:bg-dark-bluegreen text-black" style="width:200px">Submit</Button>
->>>>>>> 4d8c4196d46a526beb1719b9ab64d66765dceaac
+    <Button 
+      class="bg-light-bluegreen hover:bg-dark-bluegreen text-black" 
+      style="width:200px" 
+      on:click={handleSubmit}
+    >Submit</Button>
+</div>
+
+<div>
+  {#if successMessage}
+    <div class="text-green-600 mt-4">
+      {successMessage}
+    </div>
+  {/if}
+
+  {#if !success && errorMessage}
+    <div class="text-red-600 mt-4">
+      {errorMessage}
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -186,5 +245,3 @@
         margin: auto;
     }
 </style>
-
-
