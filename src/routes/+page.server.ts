@@ -1,51 +1,81 @@
-// // import { redirect } from "@sveltejs/kit";
+// import { sql } from '@vercel/postgres'
+// import { page } from '$app/stores';
+// import { goto } from '$app/navigation';
+// import { redirect } from '@sveltejs/kit'
 
-// // export const load = async ({ parent, url }) => {
-// //   const parentData = await parent();
+// // Function to check if a user is an administrator
+// export async function checkAdminStatus(email: string) {
+//     console.log('Verifying if user is an administrator');
 
-// //   // Redirect to the landing page if not logged in and trying to access a restricted page
-// //   if (!parentData.loggedIn && url.pathname !== '/') {
-// //     throw redirect(302, "/");
-// //   }
-// // };
-// export const load = async ({ locals }) => {
-//     const session = await locals.getSession();
-//     const loggedIn = !!session?.user;
-  
-//     return {
-//       loggedIn,
-//     };
-//   };
+//     try {
+//         // Query the administrators table to find a user with the specified email
+//         const result = await sql`
+//             SELECT isop 
+//             FROM administrators 
+//             WHERE userstring = ${email}
+//         `;
+
+//         const isAdmin = result.rows.length > 0 && result.rows[0].isop === true;
+//         console.log('Query result:', result.rows);
+//         console.log('Admin status:', isAdmin);
+
+//         if ($page.data.session) {
+//             goto('/dashboard')
+//         }
+//         return {
+//             isAdmin
+//         }
+//     } catch (error) {
+//         console.error('Error verifying administrator status:', error);
+//         return { 
+//             isAdmin: false 
+//         }
+//     }
+// }
+
 import { sql } from '@vercel/postgres'
+import { page } from '$app/stores';
+import { goto } from '$app/navigation';
+import { redirect } from '@sveltejs/kit'
 
-// Function to check if a user is an administrator
-export async function checkAdminStatus(email: string) {
-    console.log('Verifying if user is an administrator');
+export const load = async (event) => {
+    const session = await event.locals.auth()
+
+    if (session) {
+        const adminStatus = await checkAdminStatus(session)
+        if (checkAdminStatus.isAdmin) {
+            return
+        }
+    }
+}
+
+export async function checkAdminStatus(session) {
+    console.log('Verifying if user is an administrator')
 
     try {
-        // Query the administrators table to find a user with the specified email
-        const result = await sql`
-            SELECT userstring, isop 
-            FROM administrators 
-            WHERE userstring = ${email}
-            LIMIT 1
-        `;
+        if (!session) {
+            throw new Error('No active session')
+        }
 
-        if (result.rows.length > 0) {
-            const admin = result.rows[0];
-            if (admin.isop) {
-                console.log('User is an administrator and has isop set to true');
-                return true; // Return true if the user is an admin and isop is true
-            } else {
-                console.log('User is an administrator, but isop is not true');
-                return false;
-            }
-        } else {
-            console.log('User is not in the administrators table');
-            return false;
+        const userEmail = session.user?.email
+
+        const result = await sql`
+            SELECT isop
+            FROM administrators
+            WHERE userstring = ${userEmail}
+        `
+
+        const isAdmin = result.rows.length > 0 && result.rows[0].isop === true
+        console.log("Query result:", result.rows)
+        console.log("Admin status:", isAdmin)
+
+        return {
+            isAdmin
         }
     } catch (error) {
-        console.error('Error verifying administrator status:', error);
-        throw error;
+        console.error("Error verifying administrator status", error)
+        return {
+            isAdmin: false
+        }
     }
 }

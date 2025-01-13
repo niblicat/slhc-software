@@ -6,6 +6,7 @@
     import type { ActionData } from './$types';
     import { page } from '$app/stores';
     import { goto } from '$app/navigation'; // Import goto for navigation
+    import { redirect } from '@sveltejs/kit';
     import CustomNavbar from './lib/CustomNavbar.svelte';
     import { Button } from 'flowbite-svelte';
     import "$lib/app.css";
@@ -53,11 +54,11 @@
         {#if $page.data.session}
             <h1>You are logged in</h1>
         {#if $page.data.session.user?.image}
-          <!-- <img
+          <img
             src={$page.data.session.user.image}
             alt="User Profile"
             class="w-12 h-12"
-          /> -->
+          />
         {/if}
             <p>Signed in as {$page.data.session.user?.name}</p>
             <button on:click={() => signOut()} class="bg-funky text-black font-bold py-2 px-8 rounded hover:bg-red-600 transition-all duration-300 mb-4">Sign Out</button>
