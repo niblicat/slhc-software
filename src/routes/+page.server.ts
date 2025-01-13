@@ -16,4 +16,8 @@
 //       loggedIn,
 //     };
 //   };
+import { sql } from '@vercel/postgres'
 
+async function checkAdminStatus() {
+    console.log('Verifying user is in "administrator" table')
+}
