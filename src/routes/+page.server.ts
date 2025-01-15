@@ -25,7 +25,7 @@ export const load = async (event) => {
                 //alert("Not Listed");
                 console.log("Not Listed");
                 await addUserToAdminDatabase(session.user?.email)
-                throw redirect(303, '/unautherized');
+                throw redirect(303, '/unauthorized');
                 break;
         }
     }
