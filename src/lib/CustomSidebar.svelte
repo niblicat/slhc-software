@@ -1,6 +1,6 @@
 <script lang="ts">
     import { Sidebar, SidebarGroup, SidebarItem, SidebarWrapper } from 'flowbite-svelte';
-    import { GridSolid, MailBoxSolid, UserSolid, ArrowRightToBracketOutline } from 'flowbite-svelte-icons';
+    import { GridSolid, MailBoxSolid, UserSolid, ArrowRightToBracketOutline, HomeSolid } from 'flowbite-svelte-icons';
     import { createEventDispatcher } from 'svelte';
 
     import { slide } from 'svelte/transition';
@@ -26,9 +26,14 @@
         <Sidebar {activeURLHash} {activeClass} {nonActiveClass} class="h-full pointer-events-auto">
             <!-- Content wrapper inside the sidebar with padding to push content down -->
             <SidebarWrapper class="h-full overflow-y-auto pt-16"> <!-- Add padding here -->
-                TEST {activeURLHash}
+                <!-- TEST {activeURLHash} -->
                 <SidebarGroup>
-                    <SidebarItem on:click={sidebarToggleDispatch} label="Admin" href="#admin">
+                    <SidebarItem on:click={sidebarToggleDispatch} label="Dashboard" href="#">
+                        <svelte:fragment slot="icon">
+                            <HomeSolid/>
+                        </svelte:fragment>
+                    </SidebarItem>
+                    <SidebarItem on:click={sidebarToggleDispatch} label="Admins" href="#admin">
                         <svelte:fragment slot="icon">
                             <UserSolid/>
                         </svelte:fragment>

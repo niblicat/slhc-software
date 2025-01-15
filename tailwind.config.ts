@@ -1,21 +1,12 @@
-import flowbitePlugin from 'flowbite/plugin'
+/** @type {import('tailwindcss').Config} */
+const flowbitePlugin = require('flowbite/plugin');
 
-import type { Config } from 'tailwindcss';
-
-export default {
-    content: ['./src//*.{html,js,svelte,ts}', './node_modules/flowbite-svelte//*.{html,js,svelte,ts}'],
+module.exports = {
+  content: [
+    './src/**/*.{html,js,svelte,ts}',
+    './node_modules/flowbite-svelte/**/*.{html,js,svelte,ts}'
+  ],
   darkMode: 'selector',
-	// theme: {
-	// 	extend: {
-  //     colors: {
-  //       // flowbite-svelte
-  //       'funky': '#FF5500',
-  //       //'button': ''
-  //       // 'baseline': ''
-  //       // 'change': ''
-  //     }
-  //   }
-	// },
   theme: {
     screens: {
       sm: '480px',
@@ -30,13 +21,12 @@ export default {
       'light-red': '#ff6385',
       'light-blue': '#36a3eb',
       'light-bluegreen': '#4bc0c0',
-      'dark-bluegreen': '#0a5c5c',
+      'dark-bluegreen': '#369696',
     },
     fontFamily: {
       sans: ['Graphik', 'sans-serif'],
       serif: ['Merriweather', 'serif'],
     }
   },
-
-    plugins: [flowbitePlugin]
-} as Config;
+  plugins: [flowbitePlugin],
+};

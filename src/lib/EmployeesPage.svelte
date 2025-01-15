@@ -6,12 +6,47 @@
     import ScatterPlot from './ScatterPlot.svelte';
     import { Footer } from 'flowbite-svelte';
     import { sql } from '@vercel/postgres';
-    import "$lib/app.css";
 
-    // chart
+    import type { Employee } from './MyTypes';
+	import AdminPage from './AdminPage.svelte';
+
     let chart: any;
 
-    export let data;
+    export let employees: Array<Employee>;
+
+    const undefinedEmployee: Employee = {
+        employeeID: "-1",
+        firstName: "Undefined",
+        lastName: "Undefined",
+        email: "Undefined",
+        dob: "Undefined"
+    };
+
+    // used to make it easier to access employees from their full name
+    type EmployeeSearchable = {
+        name: string, // full name
+        data: Employee
+    }
+
+    // employee map that is search friendly
+    // name will hold first and last so it's easier to search
+    // actual employee data (id and stuff) is in employee_dict.data
+    $: employee_dict = employees.map((employee) => ({
+        name: `${employee.firstName} ${employee.lastName}`,
+        data: employee
+    })) as Array<EmployeeSearchable>;
+
+    let selectedEmployee: EmployeeSearchable = {
+        name: "Select an employee", 
+        data: undefinedEmployee
+    };
+
+    let inputValueName: string = "";
+    let inputValueYear = "";
+    let filteredYears: Array<string> = [];
+
+    // When the user types into the selection text box, the employees list should filter
+    $: filtered_employees = employee_dict.filter(item => item.name.toLowerCase().includes(inputValueName.toLowerCase()));
 
     // Chart Selection
     let isRightEar = false;
@@ -30,8 +65,8 @@
     let nameMenuOpen = false;
     let yearMenuOpen = false;
 
-    // Selected user and year
-    let selectedUser = "No user selected";
+    // Selected employee and year
+    // ! Some of these could be accessed from the selected employee data
     let selectedYear = "No year selected";
     let selectedEmail = "No selection made";
     let selectedDOB = "No selection made";
@@ -39,52 +74,24 @@
     let selectedStatus = "No selection made";
     let STSstatus = "No data selection";
 
-    let inputValueName = "";
-    let inputValueYear = "";
-    let filteredNames: Array<string> = [];
-    let filteredYears: Array<string> = [];
-
-    // Employee and year data for demo purposes -- still need to connect to database
-    const employeeItems = ["Jayme", "Jared", "Angel"];
     const yearItems = ["2022", "2023", "2024"];
 
-    // Initialize filtered names and years with default data
-    filteredNames = employeeItems;
-    filteredYears = yearItems;
-
-    // Functions to update selected user and year
-    const selectUser = (user: string) => {
-        selectedUser = user;
+    // Functions to update selected employee and year
+    const selectEmployee = (employee: EmployeeSearchable) => {
+        selectedEmployee = employee;
         nameMenuOpen = false; 
+
+        // TODO: When employee is selected, populate relevant data fields with the employee's specific data
     };
 
     const selectYear = (year: string) => {
         selectedYear = year;
         yearMenuOpen = false; 
     };
-    
-    const nameHandleInput = () => {
-        filteredNames = employeeItems.filter(item => item.toLowerCase().includes(inputValueName.toLowerCase()));
-    };
 
     const yearHandleInput = () => {
         filteredYears = yearItems.filter(item => item.includes(inputValueYear));
     };
-
-    interface User {
-        username: string;
-        password: string;
-    }
-
-    // const users = data.users.map((row: User) => ({
-    //     username: row.username,
-    //     password: row.password
-    // })) as Array<User>;
-
-    const users = [
-        {username: "testname", password: "testpassword"}
-    ]
-
 
     // TODO: get these from google auth
     let name = "example name";
@@ -99,22 +106,22 @@
 
 <div class="relative dropdown-container flex space-x-4 justify-center" style="margin-top: 20px;"> 
     <!-- User Dropdown -->
-    <Button class="bg-blue-200 hover:bg-blue-300 text-black flex justify-between items-center" style="width:300px">{selectedUser}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
+    <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base flex justify-between items-center" style="width:300px">{selectedEmployee.name}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
     <Dropdown bind:open={nameMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
     <div slot="header" class="p-3">
-        <Search size="md" bind:value={inputValueName} on:input={nameHandleInput}/>
+        <Search size="md" bind:value={inputValueName}/>
     </div>
-    {#each filteredNames as user}
+    {#each filtered_employees as employee}
         <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
-            <button type="button" class="w-full text-left" on:click={() => selectUser(user)}>
-                {user}
+            <button type="button" class="w-full text-left" on:click={() => selectEmployee(employee)}>
+                {employee.name}
             </button>
         </li>
     {/each}
     </Dropdown>
 
     <!-- Year Dropdown -->
-    <Button class="bg-blue-200 hover:bg-blue-300 text-black flex justify-between items-center" style="width:300px">{selectedYear}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
+    <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base flex justify-between items-center" style="width:300px">{selectedYear}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
     <Dropdown bind:open={yearMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
     <div slot="header" class="p-3">
         <Search size="md" bind:value={inputValueYear} on:input={yearHandleInput}/>
@@ -135,7 +142,7 @@
     <section class="selected-info text-xl">
         <br>
         <p>Year: {selectedYear}</p> <br>
-        <p>User: {selectedUser}</p> <br>
+        <p>Employee: {selectedEmployee}</p> <br>
         <p>Email: {selectedEmail}</p> <br>
         <p>Date of Birth: {selectedDOB}</p> <br>
         <p>Age: {selectAge}</p> <br>
@@ -147,7 +154,7 @@
     <div class="chart-container">
         {#if showBoth}
             <ScatterPlot 
-                plotTitle="Overlay: Both Ears"
+                plotTitle="Both Ears"
                 baselineHearingData={RightBaselineHearingData.concat(LeftBaselineHearingData)}
                 newHearingData={RightNewHearingData.concat(LeftNewHearingData)}
                 labels={['Right Baseline', 'Right New', 'Left Baseline', 'Left New']}
@@ -168,9 +175,9 @@
             />
         {/if}
         <ButtonGroup class="*:!ring-primary-700">
-            <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:175px" on:click={() => toggleChart('left')}>Left</Button>
-            <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:175px" on:click={() => toggleChart('right')}>Right</Button> 
-            <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:175px" on:click={() => toggleChart('both')}>Both</Button> 
+            <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base" style="width:175px" on:click={() => toggleChart('left')}>Left</Button>
+            <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base" style="width:175px" on:click={() => toggleChart('right')}>Right</Button> 
+            <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base" style="width:175px" on:click={() => toggleChart('both')}>Both</Button> 
         </ButtonGroup>
     </div>
 </div>
@@ -179,8 +186,8 @@
     <hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
     <div class="sm:flex sm:items-center sm:justify-between">
         <ButtonGroup class="*:!ring-primary-700" style="width:100%">
-            <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:50%">Print</Button>
-            <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:50%">Send Letter</Button>
+            <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-lg" style="width:50%">Print</Button>
+            <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-lg" style="width:50%">Send Letter</Button>
         </ButtonGroup>
     </div>
  </Footer>
