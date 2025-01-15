@@ -1,3 +1,4 @@
+
 import { redirect } from '@sveltejs/kit';
 import { sql } from '@vercel/postgres';
 import type { Actions, PageServerLoad } from './$types';
@@ -218,5 +219,159 @@ export const actions: Actions = {
         return JSON.stringify({
             success: true,
         });
+    },
+    fetchYears: async ({request}) => {
+        const formData = await request.formData();
+        const employeeID = formData.get('employeeID') as string;
+
+        try {
+            const employeeQuery = await sql`
+                SELECT email, date_of_birth, last_active 
+                FROM Employee 
+                WHERE employee_id = ${employeeID};
+            `;
+
+            if (employeeQuery.rowCount === 0) {
+                return { success: false, message: 'Employee not found' };
+            }
+
+            const employee = employeeQuery.rows[0];
+            const employmentStatus = employee.last_active ? 'Inactive' : 'Active';
+
+            console.log(`Employee ID: ${employeeID}, Employment Status: ${employmentStatus}, Employee: ${employee}`);
+
+            const yearsQuery = await sql`
+                SELECT DISTINCT year
+                FROM Has
+                WHERE employee_id = ${employeeID}
+                ORDER BY year;
+            `;
+
+            const availableYears = yearsQuery.rows.map(row => row.year);
+
+            return json({
+                success: true,
+                employee: {
+                    email: employee.email,
+                    dob: employee.date_of_birth,
+                    employmentStatus,
+                },
+                availableYears,
+            });
+        } 
+        catch (error: any) {
+            console.log(error.message);
+            console.log('Failed to fetch employee data', error.message);
+            return { success: false, message: 'Failed to fetch employee data' };
+        }
+    },
+    fetchEmployeeInfo: async ({ request }) => {
+        const formData = await request.formData();
+        const employeeID = formData.get('employee') as string;
+    
+        // Fetch employee_id for the selected user
+        const employeeIdQuery = await sql`SELECT employee_id FROM Employee WHERE CONCAT(first_name, ' ', last_name) = ${employeeID};`;
+        if (employeeIdQuery.rows.length === 0) {
+            throw new Error("User not found");
+        }
+    
+        const employeeId = employeeIdQuery.rows[0].employee_id;
+    
+        console.log(`Employee: ${employeeId}`);
+    
+        try {
+            // Query employee data
+            const employeeQuery = await sql`
+                SELECT email, date_of_birth, last_active 
+                FROM Employee 
+                WHERE employee_id = ${employeeId};
+            `;
+    
+            if (employeeQuery.rowCount === 0) {
+                return json({ success: false, message: 'Employee not found' });
+            }
+    
+            const employee = employeeQuery.rows[0];
+            const employmentStatus = employee.last_active ? 'Inactive' : 'Active';
+    
+            console.log(`Employee email: ${employee.email}, Employment Status: ${employmentStatus}, Employee: ${employeeID}, DOB: ${employee.date_of_birth}`);
+
+            const employeeData = {
+                email: employee.email,
+                dob: employee.date_of_birth,
+                employmentStatus,
+            }
+
+            const dataReturnTest = {
+                success: true,
+                employee: employeeData
+            }
+
+            console.log(JSON.stringify(dataReturnTest));
+    
+            // Return only the necessary data in a plain object format
+            return JSON.stringify({
+                success: true,
+                employee: employeeData
+            });
+        } 
+        catch (error: any) {
+            return json({ success: false, message: 'Failed to fetch employee data' });
+        }
+    },     
+    fetchData: async ({ request }) => {
+        const formData = await request.formData();
+        const employeeID = formData.get('employeeID') as string;
+        const year = formData.get('year') as string;
+    
+        try {
+            // Get the oldest available year for the employee
+            const baselineYearQuery = await sql`
+                SELECT MIN(year) AS baseline_year
+                FROM Has
+                WHERE employee_id = ${employeeID};
+            `;
+            const baselineYear = baselineYearQuery.rows[0]?.baseline_year;
+    
+            // Fetch hearing data for the baseline year
+            const baselineDataQuery = await sql`
+                SELECT d.Hz_500, d.Hz_1000, d.Hz_2000, d.Hz_3000, d.Hz_4000, d.Hz_6000, d.Hz_8000, h.ear
+                FROM Has h
+                JOIN Data d ON h.data_id = d.data_id
+                WHERE h.employee_id = ${employeeID} AND h.year = ${baselineYear};
+            `;
+    
+            // Fetch hearing data for the new year
+            const newDataQuery = await sql`
+                SELECT d.Hz_500, d.Hz_1000, d.Hz_2000, d.Hz_3000, d.Hz_4000, d.Hz_6000, d.Hz_8000, h.ear
+                FROM Has h
+                JOIN Data d ON h.data_id = d.data_id
+                WHERE h.employee_id = ${employeeID} AND h.year = ${year};
+            `;
+    
+            const baselineData = {
+                rightEar: baselineDataQuery.rows.filter(row => row.ear === 'right')[0] || null,
+                leftEar: baselineDataQuery.rows.filter(row => row.ear === 'left')[0] || null,
+            };
+    
+            const newData = {
+                rightEar: newDataQuery.rows.filter(row => row.ear === 'right')[0] || null,
+                leftEar: newDataQuery.rows.filter(row => row.ear === 'left')[0] || null,
+            };
+    
+            return json({
+                success: true,
+                hearingData: {
+                    baselineYear,
+                    newYear: year,
+                    baselineData,
+                    newData,
+                },
+            });
+        } 
+        catch (error: any) {
+            console.log(error.message);
+            return { success: false, message: 'Failed to fetch employee hearing data' };
+        }
     }
 };

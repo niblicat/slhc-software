@@ -8,11 +8,46 @@
     import { sql } from '@vercel/postgres';
 
     import type { Employee } from './MyTypes';
-	import AdminPage from './AdminPage.svelte';
 
     let chart: any;
 
     export let employees: Array<Employee>;
+
+    // // Data for scatter plot
+    const RightBaselineHearingData = [10,10,15,10,15,20,25];
+    const RightNewHearingData = [15, 20, 25, 30, 35, 25, 45];
+    const LeftBaselineHearingData = [15, 20, 20, 30, 25, 20, 15];
+    const LeftNewHearingData = [15, 25, 25, 35, 20, 15, 10];
+
+    // Selected employee and year
+    let selectedYear = "No year selected";
+    let selectedEmail = "No selection made";
+    let selectedDOB = "No selection made";
+    let selectAge = "No selection made";
+    let selectedStatus = "No selection made";
+    let STSstatus = "No data selection";
+
+    let inputValueName: string = "";
+    let inputValueYear = "";
+
+    let success = true;
+    let errorMessage = "";
+
+    // Dropdown menu state
+    let nameMenuOpen = false;
+    let yearMenuOpen = false;
+
+    // Chart Selection
+    let isRightEar = false;
+    let showBoth = true;
+
+    const yearItems = ["2025","2024","2023","2022","2021","2020","2019","2018"];
+    let filteredYears: Array<string> = yearItems;
+
+    function displayError(message: string) {
+        errorMessage = message;
+        success = false;
+    }
 
     const undefinedEmployee: Employee = {
         employeeID: "-1",
@@ -41,16 +76,8 @@
         data: undefinedEmployee
     };
 
-    let inputValueName: string = "";
-    let inputValueYear = "";
-    let filteredYears: Array<string> = [];
-
     // When the user types into the selection text box, the employees list should filter
     $: filtered_employees = employee_dict.filter(item => item.name.toLowerCase().includes(inputValueName.toLowerCase()));
-
-    // Chart Selection
-    let isRightEar = false;
-    let showBoth = true;
     
     const toggleChart = (ear: string) => {
         if (ear === 'both') {
@@ -61,27 +88,66 @@
         }
     };
 
-    // Dropdown menu state
-    let nameMenuOpen = false;
-    let yearMenuOpen = false;
-
-    // Selected employee and year
-    // ! Some of these could be accessed from the selected employee data
-    let selectedYear = "No year selected";
-    let selectedEmail = "No selection made";
-    let selectedDOB = "No selection made";
-    let selectAge = "No selection made";
-    let selectedStatus = "No selection made";
-    let STSstatus = "No data selection";
-
-    const yearItems = ["2022", "2023", "2024"];
-
     // Functions to update selected employee and year
-    const selectEmployee = (employee: EmployeeSearchable) => {
+    const selectEmployee = async (employee: EmployeeSearchable) => {
+        const formData = new FormData();
+
         selectedEmployee = employee;
         nameMenuOpen = false; 
 
-        // TODO: When employee is selected, populate relevant data fields with the employee's specific data
+        formData.append('employee', selectedEmployee.name);
+
+        // Fetch employee details from the server
+        try {
+            const response = await fetch('/dashboard?/fetchEmployeeInfo', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const serverResponse = await response.json();
+            const result = JSON.parse(JSON.parse(serverResponse.data)[0]);
+
+            if (result["success"]) {
+                success = true;
+                selectedEmail = result.employee.email;
+                selectedDOB = result.employee.dob
+                    ? new Date(result.employee.dob).toISOString().split('T')[0]
+                    : "No selection made";
+                selectedStatus = result.employee.employmentStatus;
+
+                if (selectedDOB !== "No selection made") {
+                    const today = new Date();
+                    const dob = new Date(selectedDOB);
+
+                    // Calculate the difference in years
+                    let age = today.getFullYear() - dob.getFullYear();
+
+                    // Check if the current month and day have passed the birth month and day
+                    if (
+                        today.getMonth() < dob.getMonth() || 
+                        (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate())
+                    ) {
+                        age--; // Decrease the age by 1 if the birthday hasn't occurred yet this year
+                    }
+
+                    selectAge = age.toString();
+                } 
+                else {
+                    selectAge = "No selection made";
+                }
+
+            }
+            else {
+                selectedEmail = "Error fetching data: not a data success";
+                selectedDOB = "Error fetching data: not a data success";
+                selectedStatus = "Error fetching data: not a data success";
+            }
+        } 
+        catch (error) {
+            selectedEmail = "Error caught while fetching data";
+            selectedDOB = "Error caught while fetching data";
+            selectedStatus = "Error caught while fetching data";
+        }
     };
 
     const selectYear = (year: string) => {
@@ -96,12 +162,6 @@
     // TODO: get these from google auth
     let name = "example name";
     let email = "example email";
-
-    // Data for scatter plot
-    const RightBaselineHearingData = [10,10,15,10,15,20,25];
-    const RightNewHearingData = [15, 20, 25, 30, 35, 25, 45];
-    const LeftBaselineHearingData = [15, 20, 20, 30, 25, 20, 15];
-    const LeftNewHearingData = [15, 25, 25, 35, 20, 15, 10];
 </script>
 
 <div class="relative dropdown-container flex space-x-4 justify-center" style="margin-top: 20px;"> 
@@ -142,7 +202,7 @@
     <section class="selected-info text-xl">
         <br>
         <p>Year: {selectedYear}</p> <br>
-        <p>Employee: {selectedEmployee}</p> <br>
+        <p>Employee: {selectedEmployee.name}</p> <br>
         <p>Email: {selectedEmail}</p> <br>
         <p>Date of Birth: {selectedDOB}</p> <br>
         <p>Age: {selectAge}</p> <br>
