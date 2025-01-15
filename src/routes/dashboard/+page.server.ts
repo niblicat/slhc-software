@@ -49,7 +49,7 @@ export const actions = {
         }
 
         const users = await sql`
-            SELECT * FROM Admin;`;
+            SELECT * FROM administrator;`;
 
         return {
             // session: session,
