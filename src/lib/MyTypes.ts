@@ -13,6 +13,14 @@ export type Admin = {
     isOP: boolean
 };
 
+export type AdminSelectable = {
+    name: string,
+    email: string,
+    googleID: string,
+    isOP: boolean
+    selected: boolean
+};
+
 export type UserSimple = {
     loggedIn: boolean,
     name: string,

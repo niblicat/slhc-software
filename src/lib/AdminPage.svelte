@@ -4,12 +4,11 @@
     import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Checkbox, Modal, Button } from 'flowbite-svelte';
     import EditIcon from './EditIcon.svelte';
     import { createEventDispatcher } from 'svelte';
-    import { error } from '@sveltejs/kit';
 
     import { Input, Label, Helper } from 'flowbite-svelte';
 	import { invalidateAll } from '$app/navigation';
 
-    import type { Admin } from './MyTypes.ts';
+    import type { Admin, AdminSelectable } from './MyTypes.ts';
 
     export let admins: Array<Admin>;
 
@@ -155,11 +154,37 @@
         nameModal = true;
     }
 
-    const disptatch = createEventDispatcher();
+    function showAdminDeletionModal() {
+        deleteModal = true;
+    }
+
+    let doSelectAll = true;
+
+    function toggleSelect(admin: AdminSelectable) { 
+        adminsMap = adminsMap.map((item) =>
+            item.googleID === admin.googleID
+                ? { ...item, selected: !item.selected }
+                : item
+        );
+        doSelectAll = true;
+    }
+
+    function massSelect() {
+        adminsMap = adminsMap.map((admin) => ({
+            ...admin,
+            selected: doSelectAll,
+        }));
+        doSelectAll = !doSelectAll;
+    }
+
+    // const disptatch = createEventDispatcher();
 
     let adminModal = false; // controls the appearance of the popup add admin confirmation window
+    let deleteModal = false; // controls the appearance of the popup delete admin confirmation window
     let adminFalseModal = false; // controls the appearance of the popup remove admin confirmation window
     let nameModal = false; // controls the appearance of the admin name change window
+
+
 </script>
 
 <Modal title="Change Admin Username" bind:open={nameModal} autoclose>
@@ -205,17 +230,39 @@
     </svelte:fragment>
 </Modal>
 
+<Modal title="Notice for Deleting Admins" bind:open={deleteModal} autoclose>
+    <p>
+        <span>The following users will be removed from the database and will no longer have permissions to access the SLHC Employee Hearing Panel.</span>
+        {#each selectedAdmins as admin}
+            <p>{admin.name} ({admin.email})</p>
+        {/each}
+        <br>
+        <span class="text-red-600">Are you sure you want to remove these admins?</span>
+    </p>
+    
+    <svelte:fragment slot="footer">
+        <!-- TODO: CHANGE THESE COLOURS -->
+        <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => deleteSelectedUsers()}>Yes</Button>
+        <Button class="bg-red-200 hover:bg-red-300 text-black">No</Button>
+    </svelte:fragment>
+</Modal>
+
 <!-- figure out if this should be main -->
-<div class="h-screen flex-column justify-center">
-    {#if !success}
-        <span class="text-red-600">{errorMessage}</span>
-    {/if}
-    <Table hoverable={true}>
+<div class="flex-column justify-center mx-4">
+    
+    <Table hoverable={true} class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+        <caption class="p-5 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800">
+            Admin Approval
+            <p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">Modify the priviledges of anyone who has attempted to sign in.</p>
+            {#if !success}
+            <p class="mt-1 text-sm font-normal text-red-600 dark:text-red-300">{errorMessage}</p>
+            {/if}
+          </caption>
         <TableHead>
             <TableHeadCell class="!p-4">
-              <Checkbox />
+              <Checkbox on:click={() => massSelect()} checked={!doSelectAll}/>
             </TableHeadCell>
-            <TableHeadCell>Name</TableHeadCell>
+            <TableHeadCell >Name</TableHeadCell>
             <TableHeadCell>Email</TableHeadCell>
             <TableHeadCell>Google ID</TableHeadCell>
             <TableHeadCell>Is Admin</TableHeadCell>
@@ -227,11 +274,11 @@
             {#each adminsMap as admin (admin.googleID)}
                 <TableBodyRow>
                     <TableBodyCell class="!p-4">
-                        <Checkbox on:click={() => admin.selected = !admin.selected}/>
+                        <Checkbox on:click={() => toggleSelect(admin)} checked={admin.selected}/>
                     </TableBodyCell>
                     <TableBodyCell>
                         {admin.name}
-                        <EditIcon on:edit={() => showNameChangeModal(admin)} />
+                        <EditIcon on:edit={() => showNameChangeModal(admin)}/>
                     </TableBodyCell>
                     <TableBodyCell>
                         {admin.email}
@@ -241,7 +288,7 @@
                     </TableBodyCell>
                     <TableBodyCell>
                         {admin.isOP}
-                        <EditIcon on:edit={() => showAdminPermissionsModal(admin)} />
+                        <EditIcon on:edit={() => showAdminPermissionsModal(admin)}/>
                     </TableBodyCell>
                     <TableBodyCell>
                         <a href="/tables" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Edit</a>
@@ -250,12 +297,13 @@
             {/each}
         </TableBody>
     </Table>
-    <!-- ! FOR TESTING, REMOVE LATER -->
-    {#each selectedAdmins as op}{op.name}.{/each}
+
+    <br>
 
     <!-- TODO: ADD OPTION TO DELETE SELECTED USERS -->
-    <div>
-        <button on:click={deleteSelectedUsers} class="bg-red-200 hover:bg-red-300 text-black">Delete selected users</button>
-    </div>
-    
+    {#if selectedAdmins.length > 0}
+        <div>
+            <Button color="red" on:click={showAdminDeletionModal} class="bg-red-200 hover:bg-red-300 text-black">Delete selected users</Button>
+        </div>
+    {/if}
 </div>
