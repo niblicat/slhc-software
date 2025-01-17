@@ -29,7 +29,7 @@ export const load: PageServerLoad = async ({ parent }) => {
 
     const admins: Admin[] = administrator.rows.map(row => ({
         name: row.name,
-        email: row.email,
+        email: row.userstring,
         googleID: row.id,
         isOP: row.isop,
         selected: false

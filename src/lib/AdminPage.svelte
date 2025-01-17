@@ -12,8 +12,8 @@
 
     export let admins: Array<Admin>;
 
-    console.log("ADMINS:");
-    console.log(admins);
+    // console.log("ADMINS:");
+    // console.log(admins);
 
     $: adminsMap = admins
         .map((row: Admin) => ({
@@ -161,6 +161,7 @@
     let doSelectAll = true;
 
     function toggleSelect(admin: AdminSelectable) { 
+        alert(JSON.stringify(admin));
         adminsMap = adminsMap.map((item) =>
             item.googleID === admin.googleID
                 ? { ...item, selected: !item.selected }
