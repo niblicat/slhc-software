@@ -4,8 +4,8 @@
     import { redirect } from '@sveltejs/kit';
     import cookie from 'cookie';
     
-    export let name = "Name Missing";
-    export let email = "null@example.com";
+    export let name = "Name";
+    export let email = "Email Address";
 
     const SESSION_COOKIE_NAME = 'session_id';
 

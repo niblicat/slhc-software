@@ -36,7 +36,7 @@
             </Button>
         </div>
     {/if}
-    <NavBrand href="/dashboard" class="flex-grow text-center">
+    <NavBrand class="flex-grow text-center">
         <span class="relative flex-1 text-3xl font-bold dark:text-white">SIUE SLHC Employee Hearing Panel</span>
     </NavBrand>
     <CustomAvatar name={name} email={email} />
