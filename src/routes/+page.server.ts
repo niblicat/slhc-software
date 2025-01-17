@@ -1,8 +1,9 @@
 import { sql } from '@vercel/postgres'
 import { page } from '$app/stores';
 import { redirect } from '@sveltejs/kit'
-import type { Session } from '@auth/sveltekit';
 import { addUserToAdminDatabase } from '$lib/utility';
+import type { UserSimple } from '$lib/MyTypes.js';
+import type { Session } from '@auth/sveltekit';
 
 export const load = async (event) => {
     const session = await event.locals.auth();
@@ -18,7 +19,11 @@ export const load = async (event) => {
                 break;
             case AdminStatus.NotListed:
                 console.log("Not Listed");
-                await addUserToAdminDatabase(session.user?.email)
+                if (session.user && session.user.email)
+                    await addUserToAdminDatabase(session.user.email)
+                else {
+                    // TODO: Handle if the user/user email does not exist on session
+                }
                 break;
         }
     }

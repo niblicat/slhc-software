@@ -12,3 +12,10 @@ export type Admin = {
     googleID: string,
     isOP: boolean
 };
+
+export type UserSimple = {
+    loggedIn: boolean,
+    name: string,
+    email: string,
+    avatar: string
+}
