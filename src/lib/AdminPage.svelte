@@ -1,7 +1,7 @@
 <script lang="ts">
     // TODO: export users and their statuses
     // TODO: make svelte store writables
-    import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Checkbox, Modal, Button } from 'flowbite-svelte';
+    import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Checkbox, Modal, Button, Tooltip } from 'flowbite-svelte';
     import EditIcon from './EditIcon.svelte';
     import { createEventDispatcher } from 'svelte';
 
@@ -9,6 +9,7 @@
 	import { invalidateAll } from '$app/navigation';
 
     import type { Admin, AdminSelectable } from './MyTypes.ts';
+	import { InfoCircleOutline } from 'flowbite-svelte-icons';
 
     export let admins: Array<Admin>;
 
@@ -267,9 +268,6 @@
             <TableHeadCell>Email</TableHeadCell>
             <TableHeadCell>Google ID</TableHeadCell>
             <TableHeadCell>Is Admin</TableHeadCell>
-            <TableHeadCell>
-                <span class="sr-only">Edit</span>
-            </TableHeadCell>
         </TableHead>
         <TableBody tableBodyClass="divide-y">
             {#each adminsMap as admin (admin.googleID)}
@@ -282,17 +280,19 @@
                         <EditIcon on:edit={() => showNameChangeModal(admin)}/>
                     </TableBodyCell>
                     <TableBodyCell>
-                        {admin.email}
+                        <span style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                            {admin.email}
+                            <InfoCircleOutline id="email{admin.googleID}" />
+                        </span>
+                        <Tooltip triggeredBy="#email{admin.googleID}">Emails cannot be changed. Instead, use a different Google account and add permissions to the new account</Tooltip>
                     </TableBodyCell>
+                    
                     <TableBodyCell>
                         {admin.googleID}
                     </TableBodyCell>
                     <TableBodyCell>
                         {admin.isOP}
                         <EditIcon on:edit={() => showAdminPermissionsModal(admin)}/>
-                    </TableBodyCell>
-                    <TableBodyCell>
-                        <a href="/tables" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Edit</a>
                     </TableBodyCell>
                 </TableBodyRow>
             {/each}
