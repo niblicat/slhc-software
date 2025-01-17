@@ -8,6 +8,7 @@
     import { sql } from '@vercel/postgres';
 
     import type { Employee } from './MyTypes';
+	import { invalidateAll } from '$app/navigation';
 
     let chart: any;
 
@@ -26,6 +27,7 @@
     let selectAge = "No selection made";
     let selectedStatus = "No selection made";
     let STSstatus = "No data selection";
+    let testYear = "NO SELECTION"
 
     let inputValueName: string = "";
     let inputValueYear = "";
@@ -41,8 +43,8 @@
     let isRightEar = false;
     let showBoth = true;
 
-    const yearItems = ["2025","2024","2023","2022","2021","2020","2019","2018"];
-    let filteredYears: Array<string> = yearItems;
+    //const yearItems = ["2025","2024","2023","2022","2021","2020","2019","2018"];
+    let yearItems: Array<string> = [];
 
     function displayError(message: string) {
         errorMessage = message;
@@ -95,25 +97,30 @@
         selectedEmployee = employee;
         nameMenuOpen = false; 
 
+        // Reset year selection and clear years dropdown
+        selectedYear = "No year selected";
+        yearItems = [];
+        inputValueYear = "";
+
         formData.append('employee', selectedEmployee.name);
 
-        // Fetch employee details from the server
+        // Fetch employee details from the server and years for other dropdown
         try {
-            const response = await fetch('/dashboard?/fetchEmployeeInfo', {
+            // data stuff first
+            const dataResponse = await fetch('/dashboard?/fetchEmployeeInfo', {
                 method: 'POST',
                 body: formData,
             });
+            const serverDataResponse = await dataResponse.json();
+            const dataResult = JSON.parse(JSON.parse(serverDataResponse.data)[0]);
 
-            const serverResponse = await response.json();
-            const result = JSON.parse(JSON.parse(serverResponse.data)[0]);
-
-            if (result["success"]) {
+            if (dataResult["success"]) {
                 success = true;
-                selectedEmail = result.employee.email;
-                selectedDOB = result.employee.dob
-                    ? new Date(result.employee.dob).toISOString().split('T')[0]
+                selectedEmail = dataResult.employee.email;
+                selectedDOB = dataResult.employee.dob
+                    ? new Date(dataResult.employee.dob).toISOString().split('T')[0]
                     : "No selection made";
-                selectedStatus = result.employee.employmentStatus;
+                selectedStatus = dataResult.employee.employmentStatus;
 
                 if (selectedDOB !== "No selection made") {
                     const today = new Date();
@@ -135,20 +142,43 @@
                 else {
                     selectAge = "No selection made";
                 }
-
             }
             else {
                 selectedEmail = "Error fetching data: not a data success";
                 selectedDOB = "Error fetching data: not a data success";
                 selectedStatus = "Error fetching data: not a data success";
             }
+
+            // years stuff next
+            const yearsResponse = await fetch('/dashboard?/fetchYears', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const serverYearsResponse = await yearsResponse.json();
+            const yearsResult = JSON.parse(JSON.parse(serverYearsResponse.data)[0]);
+
+            console.log(yearsResult);
+
+            if (yearsResult["success"]) {
+                success = true;
+                await invalidateAll();
+                yearItems = yearsResult.years.map(String);
+            }
+            else {
+                yearItems = [];
+                displayError('No years found for the selected employee');
+            }
+
         } 
         catch (error) {
-            selectedEmail = "Error caught while fetching data";
-            selectedDOB = "Error caught while fetching data";
-            selectedStatus = "Error caught while fetching data";
+            console.error('Error fetching data:', error);
+            yearItems = [];
+            displayError('Error fetching data');
         }
     };
+
+    $: filteredYears = yearItems.filter(item => item.includes(inputValueYear));
 
     const selectYear = (year: string) => {
         selectedYear = year;
@@ -158,6 +188,7 @@
     const yearHandleInput = () => {
         filteredYears = yearItems.filter(item => item.includes(inputValueYear));
     };
+
 
     // TODO: get these from google auth
     let name = "example name";
@@ -183,17 +214,18 @@
     <!-- Year Dropdown -->
     <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base flex justify-between items-center" style="width:300px">{selectedYear}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
     <Dropdown bind:open={yearMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
-    <div slot="header" class="p-3">
-        <Search size="md" bind:value={inputValueYear} on:input={yearHandleInput}/>
-    </div>
-    {#each filteredYears as year}
-        <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
-            <button type="button" class="w-full text-left" on:click={() => selectYear(year)}>
-                {year}
-            </button>
-        </li>
-    {/each}
+        <div slot="header" class="p-3">
+            <Search size="md" bind:value={inputValueYear} on:input={yearHandleInput}/>
+        </div>
+        {#each filteredYears as year}
+            <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+                <button type="button" class="w-full text-left" on:click={() => selectYear(year)}>
+                    {year}
+                </button>
+            </li>
+        {/each}
     </Dropdown>
+
 </div>
 
 <!---------------------- DISPLAY INFO ---------------------->

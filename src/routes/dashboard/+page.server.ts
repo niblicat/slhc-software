@@ -1,4 +1,3 @@
-
 import { redirect } from '@sveltejs/kit';
 import { sql } from '@vercel/postgres';
 import type { Actions, PageServerLoad } from './$types';
@@ -222,47 +221,44 @@ export const actions: Actions = {
     },
     fetchYears: async ({request}) => {
         const formData = await request.formData();
-        const employeeID = formData.get('employeeID') as string;
-
+        const employeeID = formData.get('employee') as string;
+    
+        // Fetch employee_id for the selected user
+        const employeeIdQuery = await sql`SELECT employee_id FROM Employee WHERE CONCAT(first_name, ' ', last_name) = ${employeeID};`;
+        if (employeeIdQuery.rows.length === 0) {
+            throw new Error("User not found");
+        }
+    
+        const employeeId = employeeIdQuery.rows[0].employee_id;
+    
         try {
-            const employeeQuery = await sql`
-                SELECT email, date_of_birth, last_active 
-                FROM Employee 
-                WHERE employee_id = ${employeeID};
-            `;
-
-            if (employeeQuery.rowCount === 0) {
-                return { success: false, message: 'Employee not found' };
-            }
-
-            const employee = employeeQuery.rows[0];
-            const employmentStatus = employee.last_active ? 'Inactive' : 'Active';
-
-            console.log(`Employee ID: ${employeeID}, Employment Status: ${employmentStatus}, Employee: ${employee}`);
-
             const yearsQuery = await sql`
                 SELECT DISTINCT year
                 FROM Has
-                WHERE employee_id = ${employeeID}
+                WHERE employee_id = ${employeeId}
                 ORDER BY year;
             `;
 
             const availableYears = yearsQuery.rows.map(row => row.year);
 
-            return json({
+            console.log(`Employee: ${employeeID}, Employee ID: ${employeeId}, Years: ${availableYears}`);
+            
+            const yearsReturn = {
                 success: true,
-                employee: {
-                    email: employee.email,
-                    dob: employee.date_of_birth,
-                    employmentStatus,
-                },
-                availableYears,
+                years: availableYears
+            }
+
+            console.log(JSON.stringify(yearsReturn));
+ 
+            return JSON.stringify({
+                success: true,
+                years: availableYears
             });
         } 
         catch (error: any) {
             console.log(error.message);
-            console.log('Failed to fetch employee data', error.message);
-            return { success: false, message: 'Failed to fetch employee data' };
+            console.log('Failed to fetch employee years', error.message);
+            return { success: false, message: 'Failed to fetch employee years' };
         }
     },
     fetchEmployeeInfo: async ({ request }) => {
@@ -277,7 +273,7 @@ export const actions: Actions = {
     
         const employeeId = employeeIdQuery.rows[0].employee_id;
     
-        console.log(`Employee: ${employeeId}`);
+        console.log(`Employee NAME: ${employeeID}, Employee: ${employeeId}`);
     
         try {
             // Query employee data
