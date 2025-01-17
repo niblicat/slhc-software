@@ -40,26 +40,20 @@
 
 </script>
 
+<CustomNavbar
+{user}
+hasSidebar={true} 
+sidebarOpen={sidebarOpen}
+on:toggle={toggleSidebar} 
+/>
 
-<div id="content" class="min-h-screen bg-gray-100">
-    <CustomNavbar
-    {user}
-    hasSidebar={true} 
-    sidebarOpen={sidebarOpen}
-    on:toggle={toggleSidebar} 
-    />
+<CustomSidebar
+sidebarOpen={sidebarOpen}
+activeUrl={activeURLHash}
+on:toggle={toggleSidebar}
+/>
 
-    <CustomSidebar
-    sidebarOpen={sidebarOpen}
-    activeUrl={activeURLHash}
-    on:toggle={toggleSidebar}
-    />
-
-    <!-- <p>These are for testing:</p>
-    <p>activeURLHash: {activeURLHash}</p>
-    <p>activeURL {activeURL}</p> -->
-
-
+<div id="content" class="h-dvh bg-gray-100 pt-16">
     {#if activeURLHash == "#employees"}
         <EmployeesPage {employees} />
     {:else if activeURLHash == "#mailings"}

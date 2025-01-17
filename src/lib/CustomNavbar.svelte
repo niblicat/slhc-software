@@ -32,7 +32,7 @@
     </Button>
 {/if}
 <!-- Navbar -->
-<Navbar color="form" class="fixed bg-light-bluegreen flex justify-between items-center">
+<Navbar color="form" class="fixed bg-light-bluegreen flex justify-between items-center h-16 z-10">
 
     <NavBrand href="/dashboard" class="flex-grow text-center">
         <span class="relative flex-1 text-3xl font-bold dark:text-white">SIUE SLHC Employee Hearing Panel</span>

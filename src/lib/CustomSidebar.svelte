@@ -21,11 +21,11 @@
 
     <!-- Sidebar -->
     {#key sidebarOpen}
-        <div out:slide={{ axis: 'x', easing: backIn }} in:slide={{ axis: 'x' }} class="sidebar-wrapper h-screen">
+        <div out:slide={{ axis: 'x', easing: backIn }} in:slide={{ axis: 'x' }} class="sidebar-wrapper h-screen z-25">
             {#if sidebarOpen}
                 <Sidebar {activeUrl} {activeClass} {nonActiveClass} class="pointer-events-auto h-full">
                     <!-- Content wrapper inside the sidebar with padding to push content down -->
-                    <SidebarWrapper class="overflow-y-auto pt-16  h-full">
+                    <SidebarWrapper class="overflow-y-auto pt-20 h-full">
                         <SidebarGroup>
                             <SidebarItem on:click={sidebarToggleDispatch} label="Dashboard" href="#">
                                 <svelte:fragment slot="icon">
@@ -70,6 +70,5 @@
             width: 300px;
             position: absolute;
             pointer-events: none;
-            z-index: 3;
         }
     </style>

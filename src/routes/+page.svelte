@@ -32,15 +32,14 @@
 
 </script>
 
-<div id="content" class="min-h-screen bg-gray-100">
-    <!-- Custom Navbar -->
-    <CustomNavbar
-        {user}
-        hasSidebar={false} 
-        sidebarOpen={sidebarOpen}
-        on:toggle={toggleSidebar} 
-    />
+<CustomNavbar
+{user}
+hasSidebar={false} 
+sidebarOpen={sidebarOpen}
+on:toggle={toggleSidebar} 
+/>
 
+<div id="content" class="h-dvh bg-gray-100 pt-16">
     <!-- Main content -->
     <section class="flex flex-col items-center justify-center py-12">
         <div class="max-w-3xl text-center">

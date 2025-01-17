@@ -108,31 +108,31 @@
     <!-- User Dropdown -->
     <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base flex justify-between items-center" style="width:300px">{selectedEmployee.name}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
     <Dropdown bind:open={nameMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
-    <div slot="header" class="p-3">
-        <Search size="md" bind:value={inputValueName}/>
-    </div>
-    {#each filtered_employees as employee}
-        <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
-            <button type="button" class="w-full text-left" on:click={() => selectEmployee(employee)}>
-                {employee.name}
-            </button>
-        </li>
-    {/each}
+        <div slot="header" class="p-3">
+            <Search size="md" bind:value={inputValueName}/>
+        </div>
+        {#each filtered_employees as employee}
+            <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+                <button type="button" class="w-full text-left" on:click={() => selectEmployee(employee)}>
+                    {employee.name}
+                </button>
+            </li>
+        {/each}
     </Dropdown>
 
     <!-- Year Dropdown -->
     <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base flex justify-between items-center" style="width:300px">{selectedYear}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
     <Dropdown bind:open={yearMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
-    <div slot="header" class="p-3">
-        <Search size="md" bind:value={inputValueYear} on:input={yearHandleInput}/>
-    </div>
-    {#each filteredYears as year}
-        <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
-            <button type="button" class="w-full text-left" on:click={() => selectYear(year)}>
-                {year}
-            </button>
-        </li>
-    {/each}
+        <div slot="header" class="p-3">
+            <Search size="md" bind:value={inputValueYear} on:input={yearHandleInput}/>
+        </div>
+        {#each filteredYears as year}
+            <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+                <button type="button" class="w-full text-left" on:click={() => selectYear(year)}>
+                    {year}
+                </button>
+            </li>
+        {/each}
     </Dropdown>
 </div>
 
