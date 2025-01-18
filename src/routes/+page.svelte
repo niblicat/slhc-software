@@ -3,11 +3,8 @@
 </svelte:head>
 
 <script lang="ts">
-    import type { ActionData } from './$types';
     import { page } from '$app/stores';
     import CustomNavbar from '$lib/CustomNavbar.svelte';
-    import { Button } from 'flowbite-svelte';
-    import { signIn, signOut } from '@auth/sveltekit/client';
 	import type { UserSimple } from '$lib/MyTypes';
 
     console.log($page.data.session)

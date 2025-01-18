@@ -18,7 +18,7 @@
 
     $: adminsMap = admins
         .map((row: Admin) => ({
-            name: row.name,
+            name: row.name || "Null",
             email: row.email,
             googleID: row.googleID,
             isOP: row.isOP,
@@ -162,7 +162,6 @@
     let doSelectAll = true;
 
     function toggleSelect(admin: AdminSelectable) { 
-        alert(JSON.stringify(admin));
         adminsMap = adminsMap.map((item) =>
             item.googleID === admin.googleID
                 ? { ...item, selected: !item.selected }

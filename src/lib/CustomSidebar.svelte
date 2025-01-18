@@ -28,7 +28,7 @@
                 <!-- Content wrapper inside the sidebar with padding to push content down -->
                 <SidebarWrapper class="overflow-y-auto pt-20 h-full">
                     <SidebarGroup>
-                        <SidebarItem on:click={sidebarToggleDispatch} label="Dashboard" href="#">
+                        <SidebarItem on:click={sidebarToggleDispatch} label="Dashboard" href="">
                             <svelte:fragment slot="icon">
                                 <HomeSolid/>
                             </svelte:fragment>
