@@ -6,8 +6,7 @@
     import { slide } from 'svelte/transition';
     import { backIn } from 'svelte/easing';
 
-    export let sidebarOpen;
-    export let activeUrl;
+    let { sidebarOpen, activeUrl } = $props();
 
     const dispatch = createEventDispatcher();
 
@@ -29,34 +28,22 @@
                 <SidebarWrapper class="overflow-y-auto pt-20 h-full">
                     <SidebarGroup>
                         <SidebarItem on:click={sidebarToggleDispatch} label="Dashboard" href="">
-                            <svelte:fragment slot="icon">
-                                <HomeSolid/>
-                            </svelte:fragment>
+                            <HomeSolid/>
                         </SidebarItem>
                         <SidebarItem on:click={sidebarToggleDispatch} label="Admins" href="#admin">
-                            <svelte:fragment slot="icon">
-                                <UserSolid/>
-                            </svelte:fragment>
+                            <UserSolid/>
                         </SidebarItem>
                         <SidebarItem on:click={sidebarToggleDispatch} label="Employees" href="#employees">
-                            <svelte:fragment slot="icon">
-                                <GridSolid/>
-                            </svelte:fragment>
+                            <GridSolid/>
                         </SidebarItem>
                         <SidebarItem on:click={sidebarToggleDispatch} label="Mailings" href="#mailings">
-                            <svelte:fragment slot="icon">
-                                <MailBoxSolid/>
-                            </svelte:fragment>
+                            <MailBoxSolid/>
                         </SidebarItem>
                         <SidebarItem on:click={sidebarToggleDispatch} label="Insert Employees" href="#insert">
-                            <svelte:fragment slot="icon">
-                                <ArrowRightToBracketOutline/>
-                            </svelte:fragment>
+                            <ArrowRightToBracketOutline/>
                         </SidebarItem>
                         <SidebarItem on:click={sidebarToggleDispatch} label="Insert Data" href="#data">
-                            <svelte:fragment slot="icon">
-                                <ArrowRightToBracketOutline/>
-                            </svelte:fragment>
+                            <ArrowRightToBracketOutline/>
                         </SidebarItem>
                     </SidebarGroup>
                 </SidebarWrapper>

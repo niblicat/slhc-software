@@ -12,9 +12,13 @@
         dispatch('toggle');
     }
 
-    export let hasSidebar;
-    export let sidebarOpen;
-    export let user: UserSimple;
+    interface Props {
+        hasSidebar: any;
+        sidebarOpen: any;
+        user: UserSimple;
+    }
+
+    let { hasSidebar, sidebarOpen, user }: Props = $props();
 </script>
 {#if hasSidebar}
     <Button class="fixed top-2.5 left-2.5 z-50 w-8 h-10 bg-light-blue" on:click={sidebarToggleDispatch}>

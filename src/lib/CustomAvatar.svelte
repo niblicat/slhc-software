@@ -3,7 +3,11 @@
     import type { UserSimple } from './MyTypes';
     import { signIn, signOut } from '@auth/sveltekit/client';
     
-    export let user: UserSimple;
+    interface Props {
+        user: UserSimple;
+    }
+
+    let { user }: Props = $props();
 
 </script>
 

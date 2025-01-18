@@ -29,21 +29,21 @@
         </Accordion>
     </AccordionItem>
     <AccordionItem>
-    <span slot="header">Learn about the Mailings Page Page</span>
-    <List tag="ul" class="ps-5 mt-2 space-y-1">
-        <Li>Select the "Mail Merge" button to start a mail merge</Li>
-        <Li>more info to come soon</Li>
-    </List>
+        <span slot="header">Learn about the Mailings Page Page</span>
+        <List tag="ul" class="ps-5 mt-2 space-y-1">
+            <Li>Select the "Mail Merge" button to start a mail merge</Li>
+            <Li>more info to come soon</Li>
+        </List>
     </AccordionItem>
     <AccordionItem>
-    <span slot="header">Learn about the Insert Employee Page</span>
-    <Li>Input the employee's first name, last name, SIUE email, date of birth, and employement status</Li>
+        <span slot="header">Learn about the Insert Employee Page</span>
+        <Li>Input the employee's first name, last name, SIUE email, date of birth, and employement status</Li>
         <Li>If the employee is not employeed, a new input menu appears to add in their last employement date</Li>
         <Li>Once information is inputted, click submit to add them to the employee table</Li>
     </AccordionItem>
     <AccordionItem>
-    <span slot="header">Learn about the Insert Data Page</span>
-    <Li>Select employee to add data to and input year</Li>
+        <span slot="header">Learn about the Insert Data Page</span>
+        <Li>Select employee to add data to and input year</Li>
         <Li>Input left and right ear data</Li>
         <Li>Submit information to add it to the data table</Li>
     </AccordionItem>

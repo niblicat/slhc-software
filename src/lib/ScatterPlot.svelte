@@ -2,11 +2,21 @@
     import { onMount } from "svelte";
     import { Chart, registerables } from 'chart.js';
 
-    // Export properties if needed
-    export let baselineHearingData: number[];
-    export let newHearingData: number[];
-    export let plotTitle: string;
-    export let labels: string[];
+    
+    interface Props {
+        // Export properties if needed
+        baselineHearingData: number[];
+        newHearingData: number[];
+        plotTitle: string;
+        labels: string[];
+    }
+
+    let {
+        baselineHearingData,
+        newHearingData,
+        plotTitle,
+        labels
+    }: Props = $props();
 
     let chart: any;
 

@@ -1,4 +1,4 @@
-<script lang="ts"  src="../path/to/flowbite/dist/flowbite.min.js">
+<script lang="ts">
 import { Button } from 'flowbite-svelte';
 
 </script>

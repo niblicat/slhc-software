@@ -9,12 +9,24 @@ export enum AdminStatus {
 }
 
 export enum LoginStatus {
+    None,
     NoPerms,
     HasPerms,
     NoSession,
+    NoID,
     NoName,
     NoEmail
 }
+
+export const loginMessages: Record<LoginStatus, string> = {
+    [LoginStatus.NoPerms]: "Please wait for an SLHC administrator to verify you.",
+    [LoginStatus.None]: "Please wait for an SLHC administrator to verify you.",
+    [LoginStatus.HasPerms]: "Welcome back!",
+    [LoginStatus.NoSession]: "There was an issue with your session. Try logging out and logging back in.",
+    [LoginStatus.NoID]: "There was an unusual issue with your session. Try logging out and logging back in.",
+    [LoginStatus.NoName]: "Your Google Account does not have a name attached, so we could not create an SLHC account for you.",
+    [LoginStatus.NoEmail]: "There is no email associated with your Google account, so we could not create an SLHC account for you.",
+};
 
 export function handleSearchRedirect(event: RequestEvent) {
     const redirectTo = event.url.pathname + event.url.search;

@@ -7,12 +7,7 @@ import type { Admin } from '$lib/MyTypes';
 
 // Load function to get parent data and fetch users
 export const load: PageServerLoad = async ({ parent }) => {
-    const parentData = await parent();
-
-    // ! This has not been implemented properly
-    // if (!parentData.loggedIn) {
-    //     // throw redirect(302, '/');
-    // }
+    const parentData = await parent(); // not sure why/if this is needed
 
     const employee = await sql`SELECT * FROM Employee;`;
     const administrator = await sql`SELECT * FROM Administrator;`;

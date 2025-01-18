@@ -4,11 +4,8 @@
 
 </svelte:head>
 
-<script lang="ts"  src="../path/to/flowbite/dist/flowbite.min.js">
-    export let data;
-    import { Li, List, Heading } from 'flowbite-svelte';
-    import { AccordionItem, Accordion } from 'flowbite-svelte';
-    import { page } from '$app/stores'; // ! page is deprecated...?
+<script lang="ts">
+    import { page } from '$app/state';
 	import CustomNavbar from '$lib/CustomNavbar.svelte';
 	import CustomSidebar from '$lib/CustomSidebar.svelte';
 	import EmployeesPage from '$lib/EmployeesPage.svelte';
@@ -18,24 +15,25 @@
     import AdminPage from '$lib/AdminPage.svelte';
 	import type { UserSimple } from '$lib/MyTypes.js';
 	import Information from '$lib/Information.svelte';
+    let { data } = $props();
 
-    $: activeURL = $page.url.pathname;
-    $: activeURLHash = $page.url.hash;
+    let activeURL = $derived(page.url.pathname);
+    let activeURLHash = $derived(page.url.hash);
 
-    $: admins = data.admins;
-    $: employees = data.employees;
+    let admins = $derived(data.admins);
+    let employees = $derived(data.employees);
 
     // sidebar state and visibility 
-    let sidebarOpen = false;
+    let sidebarOpen = $state(false);
     const toggleSidebar = () => {
         sidebarOpen = !sidebarOpen;
     };
 
     let user: UserSimple = {
-        loggedIn: !!$page.data.session?.user,
-        name: $page.data.session?.user?.name || "Not logged in",
-        email: $page.data.session?.user?.email || "",
-        avatar: $page.data.session?.user?.image || ""
+        loggedIn: !!page.data.session?.user,
+        name: page.data.session?.user?.name || "Not logged in",
+        email: page.data.session?.user?.email || "",
+        avatar: page.data.session?.user?.image || ""
     }
 
 </script>

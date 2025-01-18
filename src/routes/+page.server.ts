@@ -16,19 +16,21 @@ export const load = async (event) => {
 
             case AdminStatus.NoPerms:
                 console.log("User DOES NOT have perms");
-                return { status: LoginStatus.NoPerms };
+                return { loginStatus: LoginStatus.NoPerms };
 
             case AdminStatus.NotListed:
                 console.log("Not Listed");
-                if (!session.user) return { status: LoginStatus.NoSession };
-                if (!session.user.email) return { status: LoginStatus.NoEmail };
-                if (!session.user.name) return { status: LoginStatus.NoName };
+                if (!session.user) return { loginStatus: LoginStatus.NoSession };
+                if (!session.user.email) return { loginStatus: LoginStatus.NoEmail };
+                if (!session.user.name) return { loginStatus: LoginStatus.NoName };
 
                 // all checks passed, let's make a new user
                 const email = session.user.email;
                 const name = session.user?.name;
+                const googleID = session.user.id;
                 await addUserToAdminDatabase(email, name);
-                return { status: AdminStatus.NoPerms };
+                return { loginStatus: LoginStatus.NoPerms };
         }
     }
+    return { LoginStatus: LoginStatus.None }
 }

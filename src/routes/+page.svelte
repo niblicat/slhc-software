@@ -3,28 +3,37 @@
 </svelte:head>
 
 <script lang="ts">
-    import { page } from '$app/stores';
+    import { page } from '$app/state';
     import CustomNavbar from '$lib/CustomNavbar.svelte';
-	import type { UserSimple } from '$lib/MyTypes';
+    import type { UserSimple } from '$lib/MyTypes';
+    import { LoginStatus, loginMessages } from '$lib/utility';
+    import { Alert } from 'flowbite-svelte';
 
-    console.log($page.data.session)
-    console.log($page.data)
-  
-    // Store the current page URL and hash
-    $: activeURL = $page.url.pathname;
-    $: activeURLHash = $page.url.hash;
+    let { data } = $props();
+
+    // get login status
+    let loginStatus = $state(LoginStatus.None);
+    $effect(() => {
+        if (data.loginStatus) loginStatus = data.loginStatus;
+    })
+
+    let badLogin = $state(false);
+    const badLoginStatuses = [LoginStatus.NoSession, LoginStatus.NoID, LoginStatus.NoEmail, LoginStatus.NoName];
+    $effect(() => {
+        badLogin = badLoginStatuses.includes(loginStatus);
+    })
 
     // Sidebar state and visibility 
-    let sidebarOpen = false;
+    let sidebarOpen = $state(false);
     const toggleSidebar = () => {
         sidebarOpen = !sidebarOpen;
     };
 
     let user: UserSimple = {
-        loggedIn: !!$page.data.session?.user,
-        name: $page.data.session?.user?.name || "Not logged in",
-        email: $page.data.session?.user?.email || "",
-        avatar: $page.data.session?.user?.image || ""
+        loggedIn: !!page.data.session?.user,
+        name: page.data.session?.user?.name || "Not logged in",
+        email: page.data.session?.user?.email || "",
+        avatar: page.data.session?.user?.image || ""
     }
 
 </script>
@@ -37,6 +46,12 @@ on:toggle={toggleSidebar}
 />
 
 <div id="content" class="h-dvh bg-gray-100 pt-16">
+    {#if loginStatus != LoginStatus.None}
+        <Alert color={badLogin ? "red" : "yellow"}>
+            {loginMessages[loginStatus]}
+        </Alert>
+    {/if}
+
     <!-- Main content -->
     <section class="flex flex-col items-center justify-center py-12">
         <div class="max-w-3xl text-center">
