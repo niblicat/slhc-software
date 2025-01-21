@@ -314,11 +314,14 @@ export const actions: Actions = {
         catch (error: any) {
             return json({ success: false, message: 'Failed to fetch employee data' });
         }
-    },     
-    fetchData: async ({ request }) => {
+    }, 
+
+    fetchHearingData: async ({ request }) => {
         const formData = await request.formData();
         const employeeID = formData.get('employeeID') as string;
         const year = formData.get('year') as string;
+
+        console.log(`EmployeeID: ${employeeID}, Year: ${year}`);
     
         try {
             // Get the oldest available year for the employee
@@ -354,6 +357,18 @@ export const actions: Actions = {
                 rightEar: newDataQuery.rows.filter(row => row.ear === 'right')[0] || null,
                 leftEar: newDataQuery.rows.filter(row => row.ear === 'left')[0] || null,
             };
+
+            const dataReturnTest = {
+                success: true,
+                hearingData: {
+                    baselineYear,
+                    newYear: year,
+                    baselineData,
+                    newData,
+                },
+            }
+
+            console.log(JSON.stringify(dataReturnTest));
     
             return json({
                 success: true,
