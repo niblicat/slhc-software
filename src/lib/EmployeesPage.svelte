@@ -1,4 +1,4 @@
-<script lang="ts"  src="../path/to/flowbite/dist/flowbite.min.js">
+<script lang="ts">
 
     import { ButtonGroup, Button, Search } from 'flowbite-svelte';
     import { ChevronDownOutline, UserRemoveSolid } from 'flowbite-svelte-icons';
@@ -8,42 +8,45 @@
     import { sql } from '@vercel/postgres';
 
     import type { Employee } from './MyTypes';
-	import { invalidateAll } from '$app/navigation';
+    import { invalidateAll } from '$app/navigation';
+	import { controllers } from 'chart.js';
 
     let chart: any;
 
-    export let employees: Array<Employee>;
+    interface Props {
+        employees: Array<Employee>;
+    }
 
-    // // Data for scatter plot
+    let { employees }: Props = $props();
+
+    // Data for scatter plot
     const RightBaselineHearingData = [10,10,15,10,15,20,25];
     const RightNewHearingData = [15, 20, 25, 30, 35, 25, 45];
     const LeftBaselineHearingData = [15, 20, 20, 30, 25, 20, 15];
     const LeftNewHearingData = [15, 25, 25, 35, 20, 15, 10];
 
     // Selected employee and year
-    let selectedYear = "No year selected";
-    let selectedEmail = "No selection made";
-    let selectedDOB = "No selection made";
-    let selectAge = "No selection made";
-    let selectedStatus = "No selection made";
+    let selectedYear = $state("No year selected");
+    let selectedEmail = $state("No data selected");
+    let selectedDOB = $state("No data selected");
+    let selectAge = $state("No data selected");
+    let selectedStatus = $state("No data selected");
     let STSstatus = "No data selection";
-    let testYear = "NO SELECTION"
 
-    let inputValueName: string = "";
-    let inputValueYear = "";
+    let inputValueName: string = $state("");
+    let inputValueYear = $state("");
 
     let success = true;
     let errorMessage = "";
 
     // Dropdown menu state
-    let nameMenuOpen = false;
-    let yearMenuOpen = false;
+    let nameMenuOpen = $state(false);
+    let yearMenuOpen = $state(false);
 
     // Chart Selection
-    let isRightEar = false;
-    let showBoth = true;
+    let isRightEar = $state(false);
+    let showBoth = $state(true);
 
-    //const yearItems = ["2025","2024","2023","2022","2021","2020","2019","2018"];
     let yearItems: Array<string> = [];
 
     function displayError(message: string) {
@@ -68,18 +71,18 @@
     // employee map that is search friendly
     // name will hold first and last so it's easier to search
     // actual employee data (id and stuff) is in employee_dict.data
-    $: employee_dict = employees.map((employee) => ({
+    let employee_dict = $derived(employees.map((employee) => ({
         name: `${employee.firstName} ${employee.lastName}`,
         data: employee
-    })) as Array<EmployeeSearchable>;
+    })) as Array<EmployeeSearchable>);
 
-    let selectedEmployee: EmployeeSearchable = {
+    let selectedEmployee: EmployeeSearchable = $state({
         name: "Select an employee", 
         data: undefinedEmployee
-    };
+    });
 
     // When the user types into the selection text box, the employees list should filter
-    $: filtered_employees = employee_dict.filter(item => item.name.toLowerCase().includes(inputValueName.toLowerCase()));
+    let filteredEmployees = $derived(employee_dict.filter(item => item.name.toLowerCase().includes(inputValueName.toLowerCase())));
     
     const toggleChart = (ear: string) => {
         if (ear === 'both') {
@@ -164,6 +167,10 @@
                 success = true;
                 await invalidateAll();
                 yearItems = yearsResult.years.map(String);
+                console.log(yearItems);
+                // filteredYears is not updating!!
+                yearItems = [];
+                yearItems = yearItems; // idk
             }
             else {
                 yearItems = [];
@@ -178,17 +185,20 @@
         }
     };
 
-    $: filteredYears = yearItems.filter(item => item.includes(inputValueYear));
+    let filteredYears = $derived.by(() => {
+        let filterable = yearItems;
+        let filter = inputValueYear
 
+        alert("Howdy" + filterable);
+
+
+        return filterable.filter(item => item.includes(filter));
+    });
+   
     const selectYear = (year: string) => {
         selectedYear = year;
         yearMenuOpen = false; 
     };
-
-    const yearHandleInput = () => {
-        filteredYears = yearItems.filter(item => item.includes(inputValueYear));
-    };
-
 
     // TODO: get these from google auth
     let name = "example name";
@@ -199,33 +209,32 @@
     <!-- User Dropdown -->
     <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base flex justify-between items-center" style="width:300px">{selectedEmployee.name}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
     <Dropdown bind:open={nameMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
-    <div slot="header" class="p-3">
-        <Search size="md" bind:value={inputValueName}/>
-    </div>
-    {#each filtered_employees as employee}
-        <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
-            <button type="button" class="w-full text-left" on:click={() => selectEmployee(employee)}>
-                {employee.name}
-            </button>
-        </li>
-    {/each}
-    </Dropdown>
-
-    <!-- Year Dropdown -->
-    <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base flex justify-between items-center" style="width:300px">{selectedYear}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
-    <Dropdown bind:open={yearMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
-        <div slot="header" class="p-3">
-            <Search size="md" bind:value={inputValueYear} on:input={yearHandleInput}/>
+        <div  class="p-3">
+            <Search size="md" bind:value={inputValueName}/>
         </div>
-        {#each filteredYears as year}
+        {#each filteredEmployees as employee}
             <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
-                <button type="button" class="w-full text-left" on:click={() => selectYear(year)}>
-                    {year}
+                <button type="button" class="w-full text-left" onclick={() => selectEmployee(employee)}>
+                    {employee.name}
                 </button>
             </li>
         {/each}
     </Dropdown>
 
+    <!-- Year Dropdown -->
+    <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base flex justify-between items-center" style="width:300px">{selectedYear}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
+    <Dropdown bind:open={yearMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
+        <div  class="p-3">
+            <Search size="md" bind:value={inputValueYear}/>
+        </div>
+        {#each filteredYears as year}
+            <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+                <button type="button" class="w-full text-left" onclick={() => selectYear(year)}>
+                    {year}
+                </button>
+            </li>
+        {/each}
+    </Dropdown>
 </div>
 
 <!---------------------- DISPLAY INFO ---------------------->
