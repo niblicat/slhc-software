@@ -1,4 +1,4 @@
-<script lang="ts"  src="../path/to/flowbite/dist/flowbite.min.js">
+<script lang="ts">
 
     import { ButtonGroup, Button, Search } from 'flowbite-svelte';
     import { ChevronDownOutline, UserRemoveSolid } from 'flowbite-svelte-icons';
@@ -7,14 +7,54 @@
     import { Footer } from 'flowbite-svelte';
     import { sql } from '@vercel/postgres';
 
-    // chart
+    import type { Employee } from './MyTypes';
+	import AdminPage from './AdminPage.svelte';
+
     let chart: any;
 
-    export let employees;
+    interface Props {
+        employees: Array<Employee>;
+    }
+
+    let { employees }: Props = $props();
+
+    const undefinedEmployee: Employee = {
+        employeeID: "-1",
+        firstName: "Undefined",
+        lastName: "Undefined",
+        email: "Undefined",
+        dob: "Undefined"
+    };
+
+    // used to make it easier to access employees from their full name
+    type EmployeeSearchable = {
+        name: string, // full name
+        data: Employee
+    }
+
+    // employee map that is search friendly
+    // name will hold first and last so it's easier to search
+    // actual employee data (id and stuff) is in employee_dict.data
+    let employee_dict = $derived(employees.map((employee) => ({
+        name: `${employee.firstName} ${employee.lastName}`,
+        data: employee
+    })) as Array<EmployeeSearchable>);
+
+    let selectedEmployee: EmployeeSearchable = $state({
+        name: "Select an employee", 
+        data: undefinedEmployee
+    });
+
+    let inputValueName: string = $state("");
+    let inputValueYear = $state("");
+    let filteredYears: Array<string> = $state([]);
+
+    // When the user types into the selection text box, the employees list should filter
+    let filtered_employees = $derived(employee_dict.filter(item => item.name.toLowerCase().includes(inputValueName.toLowerCase())));
 
     // Chart Selection
-    let isRightEar = false;
-    let showBoth = true;
+    let isRightEar = $state(false);
+    let showBoth = $state(true);
     
     const toggleChart = (ear: string) => {
         if (ear === 'both') {
@@ -26,59 +66,36 @@
     };
 
     // Dropdown menu state
-    let nameMenuOpen = false;
-    let yearMenuOpen = false;
+    let nameMenuOpen = $state(false);
+    let yearMenuOpen = $state(false);
 
     // Selected employee and year
-    let selectedEmployee = "No employee selected";
-    let selectedYear = "No year selected";
+    // ! Some of these could be accessed from the selected employee data
+    let selectedYear = $state("No year selected");
     let selectedEmail = "No selection made";
     let selectedDOB = "No selection made";
     let selectAge = "No selection made";
     let selectedStatus = "No selection made";
     let STSstatus = "No data selection";
 
-    let inputValueName = "";
-    let inputValueYear = "";
-    let filteredNames: Array<string> = [];
-    let filteredYears: Array<string> = [];
-
-    // Employee and year data for demo purposes -- still need to connect to database
-    const employeeItems = ["Jayme", "Jared", "Angel"];
     const yearItems = ["2022", "2023", "2024"];
 
-    // Initialize filtered names and years with default data
-    filteredNames = employeeItems;
-    filteredYears = yearItems;
-
     // Functions to update selected employee and year
-    const selectEmployee = (employee: string) => {
+    const selectEmployee = (employee: EmployeeSearchable) => {
         selectedEmployee = employee;
         nameMenuOpen = false; 
+
+        // TODO: When employee is selected, populate relevant data fields with the employee's specific data
     };
 
     const selectYear = (year: string) => {
         selectedYear = year;
         yearMenuOpen = false; 
     };
-    
-    const nameHandleInput = () => {
-        filteredNames = employeeItems.filter(item => item.toLowerCase().includes(inputValueName.toLowerCase()));
-    };
 
     const yearHandleInput = () => {
         filteredYears = yearItems.filter(item => item.includes(inputValueYear));
     };
-
-    interface Employee {
-        employeename: string;
-        password: string;
-    }
-
-    const employeesMap = employees.map((row: Employee) => ({
-        employeename: row.employeename,
-        password: row.password
-    })) as Array<Employee>;
 
     // TODO: get these from google auth
     let name = "example name";
@@ -92,34 +109,34 @@
 </script>
 
 <div class="relative dropdown-container flex space-x-4 justify-center" style="margin-top: 20px;"> 
-    <!-- Employee Dropdown -->
-    <Button class="bg-dark-red hover:bg-blue-300 text-black flex justify-between items-center" style="width:300px">{selectedEmployee}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
+    <!-- User Dropdown -->
+    <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base flex justify-between items-center" style="width:300px">{selectedEmployee.name}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
     <Dropdown bind:open={nameMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
-    <div slot="header" class="p-3">
-        <Search size="md" bind:value={inputValueName} on:input={nameHandleInput}/>
-    </div>
-    {#each filteredNames as employee}
-        <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
-            <button type="button" class="w-full text-left" on:click={() => selectEmployee(employee)}>
-                {employee}
-            </button>
-        </li>
-    {/each}
+        <div  class="p-3">
+            <Search size="md" bind:value={inputValueName}/>
+        </div>
+        {#each filtered_employees as employee}
+            <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+                <button type="button" class="w-full text-left" onclick={() => selectEmployee(employee)}>
+                    {employee.name}
+                </button>
+            </li>
+        {/each}
     </Dropdown>
 
     <!-- Year Dropdown -->
-    <Button class="bg-blue-200 hover:bg-blue-300 text-black flex justify-between items-center" style="width:300px">{selectedYear}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
+    <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base flex justify-between items-center" style="width:300px">{selectedYear}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
     <Dropdown bind:open={yearMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
-    <div slot="header" class="p-3">
-        <Search size="md" bind:value={inputValueYear} on:input={yearHandleInput}/>
-    </div>
-    {#each filteredYears as year}
-        <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
-            <button type="button" class="w-full text-left" on:click={() => selectYear(year)}>
-                {year}
-            </button>
-        </li>
-    {/each}
+        <div  class="p-3">
+            <Search size="md" bind:value={inputValueYear} on:input={yearHandleInput}/>
+        </div>
+        {#each filteredYears as year}
+            <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+                <button type="button" class="w-full text-left" onclick={() => selectYear(year)}>
+                    {year}
+                </button>
+            </li>
+        {/each}
     </Dropdown>
 </div>
 
@@ -162,9 +179,9 @@
             />
         {/if}
         <ButtonGroup class="*:!ring-primary-700">
-            <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:175px" on:click={() => toggleChart('left')}>Left</Button>
-            <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:175px" on:click={() => toggleChart('right')}>Right</Button> 
-            <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:175px" on:click={() => toggleChart('both')}>Both</Button> 
+            <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base" style="width:175px" on:click={() => toggleChart('left')}>Left</Button>
+            <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base" style="width:175px" on:click={() => toggleChart('right')}>Right</Button> 
+            <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base" style="width:175px" on:click={() => toggleChart('both')}>Both</Button> 
         </ButtonGroup>
     </div>
 </div>
@@ -173,8 +190,8 @@
     <hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
     <div class="sm:flex sm:items-center sm:justify-between">
         <ButtonGroup class="*:!ring-primary-700" style="width:100%">
-            <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:50%">Print</Button>
-            <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:50%">Send Letter</Button>
+            <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-lg" style="width:50%">Print</Button>
+            <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-lg" style="width:50%">Send Letter</Button>
         </ButtonGroup>
     </div>
  </Footer>

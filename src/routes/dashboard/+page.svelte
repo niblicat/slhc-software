@@ -4,10 +4,8 @@
 
 </svelte:head>
 
-<script lang="ts"  src="../path/to/flowbite/dist/flowbite.min.js">
-    export let data;
-
-    import { page } from '$app/stores';
+<script lang="ts">
+    import { page } from '$app/state';
 	import CustomNavbar from '$lib/CustomNavbar.svelte';
 	import CustomSidebar from '$lib/CustomSidebar.svelte';
 	import EmployeesPage from '$lib/EmployeesPage.svelte';
@@ -15,27 +13,33 @@
     import InsertEmployeePage from '$lib/InsertEmployeePage.svelte';
     import InsertDataPage from '$lib/InsertDataPage.svelte';
     import AdminPage from '$lib/AdminPage.svelte';
+	import type { UserSimple } from '$lib/MyTypes.js';
+	import Information from '$lib/Information.svelte';
+    let { data } = $props();
 
-    $: activeURL = $page.url.pathname;
-    $: activeURLHash = $page.url.hash;
+    let activeURL = $derived(page.url.pathname);
+    let activeURLHash = $derived(page.url.hash);
 
-    $: admins = data.admins;
-    $: employees = data.employees;
+    let admins = $derived(data.admins);
+    let employees = $derived(data.employees);
 
     // sidebar state and visibility 
-    let sidebarOpen = false;
+    let sidebarOpen = $state(false);
     const toggleSidebar = () => {
         sidebarOpen = !sidebarOpen;
     };
 
-    // TODO: get these from google auth
-    let name = "example name";
-    let email = "example email";
+    let user: UserSimple = {
+        loggedIn: !!page.data.session?.user,
+        name: page.data.session?.user?.name || "Not logged in",
+        email: page.data.session?.user?.email || "",
+        avatar: page.data.session?.user?.image || ""
+    }
+
 </script>
 
 <CustomNavbar
-name={name}
-email={email}
+{user}
 hasSidebar={true} 
 sidebarOpen={sidebarOpen}
 on:toggle={toggleSidebar} 
@@ -43,26 +47,24 @@ on:toggle={toggleSidebar}
 
 <CustomSidebar
 sidebarOpen={sidebarOpen}
-activeURLHash={activeURLHash}
+activeUrl={activeURLHash}
 on:toggle={toggleSidebar}
 />
 
-<!-- <p>These are for testing:</p>
-<p>activeURLHash: {activeURLHash}</p>
-<p>activeURL {activeURL}</p> -->
-
-
-{#if activeURLHash == "#employees"}
-    <EmployeesPage {employees} />
-{:else if activeURLHash == "#mailings"}
-    <MailingPage/>
-{:else if activeURLHash == "#admin"}
-    <AdminPage {admins} />
-{:else if activeURLHash == "#insert"}
-    <InsertEmployeePage/>
-{:else if activeURLHash == "#data"}
-    <InsertDataPage/>
-{:else}
-    <!-- User who is not logged in should be redirected to home (no hash) -->
-    <p>You are on the dashboard. Use the sidebar to navigate to a page</p>
-{/if}
+<div id="content" class="h-dvh bg-gray-100 pt-16">
+    {#if activeURLHash == "#employees"}
+        <EmployeesPage {employees} />
+    {:else if activeURLHash == "#mailings"}
+        <MailingPage/>
+    {:else if activeURLHash == "#admin"}
+        <AdminPage {admins} />
+    {:else if activeURLHash == "#insert"}
+        <InsertEmployeePage/>
+    {:else if activeURLHash == "#data"}
+        <InsertDataPage {employees}/>
+    {:else}
+        <!-- User who is not logged in should be redirected to home (no hash) -->
+        <div class="flex justify-center p-4 text-2xl">Welcome to the dashboard</div>
+        <Information />
+    {/if}
+</div>

@@ -2,6 +2,7 @@
 // Used to intepret user data and detect if there has been STS
 
 import { base } from "$service-worker";
+import { left } from "@popperjs/core";
 import { error } from "@sveltejs/kit";
 
 enum PersonSex {
@@ -30,15 +31,19 @@ enum AnomolyStatus {
     Warning
 }
 
-class EarAnomolyStatuses {
+class EarAnomolyStatus {
     leftStatus: AnomolyStatus;
     rightStatus: AnomolyStatus;
     reportYear: number;
+    leftBaselineYear: number;
+    rightBaselineYear: number;
 
-    constructor(leftStatus: AnomolyStatus, rightStatus: AnomolyStatus, reportYear: number) {
+    constructor(leftStatus: AnomolyStatus, rightStatus: AnomolyStatus, reportYear: number, leftBaselineYear: number, rightBaselineYear: number) {
         this.leftStatus = leftStatus;
         this.rightStatus = rightStatus;
         this.reportYear = reportYear;
+        this.leftBaselineYear = leftBaselineYear;
+        this.rightBaselineYear = rightBaselineYear;
     }
 }
 
@@ -148,24 +153,26 @@ class UserHearingScreeningHistory {
 
     /**
      * GenerateHearingReport
-     * Returns an array of EarAnomolyStatuses for each year
+     * Returns an array of EarAnomolyStatus for each year
      */
-    public GenerateHearingReport(): EarAnomolyStatuses[] {
+    public GenerateHearingReport(): EarAnomolyStatus[] {
         let arrayLength = this.screenings.length;
         if (arrayLength == 0) throw error; // TODO: throw specific error
 
-        let reportArray: EarAnomolyStatuses[] = [];
+        let reportArray: EarAnomolyStatus[] = [];
         // Record the average for each each and move the index when the average is Better
         let bestLeftEarIndex = 0;
+        let bestLeftEarYear = this.screenings[0].year;
         let bestLeftEarAverage = Infinity;
         let bestRightEarIndex = 0;
+        let bestRightEarYear = this.screenings[0].year;
         let bestRightEarAverage = Infinity;
 
         bestLeftEarAverage = this.GetAverageHertzForSTSRangeForOneEar(this.screenings[0].leftEar);
         bestRightEarAverage = this.GetAverageHertzForSTSRangeForOneEar(this.screenings[0].rightEar);
 
         // push base status for the first hearing screening
-        reportArray.push(new EarAnomolyStatuses(AnomolyStatus.Base, AnomolyStatus.Base, this.screenings[0].year));
+        reportArray.push(new EarAnomolyStatus(AnomolyStatus.Base, AnomolyStatus.Base, this.screenings[0].year, this.screenings[0].year, this.screenings[0].year));
 
         for (var i = 1; i < arrayLength; i++) {
             let previousScreening: HearingScreening = this.screenings[i - 1];
@@ -177,10 +184,12 @@ class UserHearingScreeningHistory {
             if (this.ShouldUpdateBaseline(bestLeftEarAverage, newLeftEarAverage)) {
                 bestLeftEarIndex = i;
                 bestLeftEarAverage = newLeftEarAverage;
+                bestLeftEarYear = this.screenings[i].year;
             }
             if (this.ShouldUpdateBaseline(bestRightEarAverage, newRightEarAverage)) {
                 bestRightEarIndex = i;
                 bestRightEarAverage = newRightEarAverage;
+                bestRightEarYear = this.screenings[i].year;
             }
 
             let baselineLeftScreening = this.screenings[bestLeftEarIndex];
@@ -196,7 +205,7 @@ class UserHearingScreeningHistory {
             let leftAnomolyStatus = this.GetStatusForEar(baselineLeftScreening.leftEar, previousScreening.leftEar, afterScreening.leftEar, ageCorrectionLeft);
             let rightAnomolyStatus = this.GetStatusForEar(baselineRightScreening.rightEar, previousScreening.rightEar, afterScreening.rightEar, ageCorrectionRight);
 
-            let currentAnomolyStatuses = new EarAnomolyStatuses(leftAnomolyStatus, rightAnomolyStatus, afterScreening.year);
+            let currentAnomolyStatuses = new EarAnomolyStatus(leftAnomolyStatus, rightAnomolyStatus, afterScreening.year, bestLeftEarYear, bestRightEarYear);
             reportArray.push(currentAnomolyStatuses);
         }
         return reportArray;

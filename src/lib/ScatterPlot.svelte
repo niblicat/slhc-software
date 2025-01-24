@@ -2,11 +2,21 @@
     import { onMount } from "svelte";
     import { Chart, registerables } from 'chart.js';
 
-    // Export properties if needed
-    export let baselineHearingData: number[];
-    export let newHearingData: number[];
-    export let plotTitle: string;
-    export let labels: string[];
+    
+    interface Props {
+        // Export properties if needed
+        baselineHearingData: number[];
+        newHearingData: number[];
+        plotTitle: string;
+        labels: string[];
+    }
+
+    let {
+        baselineHearingData,
+        newHearingData,
+        plotTitle,
+        labels
+    }: Props = $props();
 
     let chart: any;
 
@@ -91,13 +101,24 @@
             },
             options: {
                 responsive: true,
+                // tooltips: {
+                //     mode: 'nearest',
+                //     intersect: false
+                // },
+                hover: {
+                    mode: 'nearest',
+                    intersect: false
+                },
                 scales: {
                     x: {
                         type: 'linear',
                         position: 'bottom',
                         title: {
                             display: true,
-                            text: 'Frequency (Hz)'
+                            text: 'Frequency (Hz)',
+                            font: {
+                                size: 16
+                            }
                         },
                         min: Math.min(...customTicksX),  // Ensure the x-axis starts from the minimum value of custom ticks
                         max: Math.max(...customTicksX),  // Ensure the x-axis ends at the maximum value of custom ticks
@@ -109,7 +130,10 @@
                     y: {
                         title: {
                             display: true,
-                            text: 'Hearing Level (dB)'
+                            text: 'Hearing Level (dB)',
+                            font: {
+                                size: 16
+                            }
                         },
                         min: Math.min(...customTicksY),
                         max: Math.max(...customTicksY),
@@ -130,6 +154,13 @@
                     padding: {
                         top: 20,
                         bottom: 0
+                    }
+                },
+                legend: {
+                    labels: {
+                        font: {
+                            size: 14
+                        }
                     }
                 }
             }

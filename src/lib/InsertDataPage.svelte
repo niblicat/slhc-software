@@ -1,36 +1,146 @@
-<script lang="ts"  src="../path/to/flowbite/dist/flowbite.min.js">
+<script lang="ts">
 
-    import { Label, Input, Helper} from 'flowbite-svelte';
-    import { Button } from 'flowbite-svelte';
-    import { Dropdown, Search } from 'flowbite-svelte';
-    import { ChevronDownOutline, UserRemoveSolid } from 'flowbite-svelte-icons';
-    import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Checkbox, TableSearch } from 'flowbite-svelte';
+    import { Label, Input} from 'flowbite-svelte';
+    import { Dropdown, Search, Button } from 'flowbite-svelte';
+    import { ChevronDownOutline } from 'flowbite-svelte-icons';
+    import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
+    import { sql } from '@vercel/postgres';
 
-    let nameMenuOpen = false;
-    let selectedUser = "No user selected";
+    import type { Employee } from './MyTypes';
+	import AdminPage from './AdminPage.svelte';
 
-    let inputValueName = "";
-    let filteredNames: Array<string> = [];
+  interface Props {
+    employees?: Array<Employee>;
+  }
 
-    // Employee and year data for demo purposes -- still need to connect to database
-    const employeeItems = ["Jayme", "Jared", "Angel"];
+  let { employees = [] }: Props = $props();
+    
+    const undefinedEmployee: Employee = {
+        employeeID: "-1",
+        firstName: "Undefined",
+        lastName: "Undefined",
+        email: "Undefined",
+        dob: "Undefined"
+    };
 
-    filteredNames = employeeItems;
+    // used to make it easier to access employees from their full name
+    type EmployeeSearchable = {
+        name: string, // full name
+        data: Employee
+    }
 
-    // Functions to update selected user 
-    const selectUser = (user: string) => {
-        selectedUser = user;
+    // employee map that is search friendly
+    // name will hold first and last so it's easier to search
+    // actual employee data (id and stuff) is in employee_dict.data
+    let employee_dict = $derived(employees.map((employee) => ({
+        name: `${employee.firstName} ${employee.lastName}`,
+        data: employee
+    })) as Array<EmployeeSearchable>);
+
+    let selectedEmployee: EmployeeSearchable = $state({
+        name: "Select an employee", 
+        data: undefinedEmployee
+    });
+
+    let inputValueName: string = $state("");
+
+    // When the user types into the selection text box, the employees list should filter
+    let filtered_employees = $derived(employee_dict.filter(item => item.name.toLowerCase().includes(inputValueName.toLowerCase())));
+
+    // Functions to update selected employee and year
+    const selectEmployee = (employee: EmployeeSearchable) => {
+        selectedEmployee = employee;
         nameMenuOpen = false; 
     };
-    
-    const nameHandleInput = () => {
-        filteredNames = employeeItems.filter(item => item.toLowerCase().includes(inputValueName.toLowerCase()));
-    };
 
-    interface User {
-        username: string;
-        password: string;
+    let nameMenuOpen = $state(false);
+
+    let inputValueYear = $state("");
+    let ear_side = "";
+    let leftFrequencies = $state({
+        hz500: '',
+        hz1000: '',
+        hz2000: '',
+        hz3000: '',
+        hz4000: '',
+        hz6000: '',
+        hz8000: ''
+    });
+    let rightFrequencies = $state({
+        hz500: '',
+        hz1000: '',
+        hz2000: '',
+        hz3000: '',
+        hz4000: '',
+        hz6000: '',
+        hz8000: ''
+    });
+
+    let success = $state(true);
+    let errorMessage = $state('');
+    let successMessage = $state('');
+
+    function displayError(message: string) {
+        errorMessage = message;
+        success = false;
     }
+
+    async function handleSubmit(event: Event) {
+        event.preventDefault(); // Prevent the default form submission behavior
+        successMessage = '';  
+        errorMessage = '';  
+
+        await addHearingData();
+
+        if (success) {
+        successMessage = 'Successfully added employee hearing data! Refreshing page...';
+        setTimeout(() => location.reload(), 2000);    // Refresh the page after 2 secs
+        }
+        else {
+        console.error('Error occurred:', errorMessage);
+        }
+    }
+
+    async function addHearingData() {
+    const formData = new FormData();
+    formData.append('user', selectedEmployee.name); // Pass full name
+    formData.append('year', inputValueYear); // Year of data
+    formData.append('leftEarFrequencies', JSON.stringify(leftFrequencies)); // Left ear data
+    formData.append('rightEarFrequencies', JSON.stringify(rightFrequencies)); // Right ear data
+
+    // Debug: Log form data
+    console.log('Form data to be sent:', Object.fromEntries(formData.entries()));
+
+    try {
+      const response = await fetch('/dashboard?/addHearingData', {
+        method: 'POST',
+        body: formData,
+      });
+  
+      // Debug: Log raw response
+      console.log('Raw server response:', response);
+
+      if (!response.ok) {
+        throw new Error(`Server returned error: ${response.statusText}`);
+      }
+
+      let serverResponse;
+      try {
+        serverResponse = await response.json();
+      } 
+      catch (e) {
+        console.error('Failed to parse JSON:', e);
+        throw new Error('Invalid JSON response from server');
+      }
+
+      console.log('Server Response:', serverResponse);
+    } 
+    catch (error: any) {
+      console.error('Error during fetch or JSON parsing:', error);
+      displayError(error.message || 'An error occurred');
+    }
+  }
+
 </script>
 
 <div class="center text-2xl">Add New Data</div>
@@ -39,25 +149,25 @@
     <!-- Select Employee Dropdown -->
     <div style="width: 300px;">
         <Label for="employee" class="block mb-2">Select Employee</Label>
-        <Button class="bg-blue-200 hover:bg-blue-300 text-black flex justify-between items-center" style="width: 100%">{selectedUser}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
+        <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base flex justify-between items-center" style="width:300px">{selectedEmployee.name}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
         <Dropdown bind:open={nameMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
-            <div slot="header" class="p-3">
-                <Search size="md" bind:value={inputValueName} on:input={nameHandleInput} />
-            </div>
-            {#each filteredNames as user}
-                <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
-                    <button type="button" class="w-full text-left" on:click={() => selectUser(user)}>
-                        {user}
-                    </button>
-                </li>
-            {/each}
+        <div  class="p-3">
+            <Search size="md" bind:value={inputValueName}/>
+        </div>
+        {#each filtered_employees as employee}
+            <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+                <button type="button" class="w-full text-left" onclick={() => selectEmployee(employee)}>
+                    {employee.name}
+                </button>
+            </li>
+        {/each}
         </Dropdown>
     </div>
 
     <!-- Add Year Input -->
     <div style="width: 300px; margin-left: 16px;">
         <Label for="year" class="block mb-2">Add Year</Label>
-        <Input id="year" placeholder="year" />
+        <Input id="year" placeholder="year" bind:value={inputValueYear} />
     </div>
 </div>
 	
@@ -75,29 +185,47 @@
     <TableBody tableBodyClass="divide-y">
       <TableBodyRow>
         <TableBodyCell>Left Ear</TableBodyCell>
-        <TableBodyCell><Input id="hz_500" placeholder="500" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_1000" placeholder="1000" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_2000" placeholder="2000" required/> </TableBodyCell>
-        <TableBodyCell><Input id="hz_3000" placeholder="3000" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_4000" placeholder="4000" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_6000" placeholder="6000" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_8000" placeholder="8000" required/></TableBodyCell>
-      </TableBodyRow>
+        <TableBodyCell><Input bind:value={leftFrequencies.hz500} placeholder="500" required /></TableBodyCell>
+        <TableBodyCell><Input bind:value={leftFrequencies.hz1000} placeholder="1000" required /></TableBodyCell>
+        <TableBodyCell><Input bind:value={leftFrequencies.hz2000} placeholder="2000" required /></TableBodyCell>
+        <TableBodyCell><Input bind:value={leftFrequencies.hz3000} placeholder="3000" required /></TableBodyCell>
+        <TableBodyCell><Input bind:value={leftFrequencies.hz4000} placeholder="4000" required /></TableBodyCell>
+        <TableBodyCell><Input bind:value={leftFrequencies.hz6000} placeholder="6000" required /></TableBodyCell>
+        <TableBodyCell><Input bind:value={leftFrequencies.hz8000} placeholder="8000" required /></TableBodyCell>
+    </TableBodyRow>
       <TableBodyRow>
         <TableBodyCell>Right Ear</TableBodyCell>
-        <TableBodyCell><Input id="hz_500" placeholder="500" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_1000" placeholder="1000" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_2000" placeholder="2000" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_3000" placeholder="3000" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_4000" placeholder="4000" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_6000" placeholder="6000" required/></TableBodyCell>
-        <TableBodyCell><Input id="hz_8000" placeholder="8000" required/></TableBodyCell>
+        <TableBodyCell><Input bind:value={rightFrequencies.hz500} placeholder="500" required /></TableBodyCell>
+        <TableBodyCell><Input bind:value={rightFrequencies.hz1000} placeholder="1000" required /></TableBodyCell>
+        <TableBodyCell><Input bind:value={rightFrequencies.hz2000} placeholder="2000" required /></TableBodyCell>
+        <TableBodyCell><Input bind:value={rightFrequencies.hz3000} placeholder="3000" required /></TableBodyCell>
+        <TableBodyCell><Input bind:value={rightFrequencies.hz4000} placeholder="4000" required /></TableBodyCell>
+        <TableBodyCell><Input bind:value={rightFrequencies.hz6000} placeholder="6000" required /></TableBodyCell>
+        <TableBodyCell><Input bind:value={rightFrequencies.hz8000} placeholder="8000" required /></TableBodyCell>
       </TableBodyRow>
     </TableBody>
   </Table>
 
-<div class="form">
-    <Button class="bg-blue-200 hover:bg-blue-300 text-black" style="width:200px">Submit</Button>
+  <div class="form">
+    <Button 
+      class="bg-light-bluegreen hover:bg-dark-bluegreen text-black" 
+      style="width:200px" 
+      on:click={handleSubmit}
+    >Submit</Button>
+</div>
+
+<div>
+  {#if successMessage}
+    <div class="text-green-600 mt-4">
+      {successMessage}
+    </div>
+  {/if}
+
+  {#if !success && errorMessage}
+    <div class="text-red-600 mt-4">
+      {errorMessage}
+    </div>
+  {/if}
 </div>
 
 <style>
