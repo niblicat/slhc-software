@@ -1,6 +1,7 @@
 import type { Session } from "@auth/sveltekit";
 import { redirect, type RequestEvent, type Server, type ServerLoadEvent } from "@sveltejs/kit"
 import { sql } from "@vercel/postgres";
+import type { Admin, Employee } from "./MyTypes";
 
 export enum AdminStatus {
     NotListed,
@@ -120,4 +121,32 @@ export async function turnAwayNonAdmins(event: ServerLoadEvent) {
         console.log("User does not have sufficient permissions");
         redirect(303, '/');
     }
+}
+
+export async function getEmployeesFromDatabase(): Promise<Employee[]> {
+    const employeeTable = await sql`SELECT * FROM Employee;`;
+
+    const employees: Employee[] = employeeTable.rows.map(row => ({
+        employeeID: row.employeeID,
+        firstName: row.first_name,
+        lastName: row.last_name,
+        email: row.email,
+        dob: row.date_of_birth
+    }));
+
+    return  employees;
+}
+
+export async function getAdminsFromDatabase(): Promise<Admin[]> {
+    const adminTable = await sql`SELECT * FROM Administrator;`;
+
+    const admins: Admin[] = adminTable.rows.map(row => ({
+        name: row.name,
+        email: row.userstring,
+        googleID: row.id,
+        isOP: row.isop,
+        selected: false
+    }));
+
+    return admins;
 }
