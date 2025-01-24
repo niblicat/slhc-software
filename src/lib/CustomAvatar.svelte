@@ -9,12 +9,19 @@
 
     let { user }: Props = $props();
 
+    let avatar = $state("");
+    $effect(() => {
+        // Need to parameters at the end of user.avatar
+        const avatarRaw = user.avatar;
+        avatar = avatarRaw.replace(/=.*/, '');
+    })
+
 </script>
 
 
 <div class="flex items-center md:order-2">
     <Avatar border id="avatar-menu" class="hover:border-blue-500 active:bg-gray-200 transition duration-150 ease-in-out cursor-pointer"
-    src={user.avatar} />
+    src={avatar} />
 </div>
 <Dropdown placement="bottom" triggeredBy="#avatar-menu">
     <DropdownHeader>
