@@ -4,10 +4,11 @@ import type { Actions, PageServerLoad } from './$types';
 import { json } from '@sveltejs/kit';
 import type { Employee } from '$lib/MyTypes';
 import type { Admin } from '$lib/MyTypes';
+import { turnAwayNonAdmins } from '$lib/utility';
 
 // Load function to get parent data and fetch users
-export const load: PageServerLoad = async ({ parent }) => {
-    const parentData = await parent(); // not sure why/if this is needed
+export const load: PageServerLoad = async ( event ) => {
+    await turnAwayNonAdmins(event);
 
     const employee = await sql`SELECT * FROM Employee;`;
     const administrator = await sql`SELECT * FROM Administrator;`;

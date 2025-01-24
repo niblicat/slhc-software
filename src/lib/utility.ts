@@ -1,5 +1,5 @@
 import type { Session } from "@auth/sveltekit";
-import type { RequestEvent } from "@sveltejs/kit"
+import { redirect, type RequestEvent, type Server, type ServerLoadEvent } from "@sveltejs/kit"
 import { sql } from "@vercel/postgres";
 
 export enum AdminStatus {
@@ -45,6 +45,36 @@ export async function addUserToAdminDatabase(userEmail: string, name: string): P
     }
 }
 
+export async function obtainLoginStatus(event: ServerLoadEvent): Promise<LoginStatus> {
+    const session = await event.locals.auth();
+
+    if (session) {
+        const adminStatus = await checkAdminStatus(session);
+        switch (adminStatus) {
+            case AdminStatus.HasPerms:
+                return LoginStatus.HasPerms;
+
+            case AdminStatus.NoPerms:
+                return LoginStatus.NoPerms;
+
+            case AdminStatus.NotListed:
+                console.log("Not Listed");
+                if (!session.user) return LoginStatus.NoSession;
+                if (!session.user.email) return LoginStatus.NoEmail;
+                if (!session.user.name) return LoginStatus.NoName;
+
+                // all checks passed, let's make a new user
+                const email = session.user.email;
+                const name = session.user?.name;
+                await addUserToAdminDatabase(email, name);
+                
+                return LoginStatus.NoPerms;
+        }
+    }
+
+    return LoginStatus.None;
+}
+
 export async function checkAdminStatus(session: Session): Promise<AdminStatus> {
     console.log('Verifying if user is an administrator');
 
@@ -80,5 +110,14 @@ export async function checkAdminStatus(session: Session): Promise<AdminStatus> {
     catch (error) {
         console.error("Error verifying administrator status", error);
         return AdminStatus.NotListed;
+    }
+}
+
+export async function turnAwayNonAdmins(event: ServerLoadEvent) {
+    const loginStatus = await obtainLoginStatus(event);
+    
+    if (loginStatus != LoginStatus.HasPerms) {
+        console.log("User does not have sufficient permissions");
+        redirect(303, '/');
     }
 }
