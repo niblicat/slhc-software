@@ -6,6 +6,7 @@
     import ScatterPlot from './ScatterPlot.svelte';
     import { Footer } from 'flowbite-svelte';
     import { sql } from '@vercel/postgres';
+    import { onMount } from 'svelte';
 
     import type { Employee } from './MyTypes';
     import { invalidateAll } from '$app/navigation';
@@ -19,11 +20,14 @@
 
     let { employees }: Props = $props();
 
+    //Testing purposes
+    let test = $state("");
+
     // Data for scatter plot
-    const RightBaselineHearingData = [10,10,15,10,15,20,25];
-    const RightNewHearingData = [15, 20, 25, 30, 35, 25, 45];
-    const LeftBaselineHearingData = [15, 20, 20, 30, 25, 20, 15];
-    const LeftNewHearingData = [15, 25, 25, 35, 20, 15, 10];
+    let RightBaselineHearingData = $state<Array<number>>([]);
+    let RightNewHearingData =  $state<Array<number>>([]);
+    let LeftBaselineHearingData =  $state<Array<number>>([]);
+    let LeftNewHearingData =  $state<Array<number>>([]);
 
     // Selected employee and year
     let selectedYear = $state("No year selected");
@@ -47,7 +51,7 @@
     let isRightEar = $state(false);
     let showBoth = $state(true);
 
-    let yearItems: Array<string> = [];
+    let yearItems = $state<Array<string>>([]);
 
     function displayError(message: string) {
         errorMessage = message;
@@ -104,6 +108,11 @@
         selectedYear = "No year selected";
         yearItems = [];
         inputValueYear = "";
+        // Clear previous data
+        RightBaselineHearingData.length = 0;
+        RightNewHearingData.length = 0;
+        LeftBaselineHearingData.length = 0;
+        LeftNewHearingData.length = 0;
 
         formData.append('employee', selectedEmployee.name);
 
@@ -165,12 +174,12 @@
 
             if (yearsResult["success"]) {
                 success = true;
-                await invalidateAll();
+                //await invalidateAll();
                 yearItems = yearsResult.years.map(String);
                 console.log(yearItems);
                 // filteredYears is not updating!!
-                yearItems = [];
-                yearItems = yearItems; // idk
+                //yearItems = [];
+                //yearItems = yearItems; // idk
             }
             else {
                 yearItems = [];
@@ -189,16 +198,75 @@
         let filterable = yearItems;
         let filter = inputValueYear
 
-        alert("Howdy" + filterable);
-
-
         return filterable.filter(item => item.includes(filter));
     });
    
-    const selectYear = (year: string) => {
+    const selectYear = async (year: string) => {
         selectedYear = year;
-        yearMenuOpen = false; 
+        yearMenuOpen = false;
+
+        const formData = new FormData();
+        formData.append('employeeID', selectedEmployee.name);
+        formData.append('year', year);
+
+        try {
+            const response = await fetch('/dashboard?/fetchHearingData', {
+                method: 'POST',
+                body: formData,
+            });
+            const serverResponse = await response.json();
+            const result = JSON.parse(JSON.parse(serverResponse.data)[0]);
+            
+            if (result["success"]) {
+                test = "SUCCESS!!!";
+
+                const { baselineData, newData } = result.hearingData;
+
+                // Clear previous data
+                RightBaselineHearingData.length = 0;
+                RightNewHearingData.length = 0;
+                LeftBaselineHearingData.length = 0;
+                LeftNewHearingData.length = 0;
+
+                // Extract frequencies and populate arrays
+
+                // For right ear baseline data
+                if (baselineData.rightEar) {
+                    RightBaselineHearingData.push(...extractFrequencies(baselineData.rightEar));
+                }
+
+                // For right ear new data
+                if (newData.rightEar) {
+                    RightNewHearingData.push(...extractFrequencies(newData.rightEar));
+                }
+
+                // For left ear baseline data
+                if (baselineData.leftEar) {
+                    LeftBaselineHearingData.push(...extractFrequencies(baselineData.leftEar));
+                }
+
+                // For left ear new data
+                if (newData.leftEar) {
+                    LeftNewHearingData.push(...extractFrequencies(newData.leftEar));
+                }
+            } 
+            else {
+                test = "FAIL!!"
+                displayError('Failed to fetch hearing data for the selected year');
+            }
+        } catch (error) {
+            test = "error :("
+            console.error('Error fetching hearing data:', error);
+            displayError('Error fetching hearing data');
+        }
     };
+
+    // Helper function to extract frequencies
+    const extractFrequencies = (earData: Record<string, any>): number[] => {
+        const { ear, ...frequencies } = earData; // Exclude the 'ear' property
+        return Object.values(frequencies) as number[];  // Return all frequency values as an array of numbers
+    };
+
 
     // TODO: get these from google auth
     let name = "example name";
@@ -249,6 +317,15 @@
         <p>Age: {selectAge}</p> <br>
         <p>Employment Status: {selectedStatus}</p> <br>
         <p class="text-3xl">STS Status: {STSstatus}</p> <br>
+
+        <!-- Testing Purposes -->
+        <br><br><br>
+        <p>Testing Output</p>
+        <p>HEARING DATA SUCCESS RESULT: {test}</p> <br>
+        <p>HEARING DATA TEST NEW R: {RightNewHearingData}</p> <br>
+        <p>HEARING DATA TEST NEW L: {LeftNewHearingData}</p> <br>
+        <p>HEARING DATA TEST BL R: {RightBaselineHearingData}</p> <br>
+        <p>HEARING DATA TEST BL L: {LeftBaselineHearingData}</p> <br>
     </section>
 
     <!-- Chart Section -->
