@@ -1,22 +1,11 @@
-<script lang="ts"  src="../path/to/flowbite/dist/flowbite.min.js">
-import { Button } from 'flowbite-svelte';
-
+<script>
+    import { Button } from "flowbite-svelte";
 </script>
 
-<div class="center">
-    <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black" style="width:200px">Mail Merge</Button>
+<div class="flex justify-center items-center h-screen">
+    <a href="/Letters.zip" download="Letters.zip">
+        <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base flex justify-between items-center" style="width:300px">
+            Download Letters
+        </Button>
+    </a>
 </div>
-
-
-
-<style>
-    .center {
-        margin: auto;
-        width: 50%;
-        padding: 10px;
-        text-align: center;
-    }
-</style>
-
-
-
