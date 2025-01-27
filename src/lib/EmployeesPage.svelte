@@ -19,7 +19,7 @@
     }
 
     let { employees }: Props = $props();
-
+  
     //Testing purposes
     let test = $state("");
 
@@ -96,7 +96,7 @@
             showBoth = false;
         }
     };
-
+  
     // Functions to update selected employee and year
     const selectEmployee = async (employee: EmployeeSearchable) => {
         const formData = new FormData();

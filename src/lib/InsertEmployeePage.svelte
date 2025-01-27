@@ -1,19 +1,19 @@
-<script lang="ts"  src="../path/to/flowbite/dist/flowbite.min.js">
+<script lang="ts">
 
   import { Label, Input, Radio, Button } from 'flowbite-svelte';
   import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Checkbox, Modal } from 'flowbite-svelte';
   import { invalidateAll } from '$app/navigation';
 
-  let firstName = '';
-  let lastName = '';
-  let email = '';
-  let dateOfBirth = '';
-  let isInactive = false;
-  let lastActive = '';
+  let firstName = $state('');
+  let lastName = $state('');
+  let email = $state('');
+  let dateOfBirth = $state('');
+  let isInactive = $state(false);
+  let lastActive = $state('');
 
-  let success = true;
-  let errorMessage = '';
-  let successMessage = '';
+  let success = $state(true);
+  let errorMessage = $state('');
+  let successMessage = $state('');
 
   // Employee type
   type Employee = {

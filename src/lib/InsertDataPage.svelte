@@ -1,4 +1,4 @@
-<script lang="ts"  src="../path/to/flowbite/dist/flowbite.min.js">
+<script lang="ts">
 
     import { Label, Input} from 'flowbite-svelte';
     import { Dropdown, Search, Button } from 'flowbite-svelte';
@@ -9,7 +9,11 @@
     import type { Employee } from './MyTypes';
 	import AdminPage from './AdminPage.svelte';
 
-    export let employees: Array<Employee> = [];
+  interface Props {
+    employees?: Array<Employee>;
+  }
+
+  let { employees = [] }: Props = $props();
     
     const undefinedEmployee: Employee = {
         employeeID: "-1",
@@ -28,20 +32,20 @@
     // employee map that is search friendly
     // name will hold first and last so it's easier to search
     // actual employee data (id and stuff) is in employee_dict.data
-    $: employee_dict = employees.map((employee) => ({
+    let employee_dict = $derived(employees.map((employee) => ({
         name: `${employee.firstName} ${employee.lastName}`,
         data: employee
-    })) as Array<EmployeeSearchable>;
+    })) as Array<EmployeeSearchable>);
 
-    let selectedEmployee: EmployeeSearchable = {
+    let selectedEmployee: EmployeeSearchable = $state({
         name: "Select an employee", 
         data: undefinedEmployee
-    };
+    });
 
-    let inputValueName: string = "";
+    let inputValueName: string = $state("");
 
     // When the user types into the selection text box, the employees list should filter
-    $: filtered_employees = employee_dict.filter(item => item.name.toLowerCase().includes(inputValueName.toLowerCase()));
+    let filtered_employees = $derived(employee_dict.filter(item => item.name.toLowerCase().includes(inputValueName.toLowerCase())));
 
     // Functions to update selected employee and year
     const selectEmployee = (employee: EmployeeSearchable) => {
@@ -49,11 +53,11 @@
         nameMenuOpen = false; 
     };
 
-    let nameMenuOpen = false;
+    let nameMenuOpen = $state(false);
 
-    let inputValueYear = "";
+    let inputValueYear = $state("");
     let ear_side = "";
-    let leftFrequencies = {
+    let leftFrequencies = $state({
         hz500: '',
         hz1000: '',
         hz2000: '',
@@ -61,8 +65,8 @@
         hz4000: '',
         hz6000: '',
         hz8000: ''
-    };
-    let rightFrequencies = {
+    });
+    let rightFrequencies = $state({
         hz500: '',
         hz1000: '',
         hz2000: '',
@@ -70,11 +74,11 @@
         hz4000: '',
         hz6000: '',
         hz8000: ''
-    };
+    });
 
-    let success = true;
-    let errorMessage = '';
-    let successMessage = '';
+    let success = $state(true);
+    let errorMessage = $state('');
+    let successMessage = $state('');
 
     function displayError(message: string) {
         errorMessage = message;
@@ -147,12 +151,12 @@
         <Label for="employee" class="block mb-2">Select Employee</Label>
         <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base flex justify-between items-center" style="width:300px">{selectedEmployee.name}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
         <Dropdown bind:open={nameMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
-        <div slot="header" class="p-3">
+        <div  class="p-3">
             <Search size="md" bind:value={inputValueName}/>
         </div>
         {#each filtered_employees as employee}
             <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
-                <button type="button" class="w-full text-left" on:click={() => selectEmployee(employee)}>
+                <button type="button" class="w-full text-left" onclick={() => selectEmployee(employee)}>
                     {employee.name}
                 </button>
             </li>

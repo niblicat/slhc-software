@@ -1,43 +1,55 @@
 <script lang="ts">
-    // TODO: export users and their statuses
-    // TODO: make svelte store writables
-    import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Checkbox, Modal, Button } from 'flowbite-svelte';
+    import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Checkbox, Modal, Button, Tooltip } from 'flowbite-svelte';
     import EditIcon from './EditIcon.svelte';
     import { createEventDispatcher } from 'svelte';
-    import { error } from '@sveltejs/kit';
 
     import { Input, Label, Helper } from 'flowbite-svelte';
 	import { invalidateAll } from '$app/navigation';
 
-    import type { Admin } from './MyTypes.ts';
+    import type { Admin, AdminSelectable } from './MyTypes.ts';
+	import { InfoCircleOutline } from 'flowbite-svelte-icons';
 
-    export let admins: Array<Admin>;
+    interface Props {
+        admins: Array<Admin>;
+    }
 
-    console.log("ADMINS:");
-    console.log(admins);
+    let { admins }: Props = $props();
 
-    $: adminsMap = admins
-        .map((row: Admin) => ({
-            name: row.name,
-            email: row.email,
-            googleID: row.googleID,
-            isOP: row.isOP,
-            selected: false,
-        }))
-        .sort((a, b) => a.name.localeCompare(b.name));
+    // console.log("ADMINS:");
+    // console.log(admins);
+
+    let adminsMap: Array<AdminSelectable> = $state([]);
+    $effect(() => {
+        adminsMap = admins
+            .map((row: Admin) => ({
+                name: row.name || "Null",
+                email: row.email,
+                googleID: row.googleID,
+                isOP: row.isOP,
+                selected: false,
+            }))
+            .sort((a, b) => a.name.localeCompare(b.name));
+    });
 
     // use selectedAdmins to modify multiple user-selected admins
-    let selectedAdmins: Array<Admin> = [];
+    let selectedAdmins: Array<Admin> = $state([]);
 
-    let selectedAdmin: Admin;
+    let selectedAdmin: Admin = $state({
+        name: "null",
+        email: "null",
+        googleID: "-1",
+        isOP: false
+    });
 
-    $: selectedAdmins = adminsMap.filter((e) => e.selected == true);
+    $effect(() => {
+        selectedAdmins = adminsMap.filter((e) => e.selected == true);
+    });
 
     // TODO: add indicator showing that people cannot change their email after it has been set. They must switch to a different Google account
 
-    let success = true;
-    let errorMessage = "";
-    let newName = "";
+    let success = $state(true);
+    let errorMessage = $state("");
+    let newName = $state("");
 
     function displayError(message: string) {
         errorMessage = message;
@@ -155,11 +167,35 @@
         nameModal = true;
     }
 
-    const disptatch = createEventDispatcher();
+    function showAdminDeletionModal() {
+        deleteModal = true;
+    }
 
-    let adminModal = false; // controls the appearance of the popup add admin confirmation window
-    let adminFalseModal = false; // controls the appearance of the popup remove admin confirmation window
-    let nameModal = false; // controls the appearance of the admin name change window
+    let doSelectAll = $state(true);
+
+    function toggleSelect(admin: AdminSelectable) { 
+        adminsMap = adminsMap.map((item) =>
+            item.googleID === admin.googleID
+                ? { ...item, selected: !item.selected }
+                : item
+        );
+        doSelectAll = true;
+    }
+
+    function massSelect() {
+        adminsMap = adminsMap.map((admin) => ({
+            ...admin,
+            selected: doSelectAll,
+        }));
+        doSelectAll = !doSelectAll;
+    }
+
+    let adminModal = $state(false); // controls the appearance of the popup add admin confirmation window
+    let deleteModal = $state(false); // controls the appearance of the popup delete admin confirmation window
+    let adminFalseModal = $state(false); // controls the appearance of the popup remove admin confirmation window
+    let nameModal = $state(false); // controls the appearance of the admin name change window
+
+
 </script>
 
 <Modal title="Change Admin Username" bind:open={nameModal} autoclose>
@@ -171,11 +207,9 @@
         <Input type="text" id="name" placeholder={selectedAdmin.name} bind:value={newName} required />
     </p>
     
-    <svelte:fragment slot="footer">
-        <!-- TODO: CHANGE THESE COLOURS -->
-        <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => modifyAdminName(selectedAdmin)}>Confirm</Button>
-        <Button class="bg-red-200 hover:bg-red-300 text-black">Cancel</Button>
-    </svelte:fragment>
+    <!-- TODO: CHANGE THESE COLOURS -->
+    <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => modifyAdminName(selectedAdmin)}>Confirm</Button>
+    <Button class="bg-red-200 hover:bg-red-300 text-black">Cancel</Button>
 </Modal>
 
 <Modal title="Notice for Revoking Admin Permissions" bind:open={adminFalseModal} autoclose>
@@ -183,11 +217,9 @@
         <span class="text-red-600">Are you sure you want to revoke the permissions of {selectedAdmin.name} ({selectedAdmin.email})?</span>
     </p>
     
-    <svelte:fragment slot="footer">
-        <!-- TODO: CHANGE THESE COLOURS -->
-        <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => modifyAdminPermissions(selectedAdmin)}>Yes</Button>
-        <Button class="bg-red-200 hover:bg-red-300 text-black">No</Button>
-    </svelte:fragment>
+    <!-- TODO: CHANGE THESE COLOURS -->
+    <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => modifyAdminPermissions(selectedAdmin)}>Yes</Button>
+    <Button class="bg-red-200 hover:bg-red-300 text-black">No</Button>
 </Modal>
 
 <Modal title="Notice for Granting Admin Permissions" bind:open={adminModal} autoclose>
@@ -198,64 +230,80 @@
         <span class="text-red-600">Are you sure you want to make {selectedAdmin.name} ({selectedAdmin.email}) an admin?</span>
     </p>
     
-    <svelte:fragment slot="footer">
-        <!-- TODO: CHANGE THESE COLOURS -->
-        <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => modifyAdminPermissions(selectedAdmin)}>Yes</Button>
-        <Button class="bg-red-200 hover:bg-red-300 text-black">No</Button>
-    </svelte:fragment>
+    <!-- TODO: CHANGE THESE COLOURS -->
+    <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => modifyAdminPermissions(selectedAdmin)}>Yes</Button>
+    <Button class="bg-red-200 hover:bg-red-300 text-black">No</Button>
+</Modal>
+
+<Modal title="Notice for Deleting Admins" bind:open={deleteModal} autoclose>
+    <span>The following users will be removed from the database and will no longer have permissions to access the SLHC Employee Hearing Panel.</span>
+    {#each selectedAdmins as admin}
+        <p>{admin.name} ({admin.email})</p>
+    {/each}
+    <br>
+    <span class="text-red-600">Are you sure you want to remove these admins?</span>
+    
+    <!-- TODO: CHANGE THESE COLOURS -->
+    <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => deleteSelectedUsers()}>Yes</Button>
+    <Button class="bg-red-200 hover:bg-red-300 text-black">No</Button>
 </Modal>
 
 <!-- figure out if this should be main -->
-<div class="h-screen flex-column justify-center">
-    {#if !success}
-        <span class="text-red-600">{errorMessage}</span>
-    {/if}
-    <Table hoverable={true}>
+<div class="flex-column justify-center mx-4">
+    
+    <Table hoverable={true} class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+        <caption class="p-5 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800">
+            Admin Approval
+            <p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">Modify the priviledges of anyone who has attempted to sign in.</p>
+            {#if !success}
+            <p class="mt-1 text-sm font-normal text-red-600 dark:text-red-300">{errorMessage}</p>
+            {/if}
+          </caption>
         <TableHead>
             <TableHeadCell class="!p-4">
-              <Checkbox />
+              <Checkbox on:click={() => massSelect()} checked={!doSelectAll}/>
             </TableHeadCell>
-            <TableHeadCell>Name</TableHeadCell>
+            <TableHeadCell >Name</TableHeadCell>
             <TableHeadCell>Email</TableHeadCell>
             <TableHeadCell>Google ID</TableHeadCell>
             <TableHeadCell>Is Admin</TableHeadCell>
-            <TableHeadCell>
-                <span class="sr-only">Edit</span>
-            </TableHeadCell>
         </TableHead>
         <TableBody tableBodyClass="divide-y">
             {#each adminsMap as admin (admin.googleID)}
                 <TableBodyRow>
                     <TableBodyCell class="!p-4">
-                        <Checkbox on:click={() => admin.selected = !admin.selected}/>
+                        <Checkbox on:click={() => toggleSelect(admin)} checked={admin.selected}/>
                     </TableBodyCell>
                     <TableBodyCell>
                         {admin.name}
-                        <EditIcon on:edit={() => showNameChangeModal(admin)} />
+                        <EditIcon on:edit={() => showNameChangeModal(admin)}/>
                     </TableBodyCell>
                     <TableBodyCell>
-                        {admin.email}
+                        <span style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                            {admin.email}
+                            <InfoCircleOutline id="email{admin.googleID}" />
+                        </span>
+                        <Tooltip triggeredBy="#email{admin.googleID}">Emails cannot be changed. Instead, use a different Google account and add permissions to the new account.</Tooltip>
                     </TableBodyCell>
+                    
                     <TableBodyCell>
                         {admin.googleID}
                     </TableBodyCell>
                     <TableBodyCell>
                         {admin.isOP}
-                        <EditIcon on:edit={() => showAdminPermissionsModal(admin)} />
-                    </TableBodyCell>
-                    <TableBodyCell>
-                        <a href="/tables" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Edit</a>
+                        <EditIcon on:edit={() => showAdminPermissionsModal(admin)}/>
                     </TableBodyCell>
                 </TableBodyRow>
             {/each}
         </TableBody>
     </Table>
-    <!-- ! FOR TESTING, REMOVE LATER -->
-    {#each selectedAdmins as op}{op.name}.{/each}
+
+    <br>
 
     <!-- TODO: ADD OPTION TO DELETE SELECTED USERS -->
-    <div>
-        <button on:click={deleteSelectedUsers} class="bg-red-200 hover:bg-red-300 text-black">Delete selected users</button>
-    </div>
-    
+    {#if selectedAdmins.length > 0}
+        <div>
+            <Button color="red" on:click={showAdminDeletionModal} class="bg-red-200 hover:bg-red-300 text-black">Delete selected users</Button>
+        </div>
+    {/if}
 </div>
