@@ -319,6 +319,7 @@
         <p class="text-3xl">STS Status: {STSstatus}</p> <br>
 
         <!-- Testing Purposes -->
+         <!--
         <br><br><br>
         <p>Testing Output</p>
         <p>HEARING DATA SUCCESS RESULT: {test}</p> <br>
@@ -326,6 +327,7 @@
         <p>HEARING DATA TEST NEW L: {LeftNewHearingData}</p> <br>
         <p>HEARING DATA TEST BL R: {RightBaselineHearingData}</p> <br>
         <p>HEARING DATA TEST BL L: {LeftBaselineHearingData}</p> <br>
+        -->
     </section>
 
     <!-- Chart Section -->
