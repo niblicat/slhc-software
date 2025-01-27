@@ -3,23 +3,23 @@
     import { Button } from 'flowbite-svelte';
 
     import CustomAvatar from './CustomAvatar.svelte';
-	import { createEventDispatcher } from 'svelte';
-	import type { UserSimple } from './MyTypes';
-
-    const dispatch = createEventDispatcher();
-
-    function sidebarToggleDispatch() {
-        dispatch('toggle');
-    }
+    import type { UserSimple } from './MyTypes';
 
     interface Props {
         hasSidebar: any;
         sidebarOpen: any;
         user: UserSimple;
+        toggle: any;
     }
 
-    let { hasSidebar, sidebarOpen, user }: Props = $props();
+    let { hasSidebar, sidebarOpen, user, toggle }: Props = $props();
+
+    function sidebarToggleDispatch() {
+        toggle();
+    }
+
 </script>
+
 {#if hasSidebar}
     <Button class="fixed top-2.5 left-2.5 z-50 w-8 h-10 bg-light-blue" on:click={sidebarToggleDispatch}>
         {#if sidebarOpen}
@@ -35,9 +35,8 @@
         {/if}
     </Button>
 {/if}
-<!-- Navbar -->
-<Navbar color="form" class="fixed bg-light-bluegreen flex justify-between items-center h-16 z-10">
 
+<Navbar color="form" class="fixed bg-light-bluegreen flex justify-between items-center h-16 z-30">
     <NavBrand href="/dashboard" class="flex-grow text-center">
         <span class="relative flex-1 text-3xl font-bold dark:text-white">SIUE SLHC Employee Hearing Panel</span>
     </NavBrand>

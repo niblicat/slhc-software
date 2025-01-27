@@ -48,6 +48,7 @@
 		"cookie": "^0.6.0",
 		"google-auth-library": "^8.8.0",
 		"matplotlib": "^1.0.0",
+		"svelte-outside": "^0.0.3",
 		"tailwind-merge": "^2.5.4",
 		"uuid": "^10.0.0"
 	}
