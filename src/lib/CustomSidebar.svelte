@@ -21,7 +21,7 @@
 <!-- Sidebar -->
 {#key sidebarOpen}
     <div out:slide={{ axis: 'x', easing: backIn }} in:slide={{ axis: 'x' }} 
-    class="absolute pointer-events-none left-0 w-80 h-screen z-25">
+    class="absolute pointer-events-none left-0 w-80 h-screen z-10">
         {#if sidebarOpen}
             <Sidebar {activeUrl} {activeClass} {nonActiveClass} class="pointer-events-auto h-full">
                 <!-- Content wrapper inside the sidebar with padding to push content down -->
