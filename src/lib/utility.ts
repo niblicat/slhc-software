@@ -143,7 +143,7 @@ export async function getAdminsFromDatabase(): Promise<Admin[]> {
     const admins: Admin[] = adminTable.rows.map(row => ({
         name: row.name,
         email: row.userstring,
-        googleID: row.id,
+        id: row.id,
         isOP: row.isop,
         selected: false
     }));

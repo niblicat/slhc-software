@@ -24,7 +24,7 @@
             .map((row: Admin) => ({
                 name: row.name || "Null",
                 email: row.email,
-                googleID: row.googleID,
+                id: row.id,
                 isOP: row.isOP,
                 selected: false,
             }))
@@ -37,15 +37,13 @@
     let selectedAdmin: Admin = $state({
         name: "null",
         email: "null",
-        googleID: "-1",
+        id: "-1",
         isOP: false
     });
 
     $effect(() => {
         selectedAdmins = adminsMap.filter((e) => e.selected == true);
     });
-
-    // TODO: add indicator showing that people cannot change their email after it has been set. They must switch to a different Google account
 
     let success = $state(true);
     let errorMessage = $state("");
@@ -58,7 +56,7 @@
 
     async function modifyAdminPermissions(admin: Admin): Promise<void> {
         const formData = new FormData();
-        formData.append('adminID', admin.googleID);
+        formData.append('adminID', admin.id);
         formData.append('isOp', (!admin.isOP).toString());
 
         const response = await fetch('/dashboard?/modifyAdminPermissions', {
@@ -89,7 +87,7 @@
 
     async function modifyAdminName(admin: Admin): Promise<void> {
         const formData = new FormData();
-        formData.append('adminID', admin.googleID);
+        formData.append('adminID', admin.id);
         formData.append('newName', newName);
 
         const response = await fetch('/dashboard?/modifyAdminName', {
@@ -125,7 +123,7 @@
         }
 
         // Get google IDs of admins to delete
-        const adminIDsToDelete = selectedAdmins.map(admin => admin.googleID);
+        const adminIDsToDelete = selectedAdmins.map(admin => admin.id);
 
         // Prepare the request payload
         const formData = new FormData();
@@ -175,7 +173,7 @@
 
     function toggleSelect(admin: AdminSelectable) { 
         adminsMap = adminsMap.map((item) =>
-            item.googleID === admin.googleID
+            item.id === admin.id
                 ? { ...item, selected: !item.selected }
                 : item
         );
@@ -263,13 +261,13 @@
             <TableHeadCell class="!p-4">
               <Checkbox on:click={() => massSelect()} checked={!doSelectAll}/>
             </TableHeadCell>
-            <TableHeadCell >Name</TableHeadCell>
+            <TableHeadCell>Name</TableHeadCell>
             <TableHeadCell>Email</TableHeadCell>
-            <TableHeadCell>Google ID</TableHeadCell>
+            <TableHeadCell>ID</TableHeadCell>
             <TableHeadCell>Is Admin</TableHeadCell>
         </TableHead>
         <TableBody tableBodyClass="divide-y">
-            {#each adminsMap as admin (admin.googleID)}
+            {#each adminsMap as admin (admin.id)}
                 <TableBodyRow>
                     <TableBodyCell class="!p-4">
                         <Checkbox on:click={() => toggleSelect(admin)} checked={admin.selected}/>
@@ -281,13 +279,13 @@
                     <TableBodyCell>
                         <span style="display: inline-flex; align-items: center; gap: 0.5rem;">
                             {admin.email}
-                            <InfoCircleOutline id="email{admin.googleID}" />
+                            <InfoCircleOutline id="email{admin.id}" />
                         </span>
-                        <Tooltip triggeredBy="#email{admin.googleID}">Emails cannot be changed. Instead, use a different Google account and add permissions to the new account.</Tooltip>
+                        <Tooltip triggeredBy="#email{admin.id}">Emails cannot be changed. Instead, use a different Google account and add permissions to the new account.</Tooltip>
                     </TableBodyCell>
                     
                     <TableBodyCell>
-                        {admin.googleID}
+                        {admin.id}
                     </TableBodyCell>
                     <TableBodyCell>
                         {admin.isOP}

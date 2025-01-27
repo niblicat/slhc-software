@@ -13,7 +13,7 @@
 
 
 <Avatar id="avatar-menu" class="cursor-pointer shadow-sm shadow-black"
-    src={user.avatar.replace(/=.*/, '')} size="md" />
+    src={user.avatar.replace(/=(.*)/, '')} size="md" />
 <Dropdown placement="bottom" triggeredBy="#avatar-menu">
     <DropdownHeader>
         <span class="block text-sm">{user.name}</span>
