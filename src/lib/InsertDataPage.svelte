@@ -20,7 +20,8 @@
         firstName: "Undefined",
         lastName: "Undefined",
         email: "Undefined",
-        dob: "Undefined"
+        dob: "Undefined",
+        activeStatus: "Undefined"
     };
 
     // used to make it easier to access employees from their full name

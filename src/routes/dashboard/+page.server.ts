@@ -511,4 +511,105 @@ export const actions: Actions = {
             success: true,
         });
     },
+    modifyHearingData: async ({ request }) => {
+        const formData = await request.formData();
+        const user = formData.get('user') as string;
+        const year = parseInt(formData.get('year') as string, 10);
+        const leftEarFrequencies = JSON.parse(formData.get('leftEarFrequencies') as string);
+        const rightEarFrequencies = JSON.parse(formData.get('rightEarFrequencies') as string);
+    
+        const validateFrequencies = (frequencies: Record<string, string | number>) =>
+            Object.values(frequencies).every(value => !isNaN(parseInt(value as string, 10)));
+    
+        if (!validateFrequencies(leftEarFrequencies) || !validateFrequencies(rightEarFrequencies)) {
+            throw new Error('Invalid frequency data');
+        }
+    
+        try {
+            // Fetch employee_id for the selected user
+            const userIdQuery = await sql`SELECT employee_id FROM Employee WHERE CONCAT(first_name, ' ', last_name) = ${user};`;
+            if (userIdQuery.rows.length === 0) {
+                throw new Error("User not found");
+            }
+    
+            const employeeId = userIdQuery.rows[0].employee_id;
+    
+            // Check if hearing data exists for this employee, year, and ear
+            const existingLeftData = await sql`
+                SELECT d.data_id FROM Data d
+                JOIN Has h ON d.data_id = h.data_id
+                WHERE h.employee_id = ${employeeId} AND h.year = ${year} AND h.ear = 'left';
+            `;
+    
+            const existingRightData = await sql`
+                SELECT d.data_id FROM Data d
+                JOIN Has h ON d.data_id = h.data_id
+                WHERE h.employee_id = ${employeeId} AND h.year = ${year} AND h.ear = 'right';
+            `;
+    
+            if (existingLeftData.rows.length > 0) {
+                // Update left ear data
+                const leftDataId = existingLeftData.rows[0].data_id;
+                await sql`
+                    UPDATE Data
+                    SET Hz_500 = ${leftEarFrequencies.hz500}, Hz_1000 = ${leftEarFrequencies.hz1000}, 
+                        Hz_2000 = ${leftEarFrequencies.hz2000}, Hz_3000 = ${leftEarFrequencies.hz3000}, 
+                        Hz_4000 = ${leftEarFrequencies.hz4000}, Hz_6000 = ${leftEarFrequencies.hz6000}, 
+                        Hz_8000 = ${leftEarFrequencies.hz8000}
+                    WHERE data_id = ${leftDataId};
+                `;
+            } else {
+                // Insert new left ear data
+                const leftEarDataResult = await sql`
+                    INSERT INTO Data (Hz_500, Hz_1000, Hz_2000, Hz_3000, Hz_4000, Hz_6000, Hz_8000)
+                    VALUES (${leftEarFrequencies.hz500}, ${leftEarFrequencies.hz1000}, ${leftEarFrequencies.hz2000}, 
+                            ${leftEarFrequencies.hz3000}, ${leftEarFrequencies.hz4000}, ${leftEarFrequencies.hz6000}, ${leftEarFrequencies.hz8000})
+                    RETURNING data_id;
+                `;
+                const leftEarDataId = leftEarDataResult.rows[0].data_id;
+    
+                // Insert into Has table
+                await sql`
+                    INSERT INTO Has (employee_id, data_id, year, ear)
+                    VALUES (${employeeId}, ${leftEarDataId}, ${year}, 'left');
+                `;
+            }
+    
+            if (existingRightData.rows.length > 0) {
+                // Update right ear data
+                const rightDataId = existingRightData.rows[0].data_id;
+                await sql`
+                    UPDATE Data
+                    SET Hz_500 = ${rightEarFrequencies.hz500}, Hz_1000 = ${rightEarFrequencies.hz1000}, 
+                        Hz_2000 = ${rightEarFrequencies.hz2000}, Hz_3000 = ${rightEarFrequencies.hz3000}, 
+                        Hz_4000 = ${rightEarFrequencies.hz4000}, Hz_6000 = ${rightEarFrequencies.hz6000}, 
+                        Hz_8000 = ${rightEarFrequencies.hz8000}
+                    WHERE data_id = ${rightDataId};
+                `;
+            } else {
+                // Insert new right ear data
+                const rightEarDataResult = await sql`
+                    INSERT INTO Data (Hz_500, Hz_1000, Hz_2000, Hz_3000, Hz_4000, Hz_6000, Hz_8000)
+                    VALUES (${rightEarFrequencies.hz500}, ${rightEarFrequencies.hz1000}, ${rightEarFrequencies.hz2000}, 
+                            ${rightEarFrequencies.hz3000}, ${rightEarFrequencies.hz4000}, ${rightEarFrequencies.hz6000}, ${rightEarFrequencies.hz8000})
+                    RETURNING data_id;
+                `;
+                const rightEarDataId = rightEarDataResult.rows[0].data_id;
+    
+                // Insert into Has table
+                await sql`
+                    INSERT INTO Has (employee_id, data_id, year, ear)
+                    VALUES (${employeeId}, ${rightEarDataId}, ${year}, 'right');
+                `;
+            }
+    
+        } catch (error: any) {
+            console.log("Error modifying employee's hearing data:", error.message);
+            return { success: false, message: "Failed to modify employee's hearing data due to error" };
+        }
+    
+        return JSON.stringify({
+            success: true,
+        });
+    },    
 };
