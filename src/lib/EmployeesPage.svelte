@@ -1,10 +1,11 @@
 <script lang="ts">
 
-    import { ButtonGroup, Button, Search } from 'flowbite-svelte';
+    import { ButtonGroup, Button, Search, Modal, Label, Input, Radio } from 'flowbite-svelte';
     import { ChevronDownOutline, UserRemoveSolid } from 'flowbite-svelte-icons';
     import { Dropdown } from 'flowbite-svelte';
     import ScatterPlot from './ScatterPlot.svelte';
     import { Footer } from 'flowbite-svelte';
+    import EditIcon from './EditIcon.svelte';
     import { sql } from '@vercel/postgres';
     import { onMount } from 'svelte';
 
@@ -63,7 +64,8 @@
         firstName: "Undefined",
         lastName: "Undefined",
         email: "Undefined",
-        dob: "Undefined"
+        dob: "Undefined",
+        activeStatus: "Undefined"
     };
 
     // used to make it easier to access employees from their full name
@@ -81,7 +83,7 @@
     })) as Array<EmployeeSearchable>);
 
     let selectedEmployee: EmployeeSearchable = $state({
-        name: "Select an employee", 
+        name: "No employee selected", 
         data: undefinedEmployee
     });
 
@@ -129,31 +131,11 @@
             if (dataResult["success"]) {
                 success = true;
                 selectedEmail = dataResult.employee.email;
+                selectedStatus = dataResult.employee.employmentStatus;
                 selectedDOB = dataResult.employee.dob
                     ? new Date(dataResult.employee.dob).toISOString().split('T')[0]
                     : "No selection made";
-                selectedStatus = dataResult.employee.employmentStatus;
-
-                if (selectedDOB !== "No selection made") {
-                    const today = new Date();
-                    const dob = new Date(selectedDOB);
-
-                    // Calculate the difference in years
-                    let age = today.getFullYear() - dob.getFullYear();
-
-                    // Check if the current month and day have passed the birth month and day
-                    if (
-                        today.getMonth() < dob.getMonth() || 
-                        (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate())
-                    ) {
-                        age--; // Decrease the age by 1 if the birthday hasn't occurred yet this year
-                    }
-
-                    selectAge = age.toString();
-                } 
-                else {
-                    selectAge = "No selection made";
-                }
+                selectAge = calculateAge(selectedDOB);
             }
             else {
                 selectedEmail = "Error fetching data: not a data success";
@@ -192,6 +174,27 @@
             yearItems = [];
             displayError('Error fetching data');
         }
+    };
+
+    const calculateAge = (dobString: string | null): string => {
+        if (!dobString) return "No selection made";
+
+        const today = new Date();
+        const dob = new Date(dobString);
+
+        if (isNaN(dob.getTime())) return "Invalid Date";
+
+        let age = today.getFullYear() - dob.getFullYear();
+
+        // Check if the birthday has occurred this year
+        if (
+            today.getMonth() < dob.getMonth() || 
+            (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate())
+        ) {
+            age--;
+        }
+
+        return age.toString();
     };
 
     let filteredYears = $derived.by(() => {
@@ -267,10 +270,177 @@
         return Object.values(frequencies) as number[];  // Return all frequency values as an array of numbers
     };
 
+    //DATA CHANGE STUFF
+    let nameModal = $state(false); // controls the appearance of the employee name change window
+    let emailModal = $state(false);
+    let DOBmodal = $state(false);
+    let activeStatusModal = $state(false);
 
-    // TODO: get these from google auth
-    let name = "example name";
-    let email = "example email";
+    let newFirstName = $state("");
+    let newLastName = $state("");
+    let newEmail = $state("");
+    let newDOB = $state("");
+    let newActiveStatus = $state("");
+    let isInactive = $state(false);
+
+    function showNameChangeModal(employee: Employee) {
+        newFirstName = employee.firstName;
+        newLastName = employee.lastName;
+        nameModal = true;
+    }
+    function showEmailChangeModal(employee: Employee) {
+        // newFirstName = employee.firstName;
+        // newLastName = employee.lastName;
+        newEmail = employee.email;
+        emailModal = true;
+    }
+    function showDOBChangeModal(employee: Employee) {
+        // newFirstName = employee.firstName;
+        // newLastName = employee.lastName;
+        newDOB = employee.dob
+        selectedDOB = newDOB
+                    ? new Date(newDOB).toISOString().split('T')[0]
+                    : "No selection made";
+        DOBmodal = true;
+    }
+    function showActiveStatusChangeModal(employee: Employee) {
+        // newFirstName = employee.firstName;
+        // newLastName = employee.lastName;
+        // newActiveStatus = selectedStatus;
+        activeStatusModal = true;
+    }
+
+    async function modifyEmployeeName(employee: EmployeeSearchable): Promise<void> {
+        const formData = new FormData();
+        formData.append('employee', selectedEmployee.name);
+        formData.append('newFirstName', newFirstName);
+        formData.append('newLastName', newLastName);
+
+        const response = await fetch('/dashboard?/modifyEmployeeName', {
+            method: 'POST',
+            body: formData,
+        });
+
+        try {
+            const serverResponse = await response.json();
+            console.log(response);
+
+            const result = JSON.parse(JSON.parse(serverResponse.data)[0]);
+    
+            if (result["success"]) {
+                success = true;
+                selectedEmployee.name = `${newFirstName} ${newLastName}`;
+                selectedEmployee.data.firstName = newFirstName;
+                selectedEmployee.data.lastName = newLastName;
+            }
+            else {
+                displayError(result["message"]);
+            }
+        }
+        catch (error: any) {
+            let errorMessage = error.message;
+            displayError(errorMessage);
+        }
+    }
+    async function modifyEmployeeEmail(employee: EmployeeSearchable): Promise<void> {
+        const formData = new FormData();
+        formData.append('employee', selectedEmployee.name);
+        formData.append('newEmail', newEmail);
+
+        const response = await fetch('/dashboard?/modifyEmployeeEmail', {
+            method: 'POST',
+            body: formData,
+        });
+
+        try {
+            const serverResponse = await response.json();
+            console.log(response);
+
+            const result = JSON.parse(JSON.parse(serverResponse.data)[0]);
+    
+            if (result["success"]) {
+                success = true;
+                selectedEmployee.data.email = newEmail;
+                selectedEmail = selectedEmployee.data.email;
+            }
+            else {
+                displayError(result["message"]);
+            }
+        }
+        catch (error: any) {
+            let errorMessage = error.message;
+            displayError(errorMessage);
+        }
+    }
+    async function modifyEmployeeDOB(employee: EmployeeSearchable): Promise<void> {
+        const formData = new FormData();
+        formData.append('employee', selectedEmployee.name);
+        formData.append('newDOB', newDOB);
+
+        const response = await fetch('/dashboard?/modifyEmployeeDOB', {
+            method: 'POST',
+            body: formData,
+        });
+
+        try {
+            const serverResponse = await response.json();
+            console.log(response);
+
+            const result = JSON.parse(JSON.parse(serverResponse.data)[0]);
+    
+            if (result["success"]) {
+                success = true;
+                selectedEmployee.data.dob = newDOB;
+                selectedDOB = selectedEmployee.data.dob
+                    ? new Date(selectedEmployee.data.dob).toISOString().split('T')[0]
+                    : "No selection made";
+                selectAge = calculateAge(selectedDOB);
+            }
+            else {
+                displayError(result["message"]);
+            }
+        }
+        catch (error: any) {
+            let errorMessage = error.message;
+            displayError(errorMessage);
+        }
+    }
+    async function modifyEmploymentStatus(employee: EmployeeSearchable): Promise<void> {
+        const formData = new FormData();
+        formData.append('employee', selectedEmployee.name);
+
+        // Ensure the form key matches what backend expects
+        formData.append('newActiveStatus', newActiveStatus === "Active" ? "" : newActiveStatus);
+
+        const response = await fetch('/dashboard?/modifyEmployeeStatus', {
+            method: 'POST',
+            body: formData,
+        });
+
+        try {
+            const serverResponse = await response.json();
+            console.log(response);
+
+            const result = JSON.parse(JSON.parse(serverResponse.data)[0]);
+    
+            if (result["success"]) {
+                success = true;
+                selectedEmployee.data.activeStatus = newActiveStatus;
+                if (newActiveStatus === "") {  
+                    selectedStatus = "Active";
+                } else {  
+                    selectedStatus = "Inactive";
+                }
+            }
+            else {
+                displayError(result["message"]);
+            }
+        }
+        catch (error: any) {
+            let errorMessage = error.message;
+            displayError(errorMessage);
+        }
+    }
 </script>
 
 <div class="relative dropdown-container flex space-x-4 justify-center" style="margin-top: 20px;"> 
@@ -306,16 +476,99 @@
 </div>
 
 <!---------------------- DISPLAY INFO ---------------------->
+
+<!-- MODALS -->
+<Modal title="Change Employee Name" bind:open={nameModal} autoclose>
+    <p>
+        <span>Please provide an updated name for {selectedEmployee.data.firstName} {selectedEmployee.data.lastName}</span>
+        <br>
+        <br>
+        <Label for="first" class="mb-2">First name</Label>
+        <Input type="text" id="firstName" placeholder={selectedEmployee.data.firstName} bind:value={newFirstName} required />
+        <Label for="last" class="mb-2">Last name</Label>
+        <Input type="text" id="lastName" placeholder={selectedEmployee.data.lastName} bind:value={newLastName} required />
+    
+    </p>
+    
+    <!-- TODO: CHANGE THESE COLORS -->
+    <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => modifyEmployeeName(selectedEmployee)}>Confirm</Button>
+    <Button class="bg-red-200 hover:bg-red-300 text-black">Cancel</Button>
+</Modal>
+
+<Modal title="Change Employee Email" bind:open={emailModal} autoclose>
+    <p>
+        <span>Please provide an updated email for {selectedEmployee.data.firstName} {selectedEmployee.data.lastName} ({selectedEmployee.data.email})</span>
+        <br>
+        <br>
+        <Label for="newEmail" class="mb-2">New Email</Label>
+        <Input type="text" id="email" placeholder={selectedEmployee.data.email} bind:value={newEmail} required />
+    </p>
+    
+    <!-- TODO: CHANGE THESE COLORS -->
+    <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => modifyEmployeeEmail(selectedEmployee)}>Confirm</Button>
+    <Button class="bg-red-200 hover:bg-red-300 text-black">Cancel</Button>
+</Modal>
+
+<Modal title="Change Employee Date of Birth" bind:open={DOBmodal} autoclose>
+    <p>
+        <span>Please provide an updated DOB for {selectedEmployee.data.firstName} {selectedEmployee.data.lastName}</span>
+        <br>
+        <br>
+        <Label for="newEmail" class="mb-2">New Date</Label>
+        <Input type="date" id="dob" placeholder={selectedEmployee.data.dob} bind:value={newDOB} required />
+    </p>
+    
+    <!-- TODO: CHANGE THESE COLORS -->
+    <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => modifyEmployeeDOB(selectedEmployee)}>Confirm</Button>
+    <Button class="bg-red-200 hover:bg-red-300 text-black">Cancel</Button>
+</Modal>
+
+<Modal title="Change Employee Active Status" bind:open={activeStatusModal} autoclose>
+    <p>
+        <span>Please provide an updated Employment status for {selectedEmployee.data.firstName} {selectedEmployee.data.lastName}</span>
+        <br>
+        <br>
+        <Label for="newActiveStatus" class="mb-2">New Employment Status</Label>
+        <Radio name="employmentStatus" bind:checked={isInactive} on:change={() => isInactive = false}>Active</Radio>
+        <Radio name="employmentStatus" bind:checked={isInactive} on:change={() => isInactive = true}>Inactive</Radio>
+
+        {#if isInactive}
+            <Label for="lastActive" class="block mb-2">Last Active Date</Label>
+            <Input id="lastActive" type="date" bind:value={newActiveStatus} />
+        {/if}
+    </p>
+    
+    <!-- TODO: CHANGE THESE COLORS -->
+    <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => modifyEmploymentStatus(selectedEmployee)}>Confirm</Button>
+    <Button class="bg-red-200 hover:bg-red-300 text-black">Cancel</Button>
+</Modal>
+
 <div class="flex-container">
     <!-- Information Section -->
     <section class="selected-info text-xl">
         <br>
         <p>Year: {selectedYear}</p> <br>
-        <p>Employee: {selectedEmployee.name}</p> <br>
-        <p>Email: {selectedEmail}</p> <br>
-        <p>Date of Birth: {selectedDOB}</p> <br>
+        <p>Employee: {selectedEmployee.name}
+            {#if selectedEmployee.data.employeeID !== "-1"} 
+                <EditIcon on:edit={() => showNameChangeModal(selectedEmployee.data)}/>
+            {/if} 
+        </p> <br>
+        <p>Email: {selectedEmail}
+            {#if selectedEmployee.data.email !== "Undefined"} 
+                <EditIcon on:edit={() => showEmailChangeModal(selectedEmployee.data)}/> 
+            {/if} 
+        </p> <br>
+        <p>Date of Birth: {selectedDOB}
+            {#if selectedEmployee.data.dob !== "Undefined"} 
+                <EditIcon on:edit={() => showDOBChangeModal(selectedEmployee.data)}/> 
+            {/if} 
+        </p> <br>
         <p>Age: {selectAge}</p> <br>
-        <p>Employment Status: {selectedStatus}</p> <br>
+        <p>Employment Status: {selectedStatus} <!-- inactive to active is not working -->
+            {#if selectedEmployee.data.employeeID !== "-1"} 
+                <EditIcon on:edit={() => showActiveStatusChangeModal(selectedEmployee.data)}/>
+            {/if} 
+        </p> <br>
         <p class="text-3xl">STS Status: {STSstatus}</p> <br>
 
         <!-- Testing Purposes -->

@@ -369,5 +369,146 @@ export const actions: Actions = {
             console.log(error.message);
             return { success: false, message: 'Failed to fetch employee hearing data' };
         }
-    }
+    },
+
+    modifyEmployeeName: async ({request}) => {
+        const formData = await request.formData();
+        const employeeID = formData.get('employee') as string;
+        const newFirstName = formData.get('newFirstName') as string;
+        const newLastName = formData.get('newLastName') as string;
+    
+        // Fetch employee_id for the selected user
+        const employeeIdQuery = await sql`SELECT employee_id FROM Employee WHERE CONCAT(first_name, ' ', last_name) = ${employeeID};`;
+        if (employeeIdQuery.rows.length === 0) {
+            throw new Error("User not found");
+        }
+    
+        const employeeId = employeeIdQuery.rows[0].employee_id;
+
+        console.log(`Employee NAME: ${employeeID}, EmployeeID: ${employeeId}, First: ${newFirstName}, Last: ${newLastName}`);
+
+        try {
+            const resultFirst = await sql`UPDATE Employee SET first_name = ${newFirstName} WHERE employee_id=${employeeId};`
+            const resultLast = await sql`UPDATE Employee SET last_name = ${newLastName} WHERE employee_id=${employeeId};`
+            
+            if (resultFirst.rowCount === 0) {
+                return { success: false, message: 'First name was not updated. Employee ID might be incorrect.' };
+            }
+            if (resultLast.rowCount === 0) {
+                return { success: false, message: 'Last name was not updated. Employee ID might be incorrect.' };
+            }
+
+        } catch (error: any) {
+            console.log(error.message);
+            console.log('Failed to update employee name');
+            return { success: false, message: 'Failed to update employee name' };
+        }
+
+        return JSON.stringify({
+            success: true,
+        });
+    },
+    modifyEmployeeEmail: async ({request}) => {
+        const formData = await request.formData();
+        const employeeID = formData.get('employee') as string;
+        const newEmail = formData.get('newEmail') as string;
+    
+        // Fetch employee_id for the selected user
+        const employeeIdQuery = await sql`SELECT employee_id FROM Employee WHERE CONCAT(first_name, ' ', last_name) = ${employeeID};`;
+        if (employeeIdQuery.rows.length === 0) {
+            throw new Error("User not found");
+        }
+    
+        const employeeId = employeeIdQuery.rows[0].employee_id;
+
+        console.log(`Employee NAME: ${employeeID}, EmployeeID: ${employeeId}, email: ${newEmail}`);
+
+        try {
+            const result = await sql`UPDATE Employee SET email = ${newEmail} WHERE employee_id=${employeeId};`
+            
+            if (result.rowCount === 0) {
+                return { success: false, message: 'Email was not updated. Employee ID might be incorrect.' };
+            }
+        } catch (error: any) {
+            console.log(error.message);
+            console.log('Failed to update employee email');
+            return { success: false, message: 'Failed to update employee email' };
+        }
+
+        return JSON.stringify({
+            success: true,
+        });
+    },
+    modifyEmployeeDOB: async ({request}) => {
+        const formData = await request.formData();
+        const employeeID = formData.get('employee') as string;
+        const newDOB = formData.get('newDOB') as string;
+    
+        // Fetch employee_id for the selected user
+        const employeeIdQuery = await sql`SELECT employee_id FROM Employee WHERE CONCAT(first_name, ' ', last_name) = ${employeeID};`;
+        if (employeeIdQuery.rows.length === 0) {
+            throw new Error("User not found");
+        }
+    
+        const employeeId = employeeIdQuery.rows[0].employee_id;
+
+        console.log(`Employee NAME: ${employeeID}, EmployeeID: ${employeeId}, DOB: ${newDOB}`);
+
+        try {
+            const result = await sql`UPDATE Employee SET date_of_birth = ${newDOB} WHERE employee_id=${employeeId};`
+            
+            if (result.rowCount === 0) {
+                return { success: false, message: 'DOB was not updated. Employee ID might be incorrect.' };
+            }
+        } catch (error: any) {
+            console.log(error.message);
+            console.log('Failed to update employee DOB');
+            return { success: false, message: 'Failed to update employee DOB' };
+        }
+
+        return JSON.stringify({
+            success: true,
+        });
+    },
+    modifyEmployeeStatus: async ({request}) => {
+        const formData = await request.formData();
+        const employeeID = formData.get('employee') as string;
+        const newActiveStatus = formData.get('newActiveStatus') as string;
+    
+        // Fetch employee_id for the selected user
+        const employeeIdQuery = await sql`SELECT employee_id FROM Employee WHERE CONCAT(first_name, ' ', last_name) = ${employeeID};`;
+        if (employeeIdQuery.rows.length === 0) {
+            throw new Error("User not found");
+        }
+    
+        const employeeId = employeeIdQuery.rows[0].employee_id;
+
+        const lastActiveValue = newActiveStatus === "" ? null : newActiveStatus;
+        console.log(`Employee NAME: ${employeeID}, EmployeeID: ${employeeId}, status: ${lastActiveValue}`);
+
+        try {
+            if (lastActiveValue !== null) {
+                await sql`
+                    UPDATE Employee 
+                    SET last_active = ${lastActiveValue}
+                    WHERE employee_id = ${employeeId};
+                `;
+            } else {
+                await sql`
+                    UPDATE Employee 
+                    SET last_active = NULL
+                    WHERE employee_id = ${employeeId};
+                `;
+            }
+        } 
+        catch (error: any) {
+            console.log(error.message);
+            console.log('Failed to update employment status');
+            return { success: false, message: 'Failed to update employment status' };
+        }
+
+        return JSON.stringify({
+            success: true,
+        });
+    },
 };
