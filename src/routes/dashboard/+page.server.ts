@@ -134,11 +134,11 @@ export const actions: Actions = {
         const user = formData.get('user') as string;
         const year = parseInt(formData.get('year') as string, 10);
         const leftEarFrequencies = JSON.parse(formData.get('leftEarFrequencies') as string);
-        const rightEarFrequencies = JSON.parse(formData.get('rightEarFrequencies') as string);
+        const rightEarFrequencies = JSON.parse(formData.get('rightEarFrequencies') as string);       
 
         const validateFrequencies = (frequencies: Record<string, string | number>) =>
-            Object.values(frequencies).every(value => !isNaN(parseInt(value as string, 10)));
-    
+            Object.values(frequencies).every(value => value === null || value === "CNT" || !isNaN(parseInt(value as string, 10)));
+        
         if (!validateFrequencies(leftEarFrequencies) || !validateFrequencies(rightEarFrequencies)) {
             throw new Error('Invalid frequency data');
         }
@@ -152,11 +152,28 @@ export const actions: Actions = {
 
             const employeeId = userIdQuery.rows[0].employee_id;
 
+            const transformFrequencies = (frequencies: Record<string, string | number>) => {
+                return Object.fromEntries(
+                    Object.entries(frequencies).map(([key, value]) => [
+                        key,
+                        value === "CNT" || value === null ? null : parseInt(value as string, 10),
+                    ])
+                );
+            };            
+
+            const leftEarFrequenciesTransformed = transformFrequencies(leftEarFrequencies);
+            const rightEarFrequenciesTransformed = transformFrequencies(rightEarFrequencies);  
+            
+            console.log("Left Ear Transformed:", leftEarFrequenciesTransformed);
+            console.log("Right Ear Transformed:", rightEarFrequenciesTransformed);
+
             // Insert left ear data into Data table
             const leftEarDataResult = await sql`
                 INSERT INTO Data (Hz_500, Hz_1000, Hz_2000, Hz_3000, Hz_4000, Hz_6000, Hz_8000)
-                VALUES (${leftEarFrequencies.hz500}, ${leftEarFrequencies.hz1000}, ${leftEarFrequencies.hz2000}, 
-                        ${leftEarFrequencies.hz3000}, ${leftEarFrequencies.hz4000}, ${leftEarFrequencies.hz6000}, ${leftEarFrequencies.hz8000})
+                VALUES (${leftEarFrequenciesTransformed.hz500}, ${leftEarFrequenciesTransformed.hz1000}, 
+                        ${leftEarFrequenciesTransformed.hz2000}, ${leftEarFrequenciesTransformed.hz3000}, 
+                        ${leftEarFrequenciesTransformed.hz4000}, ${leftEarFrequenciesTransformed.hz6000}, 
+                        ${leftEarFrequenciesTransformed.hz8000})
                 RETURNING data_id;
             `;
 
@@ -166,14 +183,16 @@ export const actions: Actions = {
             // Insert right ear data into Data table
             const rightEarDataResult = await sql`
                 INSERT INTO Data (Hz_500, Hz_1000, Hz_2000, Hz_3000, Hz_4000, Hz_6000, Hz_8000)
-                VALUES (${rightEarFrequencies.hz500}, ${rightEarFrequencies.hz1000}, ${rightEarFrequencies.hz2000}, 
-                        ${rightEarFrequencies.hz3000}, ${rightEarFrequencies.hz4000}, ${rightEarFrequencies.hz6000}, ${rightEarFrequencies.hz8000})
+                VALUES (${rightEarFrequenciesTransformed.hz500}, ${rightEarFrequenciesTransformed.hz1000}, 
+                        ${rightEarFrequenciesTransformed.hz2000}, ${rightEarFrequenciesTransformed.hz3000}, 
+                        ${rightEarFrequenciesTransformed.hz4000}, ${rightEarFrequenciesTransformed.hz6000}, 
+                        ${rightEarFrequenciesTransformed.hz8000})
                 RETURNING data_id;
             `;
 
             const rightEarDataId = rightEarDataResult.rows[0].data_id;
 
-            console.log(`Inserting into Has for Employee ID: ${employeeId}, Year: ${year}, Left Ear Data ID: ${leftEarDataId}, Right Ear Data ID: ${rightEarDataId}`);
+            //console.log(`Inserting into Has for Employee ID: ${employeeId}, Year: ${year}, Left Ear Data ID: ${leftEarDataId}, Right Ear Data ID: ${rightEarDataId}`);
 
             // Insert into Has table for right ear
             await sql`
@@ -519,8 +538,8 @@ export const actions: Actions = {
         const rightEarFrequencies = JSON.parse(formData.get('rightEarFrequencies') as string);
     
         const validateFrequencies = (frequencies: Record<string, string | number>) =>
-            Object.values(frequencies).every(value => !isNaN(parseInt(value as string, 10)));
-    
+            Object.values(frequencies).every(value => value === null || value === "CNT" || !isNaN(parseInt(value as string, 10)));
+        
         if (!validateFrequencies(leftEarFrequencies) || !validateFrequencies(rightEarFrequencies)) {
             throw new Error('Invalid frequency data');
         }
@@ -546,24 +565,36 @@ export const actions: Actions = {
                 JOIN Has h ON d.data_id = h.data_id
                 WHERE h.employee_id = ${employeeId} AND h.year = ${year} AND h.ear = 'right';
             `;
+
+            const transformFrequencies = (frequencies: Record<string, string | number>) => {
+                return Object.fromEntries(
+                    Object.entries(frequencies).map(([key, value]) => [
+                        key,
+                        value === "CNT" || value === null ? null : parseInt(value as string, 10),
+                    ])
+                );
+            };            
+    
+            const leftEarFrequenciesTransformed = transformFrequencies(leftEarFrequencies);
+            const rightEarFrequenciesTransformed = transformFrequencies(rightEarFrequencies);      
     
             if (existingLeftData.rows.length > 0) {
                 // Update left ear data
                 const leftDataId = existingLeftData.rows[0].data_id;
                 await sql`
                     UPDATE Data
-                    SET Hz_500 = ${leftEarFrequencies.hz500}, Hz_1000 = ${leftEarFrequencies.hz1000}, 
-                        Hz_2000 = ${leftEarFrequencies.hz2000}, Hz_3000 = ${leftEarFrequencies.hz3000}, 
-                        Hz_4000 = ${leftEarFrequencies.hz4000}, Hz_6000 = ${leftEarFrequencies.hz6000}, 
-                        Hz_8000 = ${leftEarFrequencies.hz8000}
+                    SET Hz_500 = ${leftEarFrequenciesTransformed.hz500}, Hz_1000 = ${leftEarFrequenciesTransformed.hz1000}, 
+                        Hz_2000 = ${leftEarFrequenciesTransformed.hz2000}, Hz_3000 = ${leftEarFrequenciesTransformed.hz3000}, 
+                        Hz_4000 = ${leftEarFrequenciesTransformed.hz4000}, Hz_6000 = ${leftEarFrequenciesTransformed.hz6000}, 
+                        Hz_8000 = ${leftEarFrequenciesTransformed.hz8000}
                     WHERE data_id = ${leftDataId};
                 `;
             } else {
                 // Insert new left ear data
                 const leftEarDataResult = await sql`
                     INSERT INTO Data (Hz_500, Hz_1000, Hz_2000, Hz_3000, Hz_4000, Hz_6000, Hz_8000)
-                    VALUES (${leftEarFrequencies.hz500}, ${leftEarFrequencies.hz1000}, ${leftEarFrequencies.hz2000}, 
-                            ${leftEarFrequencies.hz3000}, ${leftEarFrequencies.hz4000}, ${leftEarFrequencies.hz6000}, ${leftEarFrequencies.hz8000})
+                    VALUES (${leftEarFrequenciesTransformed.hz500}, ${leftEarFrequenciesTransformed.hz1000}, ${leftEarFrequenciesTransformed.hz2000}, 
+                            ${leftEarFrequenciesTransformed.hz3000}, ${leftEarFrequenciesTransformed.hz4000}, ${leftEarFrequenciesTransformed.hz6000}, ${leftEarFrequenciesTransformed.hz8000})
                     RETURNING data_id;
                 `;
                 const leftEarDataId = leftEarDataResult.rows[0].data_id;
@@ -580,18 +611,18 @@ export const actions: Actions = {
                 const rightDataId = existingRightData.rows[0].data_id;
                 await sql`
                     UPDATE Data
-                    SET Hz_500 = ${rightEarFrequencies.hz500}, Hz_1000 = ${rightEarFrequencies.hz1000}, 
-                        Hz_2000 = ${rightEarFrequencies.hz2000}, Hz_3000 = ${rightEarFrequencies.hz3000}, 
-                        Hz_4000 = ${rightEarFrequencies.hz4000}, Hz_6000 = ${rightEarFrequencies.hz6000}, 
-                        Hz_8000 = ${rightEarFrequencies.hz8000}
+                    SET Hz_500 = ${rightEarFrequenciesTransformed.hz500}, Hz_1000 = ${rightEarFrequenciesTransformed.hz1000}, 
+                        Hz_2000 = ${rightEarFrequenciesTransformed.hz2000}, Hz_3000 = ${rightEarFrequenciesTransformed.hz3000}, 
+                        Hz_4000 = ${rightEarFrequenciesTransformed.hz4000}, Hz_6000 = ${rightEarFrequenciesTransformed.hz6000}, 
+                        Hz_8000 = ${rightEarFrequenciesTransformed.hz8000}
                     WHERE data_id = ${rightDataId};
                 `;
             } else {
                 // Insert new right ear data
                 const rightEarDataResult = await sql`
                     INSERT INTO Data (Hz_500, Hz_1000, Hz_2000, Hz_3000, Hz_4000, Hz_6000, Hz_8000)
-                    VALUES (${rightEarFrequencies.hz500}, ${rightEarFrequencies.hz1000}, ${rightEarFrequencies.hz2000}, 
-                            ${rightEarFrequencies.hz3000}, ${rightEarFrequencies.hz4000}, ${rightEarFrequencies.hz6000}, ${rightEarFrequencies.hz8000})
+                    VALUES (${rightEarFrequenciesTransformed.hz500}, ${rightEarFrequenciesTransformed.hz1000}, ${rightEarFrequenciesTransformed.hz2000}, 
+                            ${rightEarFrequenciesTransformed.hz3000}, ${rightEarFrequenciesTransformed.hz4000}, ${rightEarFrequenciesTransformed.hz6000}, ${rightEarFrequenciesTransformed.hz8000})
                     RETURNING data_id;
                 `;
                 const rightEarDataId = rightEarDataResult.rows[0].data_id;

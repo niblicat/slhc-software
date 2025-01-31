@@ -641,22 +641,22 @@
                 <TableBodyRow>
                     <TableBodyCell>Left Ear</TableBodyCell>
                     <TableBodyCell><Input bind:value={modifiedLeftFrequencies.hz500} placeholder={`${LeftBaselineHearingData[0]}`} required /></TableBodyCell>
-                    <TableBodyCell><Input bind:value={modifiedLeftFrequencies.hz1000} placeholder={`${LeftBaselineHearingData[0]}`} required /></TableBodyCell>
-                    <TableBodyCell><Input bind:value={modifiedLeftFrequencies.hz2000} placeholder={`${LeftBaselineHearingData[0]}`} required /></TableBodyCell>
-                    <TableBodyCell><Input bind:value={modifiedLeftFrequencies.hz3000} placeholder={`${LeftBaselineHearingData[0]}`} required /></TableBodyCell>
-                    <TableBodyCell><Input bind:value={modifiedLeftFrequencies.hz4000} placeholder={`${LeftBaselineHearingData[0]}`} required /></TableBodyCell>
-                    <TableBodyCell><Input bind:value={modifiedLeftFrequencies.hz6000} placeholder={`${LeftBaselineHearingData[0]}`} required /></TableBodyCell>
-                    <TableBodyCell><Input bind:value={modifiedLeftFrequencies.hz8000} placeholder={`${LeftBaselineHearingData[0]}`} required /></TableBodyCell>
+                    <TableBodyCell><Input bind:value={modifiedLeftFrequencies.hz1000} placeholder={`${LeftBaselineHearingData[1]}`} required /></TableBodyCell>
+                    <TableBodyCell><Input bind:value={modifiedLeftFrequencies.hz2000} placeholder={`${LeftBaselineHearingData[2]}`} required /></TableBodyCell>
+                    <TableBodyCell><Input bind:value={modifiedLeftFrequencies.hz3000} placeholder={`${LeftBaselineHearingData[3]}`} required /></TableBodyCell>
+                    <TableBodyCell><Input bind:value={modifiedLeftFrequencies.hz4000} placeholder={`${LeftBaselineHearingData[4]}`} required /></TableBodyCell>
+                    <TableBodyCell><Input bind:value={modifiedLeftFrequencies.hz6000} placeholder={`${LeftBaselineHearingData[5]}`} required /></TableBodyCell>
+                    <TableBodyCell><Input bind:value={modifiedLeftFrequencies.hz8000} placeholder={`${LeftBaselineHearingData[6]}`} required /></TableBodyCell>
                 </TableBodyRow>
                 <TableBodyRow>
                     <TableBodyCell>Right Ear</TableBodyCell>
                     <TableBodyCell><Input bind:value={modifiedRightFrequencies.hz500} placeholder={`${RightBaselineHearingData[0]}`} required /></TableBodyCell>
-                    <TableBodyCell><Input bind:value={modifiedRightFrequencies.hz1000} placeholder={`${RightBaselineHearingData[0]}`} required /></TableBodyCell>
-                    <TableBodyCell><Input bind:value={modifiedRightFrequencies.hz2000} placeholder={`${RightBaselineHearingData[0]}`} required /></TableBodyCell>
-                    <TableBodyCell><Input bind:value={modifiedRightFrequencies.hz3000} placeholder={`${RightBaselineHearingData[0]}`} required /></TableBodyCell>
-                    <TableBodyCell><Input bind:value={modifiedRightFrequencies.hz4000} placeholder={`${RightBaselineHearingData[0]}`} required /></TableBodyCell>
-                    <TableBodyCell><Input bind:value={modifiedRightFrequencies.hz6000} placeholder={`${RightBaselineHearingData[0]}`} required /></TableBodyCell>
-                    <TableBodyCell><Input bind:value={modifiedRightFrequencies.hz8000} placeholder={`${RightBaselineHearingData[0]}`} required /></TableBodyCell>
+                    <TableBodyCell><Input bind:value={modifiedRightFrequencies.hz1000} placeholder={`${RightBaselineHearingData[1]}`} required /></TableBodyCell>
+                    <TableBodyCell><Input bind:value={modifiedRightFrequencies.hz2000} placeholder={`${RightBaselineHearingData[2]}`} required /></TableBodyCell>
+                    <TableBodyCell><Input bind:value={modifiedRightFrequencies.hz3000} placeholder={`${RightBaselineHearingData[3]}`} required /></TableBodyCell>
+                    <TableBodyCell><Input bind:value={modifiedRightFrequencies.hz4000} placeholder={`${RightBaselineHearingData[4]}`} required /></TableBodyCell>
+                    <TableBodyCell><Input bind:value={modifiedRightFrequencies.hz6000} placeholder={`${RightBaselineHearingData[5]}`} required /></TableBodyCell>
+                    <TableBodyCell><Input bind:value={modifiedRightFrequencies.hz8000} placeholder={`${RightBaselineHearingData[6]}`} required /></TableBodyCell>
                 </TableBodyRow>
             </TableBody>
         </Table>

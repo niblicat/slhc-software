@@ -102,44 +102,53 @@
         }
     }
 
-    async function addHearingData() {
-    const formData = new FormData();
-    formData.append('user', selectedEmployee.name); // Pass full name
-    formData.append('year', inputValueYear); // Year of data
-    formData.append('leftEarFrequencies', JSON.stringify(leftFrequencies)); // Left ear data
-    formData.append('rightEarFrequencies', JSON.stringify(rightFrequencies)); // Right ear data
-
-    // Debug: Log form data
-    console.log('Form data to be sent:', Object.fromEntries(formData.entries()));
-
-    try {
-      const response = await fetch('/dashboard?/addHearingData', {
-        method: 'POST',
-        body: formData,
-      });
-  
-      // Debug: Log raw response
-      console.log('Raw server response:', response);
-
-      if (!response.ok) {
-        throw new Error(`Server returned error: ${response.statusText}`);
-      }
-
-      let serverResponse;
-      try {
-        serverResponse = await response.json();
-      } 
-      catch (e) {
-        console.error('Failed to parse JSON:', e);
-        throw new Error('Invalid JSON response from server');
-      }
-
-      console.log('Server Response:', serverResponse);
-    } 
-    catch (error: any) {
-      console.error('Error during fetch or JSON parsing:', error);
-      displayError(error.message || 'An error occurred');
+    function preprocessFrequencies(frequencies: Record<string, string>) {
+      return Object.fromEntries(
+          Object.entries(frequencies).map(([key, value]) => [
+              key, 
+              value.trim().toUpperCase() === "CNT" ? null : value
+          ])
+      );
     }
+
+    async function addHearingData() {
+      const formData = new FormData();
+      formData.append('user', selectedEmployee.name); // Pass full name
+      formData.append('year', inputValueYear); // Year of data
+      formData.append('leftEarFrequencies', JSON.stringify(preprocessFrequencies(leftFrequencies)));
+      formData.append('rightEarFrequencies', JSON.stringify(preprocessFrequencies(rightFrequencies)));
+
+      // Debug: Log form data
+      console.log('Form data to be sent:', Object.fromEntries(formData.entries()));
+
+      try {
+        const response = await fetch('/dashboard?/addHearingData', {
+          method: 'POST',
+          body: formData,
+        });
+    
+        // Debug: Log raw response
+        console.log('Raw server response:', response);
+
+        if (!response.ok) {
+          throw new Error(`Server returned error: ${response.statusText}`);
+        }
+
+        let serverResponse;
+        try {
+          serverResponse = await response.json();
+        } 
+        catch (e) {
+          console.error('Failed to parse JSON:', e);
+          throw new Error('Invalid JSON response from server');
+        }
+
+        console.log('Server Response:', serverResponse);
+      } 
+      catch (error: any) {
+        console.error('Error during fetch or JSON parsing:', error);
+        displayError(error.message || 'An error occurred');
+      }
   }
 
 </script>
