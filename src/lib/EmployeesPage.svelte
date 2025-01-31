@@ -221,54 +221,10 @@
         selectedYear = year;
         yearMenuOpen = false;
 
-        const formData = new FormData();
-        formData.append('employeeID', selectedEmployee.name);
-        formData.append('year', year);
-
         try {
-            const response = await fetch('/dashboard?/fetchHearingData', {
-                method: 'POST',
-                body: formData,
-            });
-            const serverResponse = await response.json();
-            const result = JSON.parse(JSON.parse(serverResponse.data)[0]);
-            
-            if (result["success"]) {
-
-                const { baselineData, newData } = result.hearingData;
-
-                // Clear previous data
-                RightBaselineHearingData.length = 0;
-                RightNewHearingData.length = 0;
-                LeftBaselineHearingData.length = 0;
-                LeftNewHearingData.length = 0;
-
-                // Extract frequencies and populate arrays
-
-                // For right ear baseline data
-                if (baselineData.rightEar) {
-                    RightBaselineHearingData.push(...extractFrequencies(baselineData.rightEar));
-                }
-
-                // For right ear new data
-                if (newData.rightEar) {
-                    RightNewHearingData.push(...extractFrequencies(newData.rightEar));
-                }
-
-                // For left ear baseline data
-                if (baselineData.leftEar) {
-                    LeftBaselineHearingData.push(...extractFrequencies(baselineData.leftEar));
-                }
-
-                // For left ear new data
-                if (newData.leftEar) {
-                    LeftNewHearingData.push(...extractFrequencies(newData.leftEar));
-                }
-            } 
-            else {
-                displayError('Failed to fetch hearing data for the selected year');
-            }
-        } catch (error) {
+            await fetchUpdatedHearingData(selectedEmployee.name, year);
+        } 
+        catch (error) {
             console.error('Error fetching hearing data:', error);
             displayError('Error fetching hearing data');
         }
@@ -489,13 +445,13 @@
         if (!response.ok) {
             throw new Error(`Server returned error: ${response.statusText}`);
         }
-
+            
         const serverResponse = await response.json();
-        console.log('Server Response:', serverResponse);
+        const result = JSON.parse(JSON.parse(serverResponse.data)[0]);
 
-        if (serverResponse.success) {
+        if (result["success"]) {
             // Refresh data state after update
-            await fetchUpdatedHearingData(selectedEmployee.data.employeeID, selectedYear);
+            await fetchUpdatedHearingData(selectedEmployee.name, selectedYear); //This should update the chart??
             editDataModal = false;
         } else {
             throw new Error(serverResponse.message);
@@ -506,31 +462,57 @@
         }
     }
 
-    async function fetchUpdatedHearingData(employeeID: string, year: string) { //NOT UPDATING DYNAMICALLY!!
+    async function fetchUpdatedHearingData(employeeID: string, year: string) {
         try {
-            const response = await fetch(`/dashboard?/fetchHearingData?employeeID=${employeeID}&year=${year}`);
-            const data = await response.json();
+            const formData = new FormData();
+            formData.append('employeeID', selectedEmployee.name);
+            formData.append('year', selectedYear);
+            const response = await fetch('/dashboard?/fetchHearingData', {
+                method: 'POST',
+                body: formData,
+            });
+            
+            const serverResponse = await response.json();
+            const result = JSON.parse(JSON.parse(serverResponse.data)[0]);
+            
+            if (result["success"]) {
+                const { baselineData, newData } = result.hearingData;
 
-            if (!data.success) throw new Error('Failed to fetch updated hearing data');
+                // Clear previous data
+                RightBaselineHearingData.length = 0;
+                RightNewHearingData.length = 0;
+                LeftBaselineHearingData.length = 0;
+                LeftNewHearingData.length = 0;
 
-            // Update the frequency states with the new data
-            LeftNewHearingData = [
-                data.left.hz500, data.left.hz1000, data.left.hz2000,
-                data.left.hz3000, data.left.hz4000, data.left.hz6000, data.left.hz8000
-            ];
+                // Extract frequencies and populate arrays
+                // For right ear baseline data
+                if (baselineData.rightEar) {
+                    RightBaselineHearingData.push(...extractFrequencies(baselineData.rightEar));
+                }
 
-            RightNewHearingData = [
-                data.right.hz500, data.right.hz1000, data.right.hz2000,
-                data.right.hz3000, data.right.hz4000, data.right.hz6000, data.right.hz8000
-            ];
+                // For right ear new data
+                if (newData.rightEar) {
+                    RightNewHearingData.push(...extractFrequencies(newData.rightEar));
+                }
 
-            // LeftNewHearingData = modifiedLeftFrequencies;
-            // RightNewHearingData = modifiedRightFrequencies;
+                // For left ear baseline data
+                if (baselineData.leftEar) {
+                    LeftBaselineHearingData.push(...extractFrequencies(baselineData.leftEar));
+                }
 
-            } catch (error) {
-                console.error('Error fetching updated hearing data:', error);
-                displayError('Could not refresh hearing data.');
+                // For left ear new data
+                if (newData.leftEar) {
+                    LeftNewHearingData.push(...extractFrequencies(newData.leftEar));
+                }
+            } 
+            else {
+                displayError('Failed to fetch hearing data for the selected year');
             }
+        }
+        catch (error) {
+            console.error('Error fetching hearing data:', error);
+            displayError('Error fetching hearing data');
+        }
     }
 
 </script>
@@ -713,8 +695,7 @@
         <p class="text-3xl">STS Status: {STSstatus}</p> <br>
 
         <!-- Testing Purposes -->
-         
-        <br><br><br>
+        <!-- <br><br><br>
         <p>Testing Output</p>
         <p>HEARING DATA TEST NEW R: {RightNewHearingData}</p> <br>
         <p>HEARING DATA TEST NEW L: {LeftNewHearingData}</p> <br>
@@ -722,7 +703,7 @@
         <p>HEARING DATA TEST BL L: {LeftBaselineHearingData}</p> <br>
 
         <p>HEARING DATA TEST MODIFIED R: {modifiedRightFrequencies.hz500}</p> <br> 
-        <p>HEARING DATA TEST MODIFIED L: {modifiedLeftFrequencies.hz500}</p> <br>
+        <p>HEARING DATA TEST MODIFIED L: {modifiedLeftFrequencies.hz500}</p> <br> -->
        
     </section>
 
