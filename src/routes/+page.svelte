@@ -1,47 +1,68 @@
 <svelte:head>
-	<link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.css" rel="stylesheet" />
-
 </svelte:head>
 
-<script lang="ts"  src="../path/to/flowbite/dist/flowbite.min.js">
-    // export let data;
-
-    import { page } from '$app/stores';
-	import { Button } from 'flowbite-svelte';
+<script lang="ts">
+    import { page } from '$app/state';
     import CustomNavbar from '$lib/CustomNavbar.svelte';
-	import { redirect } from '@sveltejs/kit';
-	import { signIn, signOut } from "@auth/sveltekit/client";
+    import type { UserSimple } from '$lib/MyTypes';
+    import { LoginStatus, loginMessages } from '$lib/utility';
+    import { Alert } from 'flowbite-svelte';
 
-    console.log($page.data.session) // Display the user's data in console
+    let { data } = $props();
 
-    $: activeURL = $page.url.pathname;
-    $: activeURLHash = $page.url.hash;
+    // get login status
+    let loginStatus = $state(LoginStatus.None);
+    $effect(() => {
+        if (data.loginStatus) loginStatus = data.loginStatus;
+    })
 
-    // sidebar state and visibility 
-    let sidebarOpen = false;
+    let badLogin = $state(false);
+    const badLoginStatuses = [LoginStatus.NoSession, LoginStatus.NoID, LoginStatus.NoEmail, LoginStatus.NoName];
+    $effect(() => {
+        badLogin = badLoginStatuses.includes(loginStatus);
+    })
+
+    // Sidebar state and visibility 
+    let sidebarOpen = $state(false);
     const toggleSidebar = () => {
         sidebarOpen = !sidebarOpen;
     };
 
-    // TODO: get these from google auth
-    let name = "example name";
-    let email = "example email";
-
-    function Login() {
-        redirect(200, '/login');
+    let user: UserSimple = {
+        loggedIn: !!page.data.session?.user,
+        name: page.data.session?.user?.name || "Not logged in",
+        email: page.data.session?.user?.email || "",
+        avatar: page.data.session?.user?.image || ""
     }
+
 </script>
 
 <CustomNavbar
-name={name}
-email={email}
+{user}
 hasSidebar={false} 
 sidebarOpen={sidebarOpen}
 on:toggle={toggleSidebar} 
 />
 
-<p>welcome to the home page :)</p>
+<div id="content" class="h-dvh bg-gray-100 pt-16">
+    {#if loginStatus != LoginStatus.None}
+        <Alert color={badLogin ? "red" : "yellow"}>
+            {loginMessages[loginStatus]}
+        </Alert>
+    {/if}
 
-<Button color="yellow" on:click={Login}>Login shortcut, don't know why this doesn't work</Button>
-<a href="/login">login (for real)</a>
+    <!-- Main content -->
+    <section class="flex flex-col items-center justify-center py-12">
+        <div class="max-w-3xl text-center">
+            <h1 class="text-4xl font-extrabold text-gray-800 mb-6">Welcome to the Speech-Language-Hearing Center's Hearing Degradation Software</h1>
+            <p class="text-lg text-gray-600 mb-8">
+                Access powerful features and manage everything efficiently in our easy-to-use dashboard.
+            </p>
+
+            <!-- Correct Image Reference -->
+            <img src="landingpage/SIUE_logo_2024.png" alt="SIUE Logo">
+
+        </div>
+    </section>
+</div>
