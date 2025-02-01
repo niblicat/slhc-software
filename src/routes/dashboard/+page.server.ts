@@ -137,14 +137,18 @@ export const actions: Actions = {
         const rightEarFrequencies = JSON.parse(formData.get('rightEarFrequencies') as string);       
 
         const validateFrequencies = (frequencies: Record<string, string | number>) =>
-            Object.values(frequencies).every(value => value === null || value === "CNT" || !isNaN(parseInt(value as string, 10)));
+            Object.values(frequencies).every(value => 
+                value === null || 
+                value === "CNT" || 
+                (!isNaN(parseInt(value as string, 10)) && parseInt(value as string, 10) >= -10 && parseInt(value as string, 10) <= 90)
+            );
         
         if (!validateFrequencies(leftEarFrequencies) || !validateFrequencies(rightEarFrequencies)) {
             throw new Error('Invalid frequency data');
         }
 
         try {
-            // Fetch employee_id for the selected user
+            // Fetch employee_id for the selected user //this will be gone when merged so ignore this
             const userIdQuery = await sql`SELECT employee_id FROM Employee WHERE CONCAT(first_name, ' ', last_name) = ${user};`;
             if (userIdQuery.rows.length === 0) {
                 throw new Error("User not found");
@@ -152,6 +156,44 @@ export const actions: Actions = {
 
             const employeeId = userIdQuery.rows[0].employee_id;
 
+            // Fetch employee details
+            const employeeQuery = await sql`
+                SELECT last_active FROM employee 
+                WHERE employee_id = ${employeeId};
+            `;
+            if (employeeQuery.rows.length === 0) {
+                throw new Error("User not found");
+            }
+
+            const lastActive = employeeQuery.rows[0].last_active; // Can be NULL if still active
+            const currentYear = new Date().getFullYear();
+
+            // **Validation 1: Ensure the year is within employment period**
+            if (lastActive === null) {
+                // Employee is still active
+                if (year > currentYear || year < 1957) {
+                    throw new Error("Cannot add hearing data for invalid year range.");
+                }
+            } else {
+                // Employee is inactive
+                const lastActiveYear = new Date(lastActive).getFullYear();
+                if (year > lastActiveYear || year < 1957) {
+                    throw new Error(`Cannot add hearing data after employment ended in ${lastActiveYear}.`);
+                }
+            }
+
+            // **Validation 2: Ensure only one set of hearing data per year**
+            const existingDataCheck = await sql`
+                SELECT 1 FROM Has 
+                WHERE employee_id = ${employeeId} AND year = ${year}
+                LIMIT 1;
+            `;
+
+            if (existingDataCheck.rows.length > 0) {
+                throw new Error(`Hearing data for the year ${year} already exists for this employee.`);
+            }
+
+            // **Transform frequencies for insertion**
             const transformFrequencies = (frequencies: Record<string, string | number>) => {
                 return Object.fromEntries(
                     Object.entries(frequencies).map(([key, value]) => [
@@ -178,7 +220,6 @@ export const actions: Actions = {
             `;
 
             const leftEarDataId = leftEarDataResult.rows[0].data_id;
-
 
             // Insert right ear data into Data table
             const rightEarDataResult = await sql`
@@ -210,7 +251,6 @@ export const actions: Actions = {
             console.log("Error adding employee's hearing data:", error.message);
             return { success: false, message: "Failed to add employee's hearing data due to error" };
         }
-
         return JSON.stringify({
             success: true,
         });
@@ -538,7 +578,11 @@ export const actions: Actions = {
         const rightEarFrequencies = JSON.parse(formData.get('rightEarFrequencies') as string);
     
         const validateFrequencies = (frequencies: Record<string, string | number>) =>
-            Object.values(frequencies).every(value => value === null || value === "CNT" || !isNaN(parseInt(value as string, 10)));
+            Object.values(frequencies).every(value => 
+                value === null || 
+                value === "CNT" || 
+                (!isNaN(parseInt(value as string, 10)) && parseInt(value as string, 10) >= -10 && parseInt(value as string, 10) <= 90)
+            );
         
         if (!validateFrequencies(leftEarFrequencies) || !validateFrequencies(rightEarFrequencies)) {
             throw new Error('Invalid frequency data');

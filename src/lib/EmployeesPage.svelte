@@ -7,6 +7,7 @@
     import { Footer } from 'flowbite-svelte';
     import EditIcon from './EditIcon.svelte';
     import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
+    //import addEmployee from './InsertEmployeePage.svelte'; 
     import { sql } from '@vercel/postgres';
     import { onMount } from 'svelte';
 
@@ -242,6 +243,7 @@
     let DOBmodal = $state(false);
     let activeStatusModal = $state(false);
     let editDataModal = $state(false);
+    let addEmployeeModal = $state(false);
 
     let newFirstName = $state("");
     let newLastName = $state("");
@@ -269,6 +271,11 @@
     function showActiveStatusChangeModal(employee: Employee) {
         activeStatusModal = true;
     }
+
+    function showAddEmployeeModal() {
+        addEmployeeModal = true;
+    }
+
     function showEditDataModal(employee: EmployeeSearchable) {
         if (!selectedYear || selectedYear === "No year selected") {
             displayError("Please select a year first.");
@@ -515,6 +522,47 @@
         }
     }
 
+    async function addEmployee(first: string, last: string, email: string, dateOfBirth: string, isInactive: string, lastActive: string) {
+        const formData = new FormData();
+        formData.append('firstName', first);
+        formData.append('lastName', last);
+        formData.append('email', email);
+        formData.append('dateOfBirth', dateOfBirth);
+        formData.append('isInactive', isInactive.toString());
+
+        if (isInactive) {
+            formData.append('lastActive', lastActive);
+        }
+        try {
+            const response = await fetch('/dashboard?/addEmployee', {
+                method: 'POST',
+                body: formData,
+        });
+    
+        // Debug: Log raw response
+        console.log('Raw server response:', response);
+
+        if (!response.ok) {
+            throw new Error(`Server returned error: ${response.statusText}`);
+        }
+
+        let serverResponse;
+        try {
+            serverResponse = await response.json();
+        } 
+        catch (e) {
+            console.error('Failed to parse JSON:', e);
+            throw new Error('Invalid JSON response from server');
+        }
+
+        console.log('Server Response:', serverResponse);
+        } 
+        catch (error: any) {
+        console.error('Error during fetch or JSON parsing:', error);
+        displayError(error.message || 'An error occurred');
+        }
+    }
+
 </script>
 
 <div class="relative dropdown-container flex space-x-4" style="margin-top: 20px; margin-left: 20px;"> 
@@ -547,7 +595,9 @@
             </li>
         {/each}
     </Dropdown>
-    <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base flex justify-between items-center" style="width:55px"><UserAddSolid/></Button> <!-- DOES NOT DO ANYTHING YET -->
+
+    <Button on:click={() => showAddEmployeeModal()} class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base flex justify-between items-center" style="width:55px"><UserAddSolid/></Button>
+    
     {#if selectedYear !== "No year selected"} 
         <Button on:click={() => showEditDataModal(selectedEmployee)} class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base flex justify-between items-center" style="width:200px">Edit Employee's Data</Button>
     {/if} 
@@ -621,7 +671,7 @@
     <Button class="bg-red-200 hover:bg-red-300 text-black">Cancel</Button>
 </Modal>
 
-<Modal size = 'xl' title="Change Employee Hearing Data" bind:open={editDataModal} autoclose>  <!-- NOT FINISHED-->
+<Modal size = 'xl' title="Change Employee Hearing Data" bind:open={editDataModal} autoclose> 
     <p>
         <span>Please provide updated data points for {selectedEmployee.data.firstName} {selectedEmployee.data.lastName} during year {selectedYear}</span>
         <br>
@@ -663,6 +713,44 @@
     </p>
     <!-- TODO: CHANGE THESE COLORS -->
     <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => modifyHearingData(selectedEmployee, selectedYear)}>Confirm</Button>
+    <Button class="bg-red-200 hover:bg-red-300 text-black">Cancel</Button>
+</Modal>
+
+<Modal title="Add Employee" bind:open={addEmployeeModal} autoclose>
+    <p>
+        <span>Please provide new employee information</span>
+        <br>
+        <br>
+            <Label for="firstName" class="block mb-2">Employee First Name</Label>
+            <Input id="firstName" bind:value={newFirstName} placeholder="First Name" required />
+          
+            <Label for="lastName" class="block mb-2">Employee Last Name</Label>
+            <Input id="lastName" bind:value={newLastName} placeholder="Last Name" required />
+
+            <Label for="email" class="block mb-2">Employee Email</Label>
+            <Input id="email" type="email" bind:value={newEmail} placeholder="email@company.com" required />
+          
+            <Label for="dateOfBirth" class="block mb-2">Employee Date of Birth</Label>
+            <Input id="dateOfBirth" type="date" bind:value={newDOB} required />
+          
+            <Label for="employmentStatus" class="block mb-2">Employment Status</Label>
+            <Radio name="employmentStatus" bind:checked={isInactive} on:change={() => isInactive = false}>Active</Radio>
+            <Radio name="employmentStatus" bind:checked={isInactive} on:change={() => isInactive = true}>Inactive</Radio>
+          
+          {#if isInactive}
+              <Label for="lastActive" class="block mb-2">Last Active Date</Label>
+              <Input id="lastActive" type="date" bind:value={newActiveStatus} />
+          {/if}
+    </p>
+    
+    <!-- TODO: CHANGE THESE COLORS -->
+    <Button 
+        class="bg-blue-200 hover:bg-blue-300 text-black" 
+        on:click={() => addEmployee(newFirstName, newLastName, newEmail, newDOB, isInactive.toString(), newActiveStatus)}
+        >
+        Confirm
+    </Button>
+
     <Button class="bg-red-200 hover:bg-red-300 text-black">Cancel</Button>
 </Modal>
 

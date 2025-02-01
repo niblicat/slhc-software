@@ -94,7 +94,7 @@
         await addHearingData();
 
         if (success) {
-        successMessage = 'Successfully added employee hearing data! Refreshing page...';
+        successMessage = 'Successfully added employee hearing data! Refreshing page...'; //this still shows up even when invalid data is inputted.... 
         setTimeout(() => location.reload(), 2000);    // Refresh the page after 2 secs
         }
         else {
