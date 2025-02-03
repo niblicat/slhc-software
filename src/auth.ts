@@ -15,14 +15,16 @@ export const { handle } = SvelteKitAuth({
   callbacks: {
     async jwt({ token, account }) {
       if (account) {
-        token.accessToken = account.access_token
+        token.accessToken = account.access_token;
       }
-      return token
+      return token;
     },
     async session({ session, token, user }) {
       //@ts-ignore
-      session.access_token = token.accessToken
-      return session
+      session.access_token = token.accessToken;
+      return session;
     }
-  }
+  },
+  secret: process.env.AUTH_SECRET || 'defaultSecret',
+  trustHost: true
 });

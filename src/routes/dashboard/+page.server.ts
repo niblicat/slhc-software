@@ -77,7 +77,7 @@ export const actions: Actions = {
         const adminIDs: string = JSON.parse(formData.get('adminIDs') as string) as string;
 
         try {
-            // DELETE!!!!
+            // Delete admin from database
             const result = await sql`
                 DELETE FROM Administrator
                 WHERE id = ANY(${adminIDs});

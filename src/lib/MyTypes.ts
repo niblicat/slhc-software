@@ -10,14 +10,14 @@ export type Employee = {
 export type Admin = {
     name: string,
     email: string,
-    googleID: string,
+    id: string,
     isOP: boolean
 };
 
 export type AdminSelectable = {
     name: string,
     email: string,
-    googleID: string,
+    id: string,
     isOP: boolean
     selected: boolean
 };

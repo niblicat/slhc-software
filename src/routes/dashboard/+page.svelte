@@ -42,13 +42,13 @@
 {user}
 hasSidebar={true} 
 sidebarOpen={sidebarOpen}
-on:toggle={toggleSidebar} 
+toggle={toggleSidebar} 
 />
 
 <CustomSidebar
 sidebarOpen={sidebarOpen}
 activeUrl={activeURLHash}
-on:toggle={toggleSidebar}
+toggle={toggleSidebar}
 />
 
 <div id="content" class="h-dvh bg-gray-100 pt-16">
