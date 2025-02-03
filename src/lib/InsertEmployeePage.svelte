@@ -49,7 +49,7 @@
     }
   }
 
-  async function addEmployee() {
+  export async function addEmployee() {
     const formData = new FormData();
     formData.append('firstName', firstName);
     formData.append('lastName', lastName);

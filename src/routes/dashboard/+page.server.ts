@@ -136,17 +136,21 @@ export const actions: Actions = {
         const user = formData.get('user') as string;
         const year = parseInt(formData.get('year') as string, 10);
         const leftEarFrequencies = JSON.parse(formData.get('leftEarFrequencies') as string);
-        const rightEarFrequencies = JSON.parse(formData.get('rightEarFrequencies') as string);
+        const rightEarFrequencies = JSON.parse(formData.get('rightEarFrequencies') as string);       
 
         const validateFrequencies = (frequencies: Record<string, string | number>) =>
-            Object.values(frequencies).every(value => !isNaN(parseInt(value as string, 10)));
-    
+            Object.values(frequencies).every(value => 
+                value === null || 
+                value === "CNT" || 
+                (!isNaN(parseInt(value as string, 10)) && parseInt(value as string, 10) >= -10 && parseInt(value as string, 10) <= 90)
+            );
+        
         if (!validateFrequencies(leftEarFrequencies) || !validateFrequencies(rightEarFrequencies)) {
             throw new Error('Invalid frequency data');
         }
 
         try {
-            // Fetch employee_id for the selected user
+            // Fetch employee_id for the selected user //this will be gone when merged so ignore this
             const userIdQuery = await sql`SELECT employee_id FROM Employee WHERE CONCAT(first_name, ' ', last_name) = ${user};`;
             if (userIdQuery.rows.length === 0) {
                 throw new Error("User not found");
@@ -154,28 +158,84 @@ export const actions: Actions = {
 
             const employeeId = userIdQuery.rows[0].employee_id;
 
+            // Fetch employee details
+            const employeeQuery = await sql`
+                SELECT last_active FROM employee 
+                WHERE employee_id = ${employeeId};
+            `;
+            if (employeeQuery.rows.length === 0) {
+                throw new Error("User not found");
+            }
+
+            const lastActive = employeeQuery.rows[0].last_active; // Can be NULL if still active
+            const currentYear = new Date().getFullYear();
+
+            // **Validation 1: Ensure the year is within employment period**
+            if (lastActive === null) {
+                // Employee is still active
+                if (year > currentYear || year < 1957) {
+                    throw new Error("Cannot add hearing data for invalid year range.");
+                }
+            } else {
+                // Employee is inactive
+                const lastActiveYear = new Date(lastActive).getFullYear();
+                if (year > lastActiveYear || year < 1957) {
+                    throw new Error(`Cannot add hearing data after employment ended in ${lastActiveYear}.`);
+                }
+            }
+
+            // **Validation 2: Ensure only one set of hearing data per year**
+            const existingDataCheck = await sql`
+                SELECT 1 FROM Has 
+                WHERE employee_id = ${employeeId} AND year = ${year}
+                LIMIT 1;
+            `;
+
+            if (existingDataCheck.rows.length > 0) {
+                throw new Error(`Hearing data for the year ${year} already exists for this employee.`);
+            }
+
+            // **Transform frequencies for insertion**
+            const transformFrequencies = (frequencies: Record<string, string | number>) => {
+                return Object.fromEntries(
+                    Object.entries(frequencies).map(([key, value]) => [
+                        key,
+                        value === "CNT" || value === null ? null : parseInt(value as string, 10),
+                    ])
+                );
+            };            
+
+            const leftEarFrequenciesTransformed = transformFrequencies(leftEarFrequencies);
+            const rightEarFrequenciesTransformed = transformFrequencies(rightEarFrequencies);  
+            
+            console.log("Left Ear Transformed:", leftEarFrequenciesTransformed);
+            console.log("Right Ear Transformed:", rightEarFrequenciesTransformed);
+
             // Insert left ear data into Data table
             const leftEarDataResult = await sql`
                 INSERT INTO Data (Hz_500, Hz_1000, Hz_2000, Hz_3000, Hz_4000, Hz_6000, Hz_8000)
-                VALUES (${leftEarFrequencies.hz500}, ${leftEarFrequencies.hz1000}, ${leftEarFrequencies.hz2000}, 
-                        ${leftEarFrequencies.hz3000}, ${leftEarFrequencies.hz4000}, ${leftEarFrequencies.hz6000}, ${leftEarFrequencies.hz8000})
+                VALUES (${leftEarFrequenciesTransformed.hz500}, ${leftEarFrequenciesTransformed.hz1000}, 
+                        ${leftEarFrequenciesTransformed.hz2000}, ${leftEarFrequenciesTransformed.hz3000}, 
+                        ${leftEarFrequenciesTransformed.hz4000}, ${leftEarFrequenciesTransformed.hz6000}, 
+                        ${leftEarFrequenciesTransformed.hz8000})
                 RETURNING data_id;
             `;
 
             const leftEarDataId = leftEarDataResult.rows[0].data_id;
 
-
             // Insert right ear data into Data table
             const rightEarDataResult = await sql`
                 INSERT INTO Data (Hz_500, Hz_1000, Hz_2000, Hz_3000, Hz_4000, Hz_6000, Hz_8000)
-                VALUES (${rightEarFrequencies.hz500}, ${rightEarFrequencies.hz1000}, ${rightEarFrequencies.hz2000}, 
-                        ${rightEarFrequencies.hz3000}, ${rightEarFrequencies.hz4000}, ${rightEarFrequencies.hz6000}, ${rightEarFrequencies.hz8000})
+                VALUES (${rightEarFrequenciesTransformed.hz500}, ${rightEarFrequenciesTransformed.hz1000}, 
+                        ${rightEarFrequenciesTransformed.hz2000}, ${rightEarFrequenciesTransformed.hz3000}, 
+                        ${rightEarFrequenciesTransformed.hz4000}, ${rightEarFrequenciesTransformed.hz6000}, 
+                        ${rightEarFrequenciesTransformed.hz8000})
                 RETURNING data_id;
             `;
 
             const rightEarDataId = rightEarDataResult.rows[0].data_id;
 
-            console.log(`Inserting into Has for Employee ID: ${employeeId}, Year: ${year}, Left Ear Data ID: ${leftEarDataId}, Right Ear Data ID: ${rightEarDataId}`);
+            //console.log(`Inserting into Has for Employee ID: ${employeeId}, Year: ${year}, Left Ear Data ID: ${leftEarDataId}, Right Ear Data ID: ${rightEarDataId}`);
 
             // Insert into Has table for right ear
             await sql`
@@ -193,7 +253,6 @@ export const actions: Actions = {
             console.log("Error adding employee's hearing data:", error.message);
             return { success: false, message: "Failed to add employee's hearing data due to error" };
         }
-
         return JSON.stringify({
             success: true,
         });
@@ -373,6 +432,264 @@ export const actions: Actions = {
         }
     },
 
+    modifyEmployeeName: async ({request}) => {
+        const formData = await request.formData();
+        const employeeID = formData.get('employee') as string;
+        const newFirstName = formData.get('newFirstName') as string;
+        const newLastName = formData.get('newLastName') as string;
+    
+        // Fetch employee_id for the selected user
+        const employeeIdQuery = await sql`SELECT employee_id FROM Employee WHERE CONCAT(first_name, ' ', last_name) = ${employeeID};`;
+        if (employeeIdQuery.rows.length === 0) {
+            throw new Error("User not found");
+        }
+    
+        const employeeId = employeeIdQuery.rows[0].employee_id;
+
+        console.log(`Employee NAME: ${employeeID}, EmployeeID: ${employeeId}, First: ${newFirstName}, Last: ${newLastName}`);
+
+        try {
+            const resultFirst = await sql`UPDATE Employee SET first_name = ${newFirstName} WHERE employee_id=${employeeId};`
+            const resultLast = await sql`UPDATE Employee SET last_name = ${newLastName} WHERE employee_id=${employeeId};`
+            
+            if (resultFirst.rowCount === 0) {
+                return { success: false, message: 'First name was not updated. Employee ID might be incorrect.' };
+            }
+            if (resultLast.rowCount === 0) {
+                return { success: false, message: 'Last name was not updated. Employee ID might be incorrect.' };
+            }
+
+        } catch (error: any) {
+            console.log(error.message);
+            console.log('Failed to update employee name');
+            return { success: false, message: 'Failed to update employee name' };
+        }
+
+        return JSON.stringify({
+            success: true,
+        });
+    },
+    modifyEmployeeEmail: async ({request}) => {
+        const formData = await request.formData();
+        const employeeID = formData.get('employee') as string;
+        const newEmail = formData.get('newEmail') as string;
+    
+        // Fetch employee_id for the selected user
+        const employeeIdQuery = await sql`SELECT employee_id FROM Employee WHERE CONCAT(first_name, ' ', last_name) = ${employeeID};`;
+        if (employeeIdQuery.rows.length === 0) {
+            throw new Error("User not found");
+        }
+    
+        const employeeId = employeeIdQuery.rows[0].employee_id;
+
+        console.log(`Employee NAME: ${employeeID}, EmployeeID: ${employeeId}, email: ${newEmail}`);
+
+        try {
+            const result = await sql`UPDATE Employee SET email = ${newEmail} WHERE employee_id=${employeeId};`
+            
+            if (result.rowCount === 0) {
+                return { success: false, message: 'Email was not updated. Employee ID might be incorrect.' };
+            }
+        } catch (error: any) {
+            console.log(error.message);
+            console.log('Failed to update employee email');
+            return { success: false, message: 'Failed to update employee email' };
+        }
+
+        return JSON.stringify({
+            success: true,
+        });
+    },
+    modifyEmployeeDOB: async ({request}) => {
+        const formData = await request.formData();
+        const employeeID = formData.get('employee') as string;
+        const newDOB = formData.get('newDOB') as string;
+    
+        // Fetch employee_id for the selected user
+        const employeeIdQuery = await sql`SELECT employee_id FROM Employee WHERE CONCAT(first_name, ' ', last_name) = ${employeeID};`;
+        if (employeeIdQuery.rows.length === 0) {
+            throw new Error("User not found");
+        }
+    
+        const employeeId = employeeIdQuery.rows[0].employee_id;
+
+        console.log(`Employee NAME: ${employeeID}, EmployeeID: ${employeeId}, DOB: ${newDOB}`);
+
+        try {
+            const result = await sql`UPDATE Employee SET date_of_birth = ${newDOB} WHERE employee_id=${employeeId};`
+            
+            if (result.rowCount === 0) {
+                return { success: false, message: 'DOB was not updated. Employee ID might be incorrect.' };
+            }
+        } catch (error: any) {
+            console.log(error.message);
+            console.log('Failed to update employee DOB');
+            return { success: false, message: 'Failed to update employee DOB' };
+        }
+
+        return JSON.stringify({
+            success: true,
+        });
+    },
+    modifyEmployeeStatus: async ({request}) => {
+        const formData = await request.formData();
+        const employeeID = formData.get('employee') as string;
+        const newActiveStatus = formData.get('newActiveStatus') as string;
+    
+        // Fetch employee_id for the selected user
+        const employeeIdQuery = await sql`SELECT employee_id FROM Employee WHERE CONCAT(first_name, ' ', last_name) = ${employeeID};`;
+        if (employeeIdQuery.rows.length === 0) {
+            throw new Error("User not found");
+        }
+    
+        const employeeId = employeeIdQuery.rows[0].employee_id;
+
+        const lastActiveValue = newActiveStatus === "" ? null : newActiveStatus;
+        console.log(`Employee NAME: ${employeeID}, EmployeeID: ${employeeId}, status: ${lastActiveValue}`);
+
+        try {
+            if (lastActiveValue !== null) {
+                await sql`
+                    UPDATE Employee 
+                    SET last_active = ${lastActiveValue}
+                    WHERE employee_id = ${employeeId};
+                `;
+            } else {
+                await sql`
+                    UPDATE Employee 
+                    SET last_active = NULL
+                    WHERE employee_id = ${employeeId};
+                `;
+            }
+        } 
+        catch (error: any) {
+            console.log(error.message);
+            console.log('Failed to update employment status');
+            return { success: false, message: 'Failed to update employment status' };
+        }
+
+        return JSON.stringify({
+            success: true,
+        });
+    },
+    modifyHearingData: async ({ request }) => {
+        const formData = await request.formData();
+        const user = formData.get('user') as string;
+        const year = parseInt(formData.get('year') as string, 10);
+        const leftEarFrequencies = JSON.parse(formData.get('leftEarFrequencies') as string);
+        const rightEarFrequencies = JSON.parse(formData.get('rightEarFrequencies') as string);
+    
+        const validateFrequencies = (frequencies: Record<string, string | number>) =>
+            Object.values(frequencies).every(value => 
+                value === null || 
+                value === "CNT" || 
+                (!isNaN(parseInt(value as string, 10)) && parseInt(value as string, 10) >= -10 && parseInt(value as string, 10) <= 90)
+            );
+        
+        if (!validateFrequencies(leftEarFrequencies) || !validateFrequencies(rightEarFrequencies)) {
+            throw new Error('Invalid frequency data');
+        }
+    
+        try {
+            // Fetch employee_id for the selected user
+            const userIdQuery = await sql`SELECT employee_id FROM Employee WHERE CONCAT(first_name, ' ', last_name) = ${user};`;
+            if (userIdQuery.rows.length === 0) {
+                throw new Error("User not found");
+            }
+    
+            const employeeId = userIdQuery.rows[0].employee_id;
+    
+            // Check if hearing data exists for this employee, year, and ear
+            const existingLeftData = await sql`
+                SELECT d.data_id FROM Data d
+                JOIN Has h ON d.data_id = h.data_id
+                WHERE h.employee_id = ${employeeId} AND h.year = ${year} AND h.ear = 'left';
+            `;
+    
+            const existingRightData = await sql`
+                SELECT d.data_id FROM Data d
+                JOIN Has h ON d.data_id = h.data_id
+                WHERE h.employee_id = ${employeeId} AND h.year = ${year} AND h.ear = 'right';
+            `;
+
+            const transformFrequencies = (frequencies: Record<string, string | number>) => {
+                return Object.fromEntries(
+                    Object.entries(frequencies).map(([key, value]) => [
+                        key,
+                        value === "CNT" || value === null ? null : parseInt(value as string, 10),
+                    ])
+                );
+            };            
+    
+            const leftEarFrequenciesTransformed = transformFrequencies(leftEarFrequencies);
+            const rightEarFrequenciesTransformed = transformFrequencies(rightEarFrequencies);      
+    
+            if (existingLeftData.rows.length > 0) {
+                // Update left ear data
+                const leftDataId = existingLeftData.rows[0].data_id;
+                await sql`
+                    UPDATE Data
+                    SET Hz_500 = ${leftEarFrequenciesTransformed.hz500}, Hz_1000 = ${leftEarFrequenciesTransformed.hz1000}, 
+                        Hz_2000 = ${leftEarFrequenciesTransformed.hz2000}, Hz_3000 = ${leftEarFrequenciesTransformed.hz3000}, 
+                        Hz_4000 = ${leftEarFrequenciesTransformed.hz4000}, Hz_6000 = ${leftEarFrequenciesTransformed.hz6000}, 
+                        Hz_8000 = ${leftEarFrequenciesTransformed.hz8000}
+                    WHERE data_id = ${leftDataId};
+                `;
+            } else {
+                // Insert new left ear data
+                const leftEarDataResult = await sql`
+                    INSERT INTO Data (Hz_500, Hz_1000, Hz_2000, Hz_3000, Hz_4000, Hz_6000, Hz_8000)
+                    VALUES (${leftEarFrequenciesTransformed.hz500}, ${leftEarFrequenciesTransformed.hz1000}, ${leftEarFrequenciesTransformed.hz2000}, 
+                            ${leftEarFrequenciesTransformed.hz3000}, ${leftEarFrequenciesTransformed.hz4000}, ${leftEarFrequenciesTransformed.hz6000}, ${leftEarFrequenciesTransformed.hz8000})
+                    RETURNING data_id;
+                `;
+                const leftEarDataId = leftEarDataResult.rows[0].data_id;
+    
+                // Insert into Has table
+                await sql`
+                    INSERT INTO Has (employee_id, data_id, year, ear)
+                    VALUES (${employeeId}, ${leftEarDataId}, ${year}, 'left');
+                `;
+            }
+    
+            if (existingRightData.rows.length > 0) {
+                // Update right ear data
+                const rightDataId = existingRightData.rows[0].data_id;
+                await sql`
+                    UPDATE Data
+                    SET Hz_500 = ${rightEarFrequenciesTransformed.hz500}, Hz_1000 = ${rightEarFrequenciesTransformed.hz1000}, 
+                        Hz_2000 = ${rightEarFrequenciesTransformed.hz2000}, Hz_3000 = ${rightEarFrequenciesTransformed.hz3000}, 
+                        Hz_4000 = ${rightEarFrequenciesTransformed.hz4000}, Hz_6000 = ${rightEarFrequenciesTransformed.hz6000}, 
+                        Hz_8000 = ${rightEarFrequenciesTransformed.hz8000}
+                    WHERE data_id = ${rightDataId};
+                `;
+            } else {
+                // Insert new right ear data
+                const rightEarDataResult = await sql`
+                    INSERT INTO Data (Hz_500, Hz_1000, Hz_2000, Hz_3000, Hz_4000, Hz_6000, Hz_8000)
+                    VALUES (${rightEarFrequenciesTransformed.hz500}, ${rightEarFrequenciesTransformed.hz1000}, ${rightEarFrequenciesTransformed.hz2000}, 
+                            ${rightEarFrequenciesTransformed.hz3000}, ${rightEarFrequenciesTransformed.hz4000}, ${rightEarFrequenciesTransformed.hz6000}, ${rightEarFrequenciesTransformed.hz8000})
+                    RETURNING data_id;
+                `;
+                const rightEarDataId = rightEarDataResult.rows[0].data_id;
+    
+                // Insert into Has table
+                await sql`
+                    INSERT INTO Has (employee_id, data_id, year, ear)
+                    VALUES (${employeeId}, ${rightEarDataId}, ${year}, 'right');
+                `;
+            }
+    
+        } catch (error: any) {
+            console.log("Error modifying employee's hearing data:", error.message);
+            return { success: false, message: "Failed to modify employee's hearing data due to error" };
+        }
+    
+        return JSON.stringify({
+            success: true,
+        });
+    },
+    
     exportEmployeeData: async ({ request }) => {
         const formData = await request.formData();
         const employeeID = formData.get('employeeID') as string;

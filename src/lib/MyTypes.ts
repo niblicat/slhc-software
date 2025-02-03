@@ -3,7 +3,8 @@ export type Employee = {
     firstName: string,
     lastName: string,
     email: string,
-    dob: string
+    dob: string,
+    activeStatus: string
 };
 
 export type EmployeeSelectable = {
