@@ -7,13 +7,19 @@
     import { sql } from '@vercel/postgres';
 
     import type { Employee } from './MyTypes';
-	import AdminPage from './AdminPage.svelte';
+    import AdminPage from './AdminPage.svelte';
+	import { invalidateAll } from '$app/navigation';
+	import ErrorMessage from './ErrorMessage.svelte';
 
-  interface Props {
-    employees?: Array<Employee>;
-  }
+    interface Props {
+        employees?: Array<Employee>,
+        showEmployeesDropdown?: boolean,
+        showYears?: boolean,
+        year?: string,
+        employee?: Employee
+    }
 
-  let { employees = [] }: Props = $props();
+    let { employees = [], showYears = true, showEmployeesDropdown = false, year, employee }: Props = $props();
     
     const undefinedEmployee: Employee = {
         employeeID: "-1",
@@ -57,7 +63,6 @@
     let nameMenuOpen = $state(false);
 
     let inputValueYear = $state("");
-    let ear_side = "";
     let leftFrequencies = $state({
         hz500: '',
         hz1000: '',
@@ -94,11 +99,11 @@
         await addHearingData();
 
         if (success) {
-        successMessage = 'Successfully added employee hearing data! Refreshing page...'; //this still shows up even when invalid data is inputted.... 
-        setTimeout(() => location.reload(), 2000);    // Refresh the page after 2 secs
+            successMessage = 'Successfully added employee hearing data! Refreshing page...';
+            await invalidateAll(); // Refresh the page or data
         }
         else {
-        console.error('Error occurred:', errorMessage);
+            console.error('Error occurred: ', errorMessage);
         }
     }
 
@@ -112,75 +117,84 @@
     }
 
     async function addHearingData() {
-      const formData = new FormData();
-      formData.append('user', selectedEmployee.name); // Pass full name
-      formData.append('year', inputValueYear); // Year of data
-      formData.append('leftEarFrequencies', JSON.stringify(preprocessFrequencies(leftFrequencies)));
-      formData.append('rightEarFrequencies', JSON.stringify(preprocessFrequencies(rightFrequencies)));
+        const formData = new FormData();
+        formData.append('leftEarFrequencies', JSON.stringify(leftFrequencies)); // Left ear data
+        formData.append('rightEarFrequencies', JSON.stringify(rightFrequencies)); // Right ear data
 
-      // Debug: Log form data
-      console.log('Form data to be sent:', Object.fromEntries(formData.entries()));
+        const appendedEmployeeID = employee ? employee.employeeID : selectedEmployee.data.employeeID;
+        formData.append('id', appendedEmployeeID); // Pass id
+        const appendedYear = year ? year : inputValueYear;
+        formData.append('year', appendedYear); // Year of data
 
-      try {
+        // Debug: Log form data
+        console.log('Form data to be sent:', Object.fromEntries(formData.entries()));
+
         const response = await fetch('/dashboard?/addHearingData', {
-          method: 'POST',
-          body: formData,
+            method: 'POST',
+            body: formData,
         });
-    
-        // Debug: Log raw response
-        console.log('Raw server response:', response);
 
-        if (!response.ok) {
-          throw new Error(`Server returned error: ${response.statusText}`);
-        }
-
-        let serverResponse;
         try {
-          serverResponse = await response.json();
-        } 
-        catch (e) {
-          console.error('Failed to parse JSON:', e);
-          throw new Error('Invalid JSON response from server');
-        }
+            // Debug: Log raw response
+            console.log('Raw server response:', response);
 
-        console.log('Server Response:', serverResponse);
-      } 
-      catch (error: any) {
-        console.error('Error during fetch or JSON parsing:', error);
-        displayError(error.message || 'An error occurred');
-      }
-  }
+            const serverResponse = await response.json()
+
+            const result = JSON.parse(JSON.parse(serverResponse.data)[0]);
+
+            if (result["success"]) {
+                success = true;
+                await invalidateAll();
+            } else {
+                displayError(serverResponse.message ?? "Failed to add employee data.");
+            }
+        } 
+        catch (error: any) {
+            console.error('Error during fetch or JSON parsing:', error);
+            displayError(error.message ?? 'An error occurred');
+        }
+    }
 
 </script>
 
-<div class="center text-2xl">Add New Data</div>
+<p class="center text-2xl">Add New Data</p>
+
+{#if !success}
+    <p class="mt-1 text-sm font-normal text-red-600 dark:text-red-300">{errorMessage}</p>
+{/if}
+
 
 <div class="dropdown-container flex-container form"> 
-    <!-- Select Employee Dropdown -->
-    <div style="width: 300px;">
-        <Label for="employee" class="block mb-2">Select Employee</Label>
-        <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base flex justify-between items-center" style="width:300px">{selectedEmployee.name}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
-        <Dropdown bind:open={nameMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
-        <div  class="p-3">
-            <Search size="md" bind:value={inputValueName}/>
+    {#if showEmployeesDropdown}
+        <!-- Select Employee Dropdown -->
+        <div style="width: 300px;">
+            <Label for="employee" class="block mb-2">Select Employee</Label>
+            <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base flex justify-between items-center" style="width:300px">{selectedEmployee.name}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
+            <Dropdown bind:open={nameMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
+            <div  class="p-3">
+                <Search size="md" bind:value={inputValueName}/>
+            </div>
+                {#each filtered_employees as filtedEmployee}
+                    <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+                        <button type="button" class="w-full text-left" onclick={() => selectEmployee(filtedEmployee)}>
+                            {filtedEmployee.name}
+                        </button>
+                    </li>
+                {/each}
+            </Dropdown>
         </div>
-        {#each filtered_employees as employee}
-            <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
-                <button type="button" class="w-full text-left" onclick={() => selectEmployee(employee)}>
-                    {employee.name}
-                </button>
-            </li>
-        {/each}
-        </Dropdown>
-    </div>
-
-    <!-- Add Year Input -->
-    <div style="width: 300px; margin-left: 16px;">
-        <Label for="year" class="block mb-2">Add Year</Label>
-        <Input id="year" placeholder="year" bind:value={inputValueYear} />
-    </div>
+    {/if}
+    
+    {#if showYears}
+        <!-- Add Year Input -->
+        <div style="width: 300px; margin-left: 16px;">
+            <Label for="year" class="block mb-2">Add Year</Label>
+            <Input id="year" placeholder="year" bind:value={inputValueYear} />
+        </div>
+    {/if}
 </div>
-	
+
+    
 <Table> <!--  style="width: 90%; text-align: center; margin: auto;" -->
     <TableHead>
         <TableHeadCell></TableHeadCell>
@@ -193,7 +207,7 @@
         <TableHeadCell>8000 Hz</TableHeadCell>
     </TableHead>
     <TableBody tableBodyClass="divide-y">
-      <TableBodyRow>
+    <TableBodyRow>
         <TableBodyCell>Left Ear</TableBodyCell>
         <TableBodyCell><Input bind:value={leftFrequencies.hz500} placeholder="500" required /></TableBodyCell>
         <TableBodyCell><Input bind:value={leftFrequencies.hz1000} placeholder="1000" required /></TableBodyCell>
@@ -203,7 +217,7 @@
         <TableBodyCell><Input bind:value={leftFrequencies.hz6000} placeholder="6000" required /></TableBodyCell>
         <TableBodyCell><Input bind:value={leftFrequencies.hz8000} placeholder="8000" required /></TableBodyCell>
     </TableBodyRow>
-      <TableBodyRow>
+    <TableBodyRow>
         <TableBodyCell>Right Ear</TableBodyCell>
         <TableBodyCell><Input bind:value={rightFrequencies.hz500} placeholder="500" required /></TableBodyCell>
         <TableBodyCell><Input bind:value={rightFrequencies.hz1000} placeholder="1000" required /></TableBodyCell>
@@ -212,33 +226,30 @@
         <TableBodyCell><Input bind:value={rightFrequencies.hz4000} placeholder="4000" required /></TableBodyCell>
         <TableBodyCell><Input bind:value={rightFrequencies.hz6000} placeholder="6000" required /></TableBodyCell>
         <TableBodyCell><Input bind:value={rightFrequencies.hz8000} placeholder="8000" required /></TableBodyCell>
-      </TableBodyRow>
+    </TableBodyRow>
     </TableBody>
-  </Table>
+</Table>
 
-  <div class="form">
+<div class="form">
     <Button 
-      class="bg-light-bluegreen hover:bg-dark-bluegreen text-black" 
-      style="width:200px" 
-      on:click={handleSubmit}
+    class="bg-light-bluegreen hover:bg-dark-bluegreen text-black" 
+    style="width:200px" 
+    on:click={handleSubmit}
     >Submit</Button>
 </div>
 
 <div>
-  {#if successMessage}
-    <div class="text-green-600 mt-4">
-      {successMessage}
-    </div>
-  {/if}
+    {#if successMessage}
+        <div class="text-green-600 mt-4">
+        {successMessage}
+        </div>
+    {/if}
 
-  {#if !success && errorMessage}
-    <div class="text-red-600 mt-4">
-      {errorMessage}
-    </div>
-  {/if}
+    <ErrorMessage {success} {errorMessage} />
 </div>
 
 <style>
+    /* TODO: Turn these into tailwind classes */
     .center {
         margin: auto;
         width: 50%;

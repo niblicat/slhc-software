@@ -8,6 +8,7 @@
 
     import type { Admin, AdminSelectable } from './MyTypes.ts';
 	import { InfoCircleOutline } from 'flowbite-svelte-icons';
+	import ErrorMessage from './ErrorMessage.svelte';
 
     interface Props {
         admins: Array<Admin>;
@@ -77,12 +78,12 @@
                 adminsMap = adminsMap; // update the DOM
             }
             else {
-                displayError(result["message"]);
+                displayError(result["message"]  ?? "Failed to modify admin permissions.");
             }
         }
         catch (error: any) {
             let errorMessage = error.message;
-            displayError(errorMessage);
+            displayError(errorMessage ?? "An error occurred when modifying admin permissions");
         }
     }
 
@@ -147,7 +148,7 @@
                 await invalidateAll(); // Refresh the page or data
                 adminsMap = adminsMap;
             } else {
-                displayError(serverResponse.message || "Failed to delete selected users.");
+                displayError(serverResponse.message ?? "Failed to delete selected users.");
             }
         } catch (error: any) {
             displayError("An error occurred while deleting users: " + error.message);
@@ -254,9 +255,7 @@
         <caption class="p-5 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800">
             Admin Approval
             <p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">Modify the priviledges of anyone who has attempted to sign in.</p>
-            {#if !success}
-            <p class="mt-1 text-sm font-normal text-red-600 dark:text-red-300">{errorMessage}</p>
-            {/if}
+            <ErrorMessage {success} {errorMessage} />
           </caption>
         <TableHead>
             <TableHeadCell class="!p-4">

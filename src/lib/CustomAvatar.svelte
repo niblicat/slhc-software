@@ -25,5 +25,3 @@
         <DropdownItem on:click={() => signIn("google")} class="hover:text-gray-700 hover:no-underline">Log In</DropdownItem>
     {/if}
 </Dropdown>
-
-<form id="logout-form" action="/signout" method="POST" style="display: none;"></form>

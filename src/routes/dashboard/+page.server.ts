@@ -130,6 +130,8 @@ export const actions: Actions = {
     },
 
     addHearingData: async ({ request }) => {
+
+        return { success: false, message: "Test Error" };
         const formData = await request.formData();
         const user = formData.get('user') as string;
         const year = parseInt(formData.get('year') as string, 10);
