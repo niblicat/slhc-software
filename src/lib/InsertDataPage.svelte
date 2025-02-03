@@ -12,6 +12,7 @@
 	import ErrorMessage from './ErrorMessage.svelte';
 	import { error } from '@sveltejs/kit';
 	import { isNumber } from './utility';
+	import SuccessMessage from './SuccessMessage.svelte';
 
     interface Props {
         employees?: Array<Employee>,
@@ -134,6 +135,7 @@
             displayError(`The selected year is after ${currentYear}. Please choose a valid year.`);
             return;
         }
+        
         const formData = new FormData();
 
         const appendedEmployeeID = employee ? employee.employeeID : selectedEmployee.data.employeeID;
@@ -206,6 +208,7 @@
 
 <p class="center text-2xl">Add New Data</p>
 
+<SuccessMessage {success} {successMessage} />
 <ErrorMessage {success} {errorMessage} />
 
 <div class="dropdown-container flex-container form"> 

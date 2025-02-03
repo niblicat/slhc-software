@@ -14,6 +14,7 @@
     import type { Employee } from './MyTypes';
     import { invalidateAll } from '$app/navigation';
 	import { controllers } from 'chart.js';
+	import InsertEmployeePage from './InsertEmployeePage.svelte';
 
     let chart: any;
 
@@ -522,47 +523,6 @@
         }
     }
 
-    async function addEmployee(first: string, last: string, email: string, dateOfBirth: string, isInactive: string, lastActive: string) {
-        const formData = new FormData();
-        formData.append('firstName', first);
-        formData.append('lastName', last);
-        formData.append('email', email);
-        formData.append('dateOfBirth', dateOfBirth);
-        formData.append('isInactive', isInactive.toString());
-
-        if (isInactive) {
-            formData.append('lastActive', lastActive);
-        }
-        try {
-            const response = await fetch('/dashboard?/addEmployee', {
-                method: 'POST',
-                body: formData,
-        });
-    
-        // Debug: Log raw response
-        console.log('Raw server response:', response);
-
-        if (!response.ok) {
-            throw new Error(`Server returned error: ${response.statusText}`);
-        }
-
-        let serverResponse;
-        try {
-            serverResponse = await response.json();
-        } 
-        catch (e) {
-            console.error('Failed to parse JSON:', e);
-            throw new Error('Invalid JSON response from server');
-        }
-
-        console.log('Server Response:', serverResponse);
-        } 
-        catch (error: any) {
-        console.error('Error during fetch or JSON parsing:', error);
-        displayError(error.message || 'An error occurred');
-        }
-    }
-
 </script>
 
 <div class="relative dropdown-container flex space-x-4" style="margin-top: 20px; margin-left: 20px;"> 
@@ -716,42 +676,14 @@
     <Button class="bg-red-200 hover:bg-red-300 text-black">Cancel</Button>
 </Modal>
 
-<Modal title="Add Employee" bind:open={addEmployeeModal} autoclose>
-    <p>
-        <span>Please provide new employee information</span>
-        <br>
-        <br>
-            <Label for="firstName" class="block mb-2">Employee First Name</Label>
-            <Input id="firstName" bind:value={newFirstName} placeholder="First Name" required />
-          
-            <Label for="lastName" class="block mb-2">Employee Last Name</Label>
-            <Input id="lastName" bind:value={newLastName} placeholder="Last Name" required />
-
-            <Label for="email" class="block mb-2">Employee Email</Label>
-            <Input id="email" type="email" bind:value={newEmail} placeholder="email@company.com" required />
-          
-            <Label for="dateOfBirth" class="block mb-2">Employee Date of Birth</Label>
-            <Input id="dateOfBirth" type="date" bind:value={newDOB} required />
-          
-            <Label for="employmentStatus" class="block mb-2">Employment Status</Label>
-            <Radio name="employmentStatus" bind:checked={isInactive} on:change={() => isInactive = false}>Active</Radio>
-            <Radio name="employmentStatus" bind:checked={isInactive} on:change={() => isInactive = true}>Inactive</Radio>
-          
-          {#if isInactive}
-              <Label for="lastActive" class="block mb-2">Last Active Date</Label>
-              <Input id="lastActive" type="date" bind:value={newActiveStatus} />
-          {/if}
-    </p>
-    
-    <!-- TODO: CHANGE THESE COLORS -->
-    <Button 
-        class="bg-blue-200 hover:bg-blue-300 text-black" 
-        on:click={() => addEmployee(newFirstName, newLastName, newEmail, newDOB, isInactive.toString(), newActiveStatus)}
-        >
-        Confirm
-    </Button>
-
-    <Button class="bg-red-200 hover:bg-red-300 text-black">Cancel</Button>
+<Modal title="Add Employee" bind:open={addEmployeeModal}>
+    <InsertEmployeePage />
+    <svelte:fragment slot="footer">
+        <Button class="bg-red-200 hover:bg-red-300 text-black"
+            on:click={() => addEmployeeModal = false}>
+            Cancel
+        </Button>
+    </svelte:fragment>
 </Modal>
 
 <div class="flex-container">
