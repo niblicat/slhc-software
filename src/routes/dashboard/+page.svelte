@@ -61,7 +61,8 @@ toggle={toggleSidebar}
     {:else if activeURLHash == "#insert"}
         <InsertEmployeePage/>
     {:else if activeURLHash == "#data"}
-        <InsertDataPage {employees}/>
+        <InsertDataPage {employees} showEmployeesDropdown={true} 
+            showYears={true} />
     {:else}
         <!-- User who is not logged in should be redirected to home (no hash) -->
         <div class="flex justify-center p-4 text-2xl">Welcome to the dashboard</div>
