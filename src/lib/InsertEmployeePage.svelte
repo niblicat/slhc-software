@@ -22,10 +22,10 @@
     let top: HTMLElement;
 
     interface Props {
-        showTitle: boolean;
+        showTitle?: boolean;
     }
 
-    let { showTitle }: Props = $props();
+    let { showTitle = false }: Props = $props();
 
     // Employee type
     type Employee = {
