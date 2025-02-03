@@ -6,6 +6,15 @@ export type Employee = {
     dob: string
 };
 
+export type EmployeeSelectable = {
+    employeeID: string,
+    firstName: string,
+    lastName: string,
+    email: string,
+    dob: string,
+    selected: boolean
+};
+
 export type Admin = {
     name: string,
     email: string,

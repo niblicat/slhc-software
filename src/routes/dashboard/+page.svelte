@@ -55,7 +55,7 @@ toggle={toggleSidebar}
     {#if activeURLHash == "#employees"}
         <EmployeesPage {employees} />
     {:else if activeURLHash == "#mailings"}
-        <MailingPage/>
+        <MailingPage {employees} />
     {:else if activeURLHash == "#admin"}
         <AdminPage {admins} />
     {:else if activeURLHash == "#insert"}

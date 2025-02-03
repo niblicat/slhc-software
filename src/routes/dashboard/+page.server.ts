@@ -12,6 +12,8 @@ export const load: PageServerLoad = async ( event ) => {
     const employees = await getEmployeesFromDatabase();
     const admins = await getAdminsFromDatabase();
 
+    // console.log("Loaded employees:", employees); 
+
     return {
         employees: employees,
         admins: admins
@@ -368,6 +370,60 @@ export const actions: Actions = {
         catch (error: any) {
             console.log(error.message);
             return { success: false, message: 'Failed to fetch employee hearing data' };
+        }
+    },
+
+    exportEmployeeData: async ({ request }) => {
+        const formData = await request.formData();
+        const employeeID = formData.get('employeeID') as string;
+        const first_name = formData.get('first_name') as string;
+        const last_name = formData.get('last_name') as string;
+        const email = formData.get('email') as string;
+
+        try {
+            // Query to get all employee and hearing data
+            const employeeDataQuery = await sql`
+                SELECT
+                    e.employee_id,
+                    e.first_name,
+                    e.last_name,
+                    e.email,
+                    e.date_of_birth,
+                    e.last_active,
+                    h.year,
+                    h.ear,
+                    d.Hz_500,
+                    d.Hz_1000,
+                    d.Hz_2000,
+                    d.Hz_3000,
+                    d.Hz_4000,
+                    d.Hz_6000,
+                    d.Hz_8000 
+                FROM Employee e
+                LEFT JOIN Has h ON e.employee_id = h.employee_id
+                LEFT JOIN Data d ON h.data_id = d.data_id
+                ORDER BY e.employee_id, h.year, h.ear;
+            `;
+    
+            const employeeData = employeeDataQuery.rows[0];
+
+            const dataReturnTest = {
+                success: true,
+                employeeData
+            }
+
+            console.log(JSON.stringify(dataReturnTest));
+
+            JSON.stringify({
+                success: true,
+                data: employeeData.rows
+            });  
+        } catch (error: any) {
+            console.error('Error fetching employee data:', error.message);
+            return JSON.stringify({
+                success: false,
+                message: 'Failed to fetch employee data'
+            });
         }
     }
 };

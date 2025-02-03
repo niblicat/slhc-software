@@ -127,7 +127,7 @@ export async function getEmployeesFromDatabase(): Promise<Employee[]> {
     const employeeTable = await sql`SELECT * FROM Employee;`;
 
     const employees: Employee[] = employeeTable.rows.map(row => ({
-        employeeID: row.employeeID,
+        employeeID: row.employee_id,
         firstName: row.first_name,
         lastName: row.last_name,
         email: row.email,
