@@ -38,18 +38,11 @@
 
 </script>
 
-<CustomNavbar
-{user}
-hasSidebar={true} 
-sidebarOpen={sidebarOpen}
-toggle={toggleSidebar} 
-/>
+<CustomNavbar {user} hasSidebar={true} 
+    sidebarOpen={sidebarOpen} toggle={toggleSidebar} />
 
-<CustomSidebar
-sidebarOpen={sidebarOpen}
-activeUrl={activeURLHash}
-toggle={toggleSidebar}
-/>
+<CustomSidebar sidebarOpen={sidebarOpen}
+    activeUrl={activeURLHash} toggle={toggleSidebar} />
 
 <div id="content" class="h-dvh bg-gray-100 pt-16">
     {#if activeURLHash == "#employees"}
@@ -59,7 +52,7 @@ toggle={toggleSidebar}
     {:else if activeURLHash == "#admin"}
         <AdminPage {admins} />
     {:else if activeURLHash == "#insert"}
-        <InsertEmployeePage/>
+        <InsertEmployeePage showTitle />
     {:else if activeURLHash == "#data"}
         <InsertDataPage {employees} showEmployeesDropdown={true} 
             showYears={true} />

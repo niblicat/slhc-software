@@ -33,7 +33,7 @@ export const actions: Actions = {
     
     // actionsemployeeadd.ts
     addEmployee: async ({ request }) => {
-        addEmployee(request);
+        return addEmployee(request);
     },
     // ================================================
 

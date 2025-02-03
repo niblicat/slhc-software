@@ -41,9 +41,10 @@ export async function fetchYears(request: Request) {
         });
     } 
     catch (error: any) {
-        console.log(error.message);
-        console.log('Failed to fetch employee years', error.message);
-        return JSON.stringify({ success: false, message: 'Failed to fetch employee years' });
+        const errorMessage = "Failed to fetch employee years of employment: " 
+            + (error.message ?? "no error message provided by server");
+        console.error(errorMessage);
+        return { success: false, message: errorMessage };
     }
 }
 
@@ -98,7 +99,10 @@ export async function fetchEmployeeInfo(request: Request) {
         });
     } 
     catch (error: any) {
-        return JSON.stringify({ success: false, message: `Failed to fetch employee data: ${error.message ?? "no error message supplied"}` });
+        const errorMessage = "Failed to fetch employee data: " 
+            + (error.message ?? "no error message provided by server");
+        console.error(errorMessage);
+        return { success: false, message: errorMessage };
     }
 }
 
@@ -177,7 +181,7 @@ export async function fetchHearingData(request: Request) {
     catch (error: any) {
         const errorMessage = "Could not fetch hearing data: " 
             + (error.message ?? "no error message provided by server");
-        console.log(errorMessage);
+        console.error(errorMessage);
         return JSON.stringify({ success: false, message: errorMessage });
     }
 }
@@ -210,9 +214,10 @@ export async function modifyEmployeeName(request: Request) {
         }
 
     } catch (error: any) {
-        console.log(error.message);
-        console.log('Failed to update employee name');
-        return { success: false, message: 'Failed to update employee name' };
+        const errorMessage = "Failed to update employee name: " 
+            + (error.message ?? "no error message provided by server");
+        console.error(errorMessage);
+        return { success: false, message: errorMessage };
     }
 
     return JSON.stringify({
@@ -242,9 +247,10 @@ export async function modifyEmployeeEmail(request: Request) {
             return { success: false, message: 'Email was not updated. Employee ID might be incorrect.' };
         }
     } catch (error: any) {
-        console.log(error.message);
-        console.log('Failed to update employee email');
-        return { success: false, message: 'Failed to update employee email' };
+        const errorMessage = "Failed to update employee email: " 
+            + (error.message ?? "no error message provided by server");
+        console.error(errorMessage);
+        return { success: false, message: errorMessage };
     }
 
     return JSON.stringify({
@@ -274,9 +280,10 @@ export async function modifyEmployeeDOB(request: Request) {
             return { success: false, message: 'DOB was not updated. Employee ID might be incorrect.' };
         }
     } catch (error: any) {
-        console.log(error.message);
-        console.log('Failed to update employee DOB');
-        return { success: false, message: 'Failed to update employee DOB' };
+        const errorMessage = "Error modifying employee date of birth: " 
+            + (error.message ?? "no error message provided by server");
+        console.error(errorMessage);
+        return { success: false, message: errorMessage };
     }
 
     return JSON.stringify({
@@ -316,9 +323,10 @@ export async function modifyEmployeeStatus(request: Request) {
         }
     } 
     catch (error: any) {
-        console.log(error.message);
-        console.log('Failed to update employment status');
-        return { success: false, message: 'Failed to update employment status' };
+        const errorMessage = "Failed to update employment status: " 
+            + (error.message ?? "no error message provided by server");
+        console.error(errorMessage);
+        return { success: false, message: errorMessage };
     }
 
     return JSON.stringify({

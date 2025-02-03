@@ -9,6 +9,10 @@ export function isNumber(value?: string | number): boolean {
             !isNaN(Number(value.toString())));
 }
 
+export function isDate(value: unknown): value is Date {
+    return value instanceof Date && !isNaN(+value);
+}
+
 export enum AdminStatus {
     NotListed,
     NoPerms,

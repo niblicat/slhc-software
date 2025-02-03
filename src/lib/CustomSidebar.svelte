@@ -10,7 +10,6 @@
 
     let clickOutsideLock = false;
     const clickOutsideDelayMilliseconds = 500;
-    const waitForOutsideClickDelayMilliseconds = 250;
 
     $effect(() => {
         if (sidebarOpen) {
@@ -29,6 +28,7 @@
         if (sidebarOpen && !clickOutsideLock) toggle();
     }
 
+    // TODO: Make it more obvious which button is active by changing CSS
     let activeClass = 'flex items-center p-2 text-base font-normal text-primary-900 bg-primary-200 dark:bg-primary-700 rounded-lg dark:text-white hover:bg-primary-100 dark:hover:bg-gray-700';
     let nonActiveClass = 'flex items-center p-2 text-base font-normal text-green-900 rounded-lg dark:text-white hover:bg-green-100 dark:hover:bg-green-700';
 </script>

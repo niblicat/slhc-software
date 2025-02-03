@@ -19,7 +19,7 @@ export async function modifyAdminPermissions(request: Request) {
     } catch (error: any) {
         const errorMessage = "Error in database when modifying admin permissions: " 
             + (error.message ?? "no error message provided by server");
-        console.log(errorMessage);
+        console.error(errorMessage);
         return JSON.stringify({ success: false, message: errorMessage });
     }
     
@@ -43,8 +43,7 @@ export async function modifyAdminName(request: Request) {
     } catch (error: any) {
         const errorMessage = "Error in database when modifying admin name: " 
             + (error.message ?? "no error message provided by server");
-        console.log(error);
-        console.log('Failed to update admin name');
+        console.error(errorMessage);
         return JSON.stringify({ success: false, message: errorMessage });
     }
 

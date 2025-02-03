@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { Alert } from "flowbite-svelte";
+
     interface Props {
         success: boolean,
         errorMessage: string
@@ -11,5 +13,8 @@
 </script>
 
 {#if !success}
-    <p class="mt-1 text-sm font-normal text-red-600 dark:text-red-300">{errorMessage}</p>
+    <Alert color="red" border class="ml-10 mr-10">
+        <span class="font-heavy">Error!</span>
+        {errorMessage}
+    </Alert>
 {/if}

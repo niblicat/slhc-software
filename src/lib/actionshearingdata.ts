@@ -19,7 +19,7 @@ export async function checkYearAvailability(request: Request) {
     catch (error: any) {
         const errorMessage = "Error determining if the employee has exising data for this year: " 
             + (error.message ?? "no error message provided by server");
-        console.log(errorMessage);
+        console.error(errorMessage);
         return JSON.stringify({ success: false, message: errorMessage });
     }
     return JSON.stringify({
@@ -144,8 +144,10 @@ export async function addHearingData(request: Request) {
         `;
     } 
     catch (error: any) {
-        console.log("Error adding employee's hearing data:", error.message);
-        return { success: false, message: "Failed to add employee's hearing data due to error" };
+        const errorMessage = "Unable to add employee hearing data: " 
+            + (error.message ?? "no error message provided by server");
+        console.error(errorMessage);
+        return JSON.stringify({ success: false, message: errorMessage });
     }
     return JSON.stringify({
         success: true,
@@ -261,8 +263,10 @@ export async function modifyHearingData(request: Request) {
         }
 
     } catch (error: any) {
-        console.log("Error modifying employee's hearing data:", error.message);
-        return { success: false, message: "Failed to modify employee's hearing data due to error" };
+        const errorMessage = "Unable to modify employee hearing data: " 
+            + (error.message ?? "no error message provided by server");
+        console.error(errorMessage);
+        return JSON.stringify({ success: false, message: errorMessage });
     }
 
     return JSON.stringify({

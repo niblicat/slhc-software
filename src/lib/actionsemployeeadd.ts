@@ -10,14 +10,15 @@ export async function addEmployee(request: Request) {
     const lastName = formData.get('lastName') as string;
     const email = formData.get('email') as string;
     const dateOfBirth = formData.get('dateOfBirth') as string;
+    const sex = formData.get('sex') as string;
     const isInactive = formData.get('isInactive') === 'true';
     const lastActive = isInactive ? formData.get('lastActive') as string : null;
 
     try {
         // Insert new employee into the database (adjust as needed for your DB schema)
         const result = await sql`
-            INSERT INTO Employee (first_name, last_name, email, date_of_birth, last_active)
-            VALUES (${firstName}, ${lastName}, ${email}, ${dateOfBirth}, ${lastActive});
+            INSERT INTO Employee (first_name, last_name, email, date_of_birth, sex, last_active)
+            VALUES (${firstName}, ${lastName}, ${email}, ${dateOfBirth}, ${sex}, ${lastActive});
         `;
     
         if (result.rowCount === 0) {
@@ -28,7 +29,7 @@ export async function addEmployee(request: Request) {
     catch (error: any) {
         const errorMessage = "Error in database when adding employee: " 
             + (error.message ?? "no error message provided by server");
-        console.log(errorMessage);
+        console.error(errorMessage);
         return JSON.stringify({ success: false, message: errorMessage });
     }
 
