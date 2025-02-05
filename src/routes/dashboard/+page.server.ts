@@ -5,6 +5,7 @@ import { json } from '@sveltejs/kit';
 import type { Employee } from '$lib/MyTypes';
 import type { Admin } from '$lib/MyTypes';
 import { getAdminsFromDatabase, getEmployeesFromDatabase, turnAwayNonAdmins } from '$lib/utility';
+import { UserHearingScreeningHistory, HearingScreening, HearingDataOneEar, PersonSex } from "$lib/interpret";
 
 export const load: PageServerLoad = async ( event ) => {
     await turnAwayNonAdmins(event);
@@ -206,8 +207,8 @@ export const actions: Actions = {
             const leftEarFrequenciesTransformed = transformFrequencies(leftEarFrequencies);
             const rightEarFrequenciesTransformed = transformFrequencies(rightEarFrequencies);  
             
-            console.log("Left Ear Transformed:", leftEarFrequenciesTransformed);
-            console.log("Right Ear Transformed:", rightEarFrequenciesTransformed);
+            //console.log("Left Ear Transformed:", leftEarFrequenciesTransformed);
+            //console.log("Right Ear Transformed:", rightEarFrequenciesTransformed);
 
             // Insert left ear data into Data table
             const leftEarDataResult = await sql`
@@ -277,14 +278,14 @@ export const actions: Actions = {
 
             const availableYears = yearsQuery.rows.map(row => row.year);
 
-            console.log(`Employee: ${employeeID}, Employee ID: ${employeeId}, Years: ${availableYears}`);
+            //console.log(`Employee: ${employeeID}, Employee ID: ${employeeId}, Years: ${availableYears}`);
             
             const yearsReturn = {
                 success: true,
                 years: availableYears
             }
 
-            console.log(JSON.stringify(yearsReturn));
+            //console.log(JSON.stringify(yearsReturn));
  
             return JSON.stringify({
                 success: true,
@@ -309,12 +310,12 @@ export const actions: Actions = {
     
         const employeeId = employeeIdQuery.rows[0].employee_id;
     
-        console.log(`Employee NAME: ${employeeID}, Employee: ${employeeId}`);
+        //`Employee NAME: ${employeeID}, Employee: ${employeeId}`);
     
         try {
             // Query employee data
             const employeeQuery = await sql`
-                SELECT email, date_of_birth, last_active 
+                SELECT email, date_of_birth, last_active, sex 
                 FROM Employee 
                 WHERE employee_id = ${employeeId};
             `;
@@ -326,12 +327,13 @@ export const actions: Actions = {
             const employee = employeeQuery.rows[0];
             const employmentStatus = employee.last_active ? 'Inactive' : 'Active';
     
-            console.log(`Employee email: ${employee.email}, Employment Status: ${employmentStatus}, Employee: ${employeeID}, DOB: ${employee.date_of_birth}`);
+            //console.log(`Employee email: ${employee.email}, Employment Status: ${employmentStatus}, Employee: ${employeeID}, DOB: ${employee.date_of_birth}, sex: ${employee.sex}`);
 
             const employeeData = {
                 email: employee.email,
                 dob: employee.date_of_birth,
                 employmentStatus,
+                sex: employee.sex
             }
 
             const dataReturnTest = {
@@ -339,7 +341,7 @@ export const actions: Actions = {
                 employee: employeeData
             }
 
-            console.log(JSON.stringify(dataReturnTest));
+            //console.log(JSON.stringify(dataReturnTest));
     
             // Return only the necessary data in a plain object format
             return JSON.stringify({
@@ -357,22 +359,14 @@ export const actions: Actions = {
         const employeeID = formData.get('employeeID') as string;
         const year = formData.get('year') as string;
     
-        // Fetch employee_id for the selected user
-        const employeeIdQuery = await sql`SELECT employee_id FROM Employee WHERE CONCAT(first_name, ' ', last_name) = ${employeeID};`;
-        if (employeeIdQuery.rows.length === 0) {
-            throw new Error("User not found");
-        }
-    
-        const employeeId = employeeIdQuery.rows[0].employee_id;
-    
-        console.log(`Employee NAME: ${employeeID}, EmployeeID: ${employeeId}, Year: ${year}`);
+        console.log(`Employee ID: ${employeeID}, Year: ${year}`);
     
         try {
             // Get the oldest available year for the employee
             const baselineYearQuery = await sql`
                 SELECT MIN(year) AS baseline_year
                 FROM Has
-                WHERE employee_id = ${employeeId};
+                WHERE employee_id = ${employeeID};
             `;
             const baselineYear = baselineYearQuery.rows[0]?.baseline_year;
     
@@ -381,7 +375,7 @@ export const actions: Actions = {
                 SELECT d.Hz_500, d.Hz_1000, d.Hz_2000, d.Hz_3000, d.Hz_4000, d.Hz_6000, d.Hz_8000, h.ear
                 FROM Has h
                 JOIN Data d ON h.data_id = d.data_id
-                WHERE h.employee_id = ${employeeId} AND h.year = ${baselineYear};
+                WHERE h.employee_id = ${employeeID} AND h.year = ${baselineYear};
             `;
     
             // Fetch hearing data for the new year
@@ -389,7 +383,7 @@ export const actions: Actions = {
                 SELECT d.Hz_500, d.Hz_1000, d.Hz_2000, d.Hz_3000, d.Hz_4000, d.Hz_6000, d.Hz_8000, h.ear
                 FROM Has h
                 JOIN Data d ON h.data_id = d.data_id
-                WHERE h.employee_id = ${employeeId} AND h.year = ${year};
+                WHERE h.employee_id = ${employeeID} AND h.year = ${year};
             `;
     
             const baselineData = {
@@ -412,7 +406,7 @@ export const actions: Actions = {
                 },
             }
 
-            console.log(JSON.stringify(dataReturnTest));
+            //console.log(JSON.stringify(dataReturnTest));
     
             return JSON.stringify({
                 success: true,
@@ -444,7 +438,7 @@ export const actions: Actions = {
     
         const employeeId = employeeIdQuery.rows[0].employee_id;
 
-        console.log(`Employee NAME: ${employeeID}, EmployeeID: ${employeeId}, First: ${newFirstName}, Last: ${newLastName}`);
+        //console.log(`Employee NAME: ${employeeID}, EmployeeID: ${employeeId}, First: ${newFirstName}, Last: ${newLastName}`);
 
         try {
             const resultFirst = await sql`UPDATE Employee SET first_name = ${newFirstName} WHERE employee_id=${employeeId};`
@@ -480,7 +474,7 @@ export const actions: Actions = {
     
         const employeeId = employeeIdQuery.rows[0].employee_id;
 
-        console.log(`Employee NAME: ${employeeID}, EmployeeID: ${employeeId}, email: ${newEmail}`);
+        //console.log(`Employee NAME: ${employeeID}, EmployeeID: ${employeeId}, email: ${newEmail}`);
 
         try {
             const result = await sql`UPDATE Employee SET email = ${newEmail} WHERE employee_id=${employeeId};`
@@ -511,7 +505,7 @@ export const actions: Actions = {
     
         const employeeId = employeeIdQuery.rows[0].employee_id;
 
-        console.log(`Employee NAME: ${employeeID}, EmployeeID: ${employeeId}, DOB: ${newDOB}`);
+        //console.log(`Employee NAME: ${employeeID}, EmployeeID: ${employeeId}, DOB: ${newDOB}`);
 
         try {
             const result = await sql`UPDATE Employee SET date_of_birth = ${newDOB} WHERE employee_id=${employeeId};`
@@ -543,7 +537,7 @@ export const actions: Actions = {
         const employeeId = employeeIdQuery.rows[0].employee_id;
 
         const lastActiveValue = newActiveStatus === "" ? null : newActiveStatus;
-        console.log(`Employee NAME: ${employeeID}, EmployeeID: ${employeeId}, status: ${lastActiveValue}`);
+        //console.log(`Employee NAME: ${employeeID}, EmployeeID: ${employeeId}, status: ${lastActiveValue}`);
 
         try {
             if (lastActiveValue !== null) {
@@ -686,5 +680,87 @@ export const actions: Actions = {
         return JSON.stringify({
             success: true,
         });
-    },    
+    }, 
+    calculateSTS: async ({ request, fetch }) => {  // Use event-provided `fetch`
+        const formData = await request.formData();
+        const employeeID = formData.get('employee') as string;
+        const year = parseInt(formData.get('year') as string, 10);
+        const age = parseInt(formData.get('age') as string, 10); //probably going to need to calculate this depending on the year of the test
+        const sex = formData.get('sex') as string;
+
+        let RightBaselineHearingData: number[] = [];
+        let RightNewHearingData: number[] = [];
+        let LeftBaselineHearingData: number[] = [];
+        let LeftNewHearingData: number[] = [];
+
+        const extractFrequencies = (earData: Record<string, any>): number[] => {
+            const { ear, ...frequencies } = earData; // Exclude the 'ear' property
+            const values = Object.values(frequencies).map(num => Number(num) || 0); // Convert to numbers and handle NaN cases
+            return values.length === 7 ? values : [...values, ...Array(7 - values.length).fill(0)]; // Ensure exactly 7 elements
+        }; 
+    
+        if (!employeeID || !year || !age || !sex) {
+            return json({ success: false, error: "Invalid input" });
+        }
+
+        console.log(`Employee ID: ${employeeID}, sex: ${sex}, Year: ${year}, age: ${age}`);
+    
+        const hearingFormData = new FormData();
+        hearingFormData.append('employeeID', employeeID);
+        hearingFormData.append('year', year.toString());
+        const hearingResponse = await fetch('/dashboard?/fetchHearingData', {
+            method: 'POST',
+            body: hearingFormData,
+        });
+
+        const hearingData = await hearingResponse.json();
+        const result = JSON.parse(JSON.parse(hearingData.data)[0]);
+ 
+        if (result["success"]) {
+            const { baselineData, newData } = result.hearingData;
+            console.log("BASELINE", baselineData, "NEW", newData);
+
+            RightBaselineHearingData = extractFrequencies(baselineData.rightEar);
+            RightNewHearingData = extractFrequencies(newData.rightEar);
+            LeftBaselineHearingData = extractFrequencies(baselineData.leftEar);
+            LeftNewHearingData = extractFrequencies(newData.leftEar);
+        } 
+        else {
+            console.log("Error fetching hearing data for STS calculation");
+            return { success: false, message: "Failed fetching hearing data for STS calculation due to error" };
+        }
+
+        // Convert sex string to enum
+        const personSex = sex === "Male" ? PersonSex.Male : sex === "Female" ? PersonSex.Female : PersonSex.Other;
+    
+        // Convert fetched data into HearingScreening objects
+        const screenings = [
+            new HearingScreening(
+                result.hearingData.baselineYear,
+                new HearingDataOneEar(...RightBaselineHearingData), 
+                new HearingDataOneEar(...LeftBaselineHearingData)
+            ),
+            new HearingScreening(
+                year,
+                new HearingDataOneEar(...RightNewHearingData),
+                new HearingDataOneEar(...LeftNewHearingData)
+            )
+        ];      
+    
+        // Create UserHearingScreeningHistory instance
+        const userHearingHistory = new UserHearingScreeningHistory(age, personSex, year, screenings);
+    
+        // Generate hearing report
+        const hearingReport = userHearingHistory.GenerateHearingReport();
+
+        //console.log(`SCREENINGS: ${JSON.stringify(screenings)}, HISTORY: ${userHearingHistory}`);
+    
+        console.log("REPORT: ", hearingReport);
+    
+        return JSON.stringify({
+            success: true, 
+            hearingReport
+        });
+    }
+    
 };

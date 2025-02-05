@@ -8,12 +8,9 @@
     import EditIcon from './EditIcon.svelte';
     import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
     //import addEmployee from './InsertEmployeePage.svelte'; 
-    import { sql } from '@vercel/postgres';
-    import { onMount } from 'svelte';
 
     import type { Employee } from './MyTypes';
     import { invalidateAll } from '$app/navigation';
-	import { controllers } from 'chart.js';
 
     let chart: any;
 
@@ -33,9 +30,11 @@
     let selectedYear = $state("No year selected");
     let selectedEmail = $state("No data selected");
     let selectedDOB = $state("No data selected");
-    let selectAge = $state("No data selected");
+    let selectedAge = $state("No data selected");
     let selectedStatus = $state("No data selected");
-    let STSstatus = "No data selection";
+    let STSstatus = $state("No data selected");
+    let selectedSex = $state("No data selected");
+
 
     let modifiedLeftFrequencies = $state({
         hz500: '',
@@ -60,7 +59,7 @@
     let inputValueYear = $state("");
 
     let success = true;
-    let errorMessage = "";
+    let errorMessage = $state("");
 
     // Dropdown menu state
     let nameMenuOpen = $state(false);
@@ -83,7 +82,8 @@
         lastName: "Undefined",
         email: "Undefined",
         dob: "Undefined",
-        activeStatus: "Undefined"
+        activeStatus: "Undefined",
+        sex: "Undefined"
     };
 
     // used to make it easier to access employees from their full name
@@ -153,7 +153,8 @@
                 selectedDOB = dataResult.employee.dob
                     ? new Date(dataResult.employee.dob).toISOString().split('T')[0]
                     : "No selection made";
-                selectAge = calculateAge(selectedDOB);
+                selectedAge = calculateAge(selectedDOB);
+                selectedSex = dataResult.employee.sex
             }
             else {
                 selectedEmail = "Error fetching data: not a data success";
@@ -224,8 +225,33 @@
 
         try {
             await fetchUpdatedHearingData(selectedEmployee.name, year);
-        } 
-        catch (error) {
+
+            const formData = new FormData();
+            formData.append('employee', selectedEmployee.data.employeeID);
+            formData.append('year', year);
+            formData.append('age', selectedAge.toString());
+            formData.append('sex', selectedEmployee.data.sex);
+
+            const response = await fetch('/dashboard?/calculateSTS', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const serverResponse = await response.json();
+            console.log(response);
+
+            const result = JSON.parse(JSON.parse(serverResponse.data)[0]);
+    
+            if (result["success"]) {
+                success = true;
+                STSstatus = JSON.stringify(result.hearingReport);
+                console.log("STS Report:", STSstatus);
+            }
+            else {
+                throw new Error(serverResponse.error || "Failed to calculate STS");
+            }
+
+        } catch (error) {
             console.error('Error fetching hearing data:', error);
             displayError('Error fetching hearing data');
         }
@@ -237,7 +263,7 @@
         return Object.values(frequencies) as number[];  // Return all frequency values as an array of numbers
     };
 
-    //DATA CHANGE STUFF
+    //DATA MODIFICATION STUFF
     let nameModal = $state(false); // controls the appearance of the employee name change window
     let emailModal = $state(false);
     let DOBmodal = $state(false);
@@ -390,7 +416,7 @@
                 selectedDOB = selectedEmployee.data.dob
                     ? new Date(selectedEmployee.data.dob).toISOString().split('T')[0]
                     : "No selection made";
-                selectAge = calculateAge(selectedDOB);
+                selectedAge = calculateAge(selectedDOB);
             }
             else {
                 displayError(result["message"]);
@@ -472,7 +498,7 @@
     async function fetchUpdatedHearingData(employeeID: string, year: string) {
         try {
             const formData = new FormData();
-            formData.append('employeeID', selectedEmployee.name);
+            formData.append('employeeID', selectedEmployee.data.employeeID);
             formData.append('year', selectedYear);
             const response = await fetch('/dashboard?/fetchHearingData', {
                 method: 'POST',
@@ -562,7 +588,6 @@
         displayError(error.message || 'An error occurred');
         }
     }
-
 </script>
 
 <div class="relative dropdown-container flex space-x-4" style="margin-top: 20px; margin-left: 20px;"> 
@@ -617,10 +642,10 @@
         <Input type="text" id="lastName" placeholder={selectedEmployee.data.lastName} bind:value={newLastName} required />
     
     </p>
-    
-    <!-- TODO: CHANGE THESE COLORS -->
+    <svelte:fragment slot="footer">
     <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => modifyEmployeeName(selectedEmployee)}>Confirm</Button>
     <Button class="bg-red-200 hover:bg-red-300 text-black">Cancel</Button>
+    </svelte:fragment>
 </Modal>
 
 <Modal title="Change Employee Email" bind:open={emailModal} autoclose>
@@ -631,10 +656,10 @@
         <Label for="newEmail" class="mb-2">New Email</Label>
         <Input type="text" id="email" placeholder={selectedEmployee.data.email} bind:value={newEmail} required />
     </p>
-    
-    <!-- TODO: CHANGE THESE COLORS -->
+    <svelte:fragment slot="footer">
     <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => modifyEmployeeEmail(selectedEmployee)}>Confirm</Button>
     <Button class="bg-red-200 hover:bg-red-300 text-black">Cancel</Button>
+    </svelte:fragment>
 </Modal>
 
 <Modal title="Change Employee Date of Birth" bind:open={DOBmodal} autoclose>
@@ -645,10 +670,10 @@
         <Label for="newEmail" class="mb-2">New Date</Label>
         <Input type="date" id="dob" placeholder={selectedEmployee.data.dob} bind:value={newDOB} required />
     </p>
-    
-    <!-- TODO: CHANGE THESE COLORS -->
+    <svelte:fragment slot="footer">
     <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => modifyEmployeeDOB(selectedEmployee)}>Confirm</Button>
     <Button class="bg-red-200 hover:bg-red-300 text-black">Cancel</Button>
+    </svelte:fragment>
 </Modal>
 
 <Modal title="Change Employee Active Status" bind:open={activeStatusModal} autoclose>
@@ -665,13 +690,13 @@
             <Input id="lastActive" type="date" bind:value={newActiveStatus} />
         {/if}
     </p>
-    
-    <!-- TODO: CHANGE THESE COLORS -->
+    <svelte:fragment slot="footer">
     <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => modifyEmploymentStatus(selectedEmployee)}>Confirm</Button>
     <Button class="bg-red-200 hover:bg-red-300 text-black">Cancel</Button>
+    </svelte:fragment>
 </Modal>
 
-<Modal size = 'xl' title="Change Employee Hearing Data" bind:open={editDataModal} autoclose> 
+<Modal size = 'xl' title="Change Employee Hearing Data" bind:open={editDataModal}> 
     <p>
         <span>Please provide updated data points for {selectedEmployee.data.firstName} {selectedEmployee.data.lastName} during year {selectedYear}</span>
         <br>
@@ -711,9 +736,21 @@
             </TableBody>
         </Table>
     </p>
-    <!-- TODO: CHANGE THESE COLORS -->
-    <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => modifyHearingData(selectedEmployee, selectedYear)}>Confirm</Button>
-    <Button class="bg-red-200 hover:bg-red-300 text-black">Cancel</Button>
+
+    {#if errorMessage}
+    <p class="text-red-500">{errorMessage}</p> <!-- Display error message if any -->
+    {/if}
+
+    <svelte:fragment slot="footer">
+        <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => { 
+            modifyHearingData(selectedEmployee, selectedYear).then(() => {
+                if (!errorMessage) {
+                    editDataModal = false;  // Close modal if no error
+                }
+            });
+        }}>Confirm</Button>        
+    <Button class="bg-red-200 hover:bg-red-300 text-black" on:click={() => editDataModal = false}>Cancel</Button>
+    </svelte:fragment>
 </Modal>
 
 <Modal title="Add Employee" bind:open={addEmployeeModal} autoclose>
@@ -742,16 +779,15 @@
               <Input id="lastActive" type="date" bind:value={newActiveStatus} />
           {/if}
     </p>
-    
-    <!-- TODO: CHANGE THESE COLORS -->
+    <svelte:fragment slot="footer">
     <Button 
         class="bg-blue-200 hover:bg-blue-300 text-black" 
         on:click={() => addEmployee(newFirstName, newLastName, newEmail, newDOB, isInactive.toString(), newActiveStatus)}
         >
         Confirm
     </Button>
-
     <Button class="bg-red-200 hover:bg-red-300 text-black">Cancel</Button>
+    </svelte:fragment>
 </Modal>
 
 <div class="flex-container">
@@ -774,25 +810,14 @@
                 <EditIcon on:edit={() => showDOBChangeModal(selectedEmployee.data)}/> 
             {/if} 
         </p> <br>
-        <p>Age: {selectAge}</p> <br>
-        <p>Employment Status: {selectedStatus} <!-- inactive to active is not working -->
+        <p>Age: {selectedAge}</p> <br>
+        <p>Sex: {selectedSex}</p> <br>
+        <p>Employment Status: {selectedStatus} <!-- inactive to active is not working // double check --> 
             {#if selectedEmployee.data.employeeID !== "-1"} 
                 <EditIcon on:edit={() => showActiveStatusChangeModal(selectedEmployee.data)}/>
             {/if} 
         </p> <br>
         <p class="text-3xl">STS Status: {STSstatus}</p> <br>
-
-        <!-- Testing Purposes -->
-        <!-- <br><br><br>
-        <p>Testing Output</p>
-        <p>HEARING DATA TEST NEW R: {RightNewHearingData}</p> <br>
-        <p>HEARING DATA TEST NEW L: {LeftNewHearingData}</p> <br>
-        <p>HEARING DATA TEST BL R: {RightBaselineHearingData}</p> <br>
-        <p>HEARING DATA TEST BL L: {LeftBaselineHearingData}</p> <br>
-
-        <p>HEARING DATA TEST MODIFIED R: {modifiedRightFrequencies.hz500}</p> <br> 
-        <p>HEARING DATA TEST MODIFIED L: {modifiedLeftFrequencies.hz500}</p> <br> -->
-       
     </section>
 
     <!-- Chart Section -->

@@ -4,7 +4,8 @@ export type Employee = {
     lastName: string,
     email: string,
     dob: string,
-    activeStatus: string
+    activeStatus: string,
+    sex: string
 };
 
 export type Admin = {
