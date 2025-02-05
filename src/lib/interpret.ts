@@ -25,13 +25,13 @@ function findAverage(...args: number[]) {
 
 // used to identify hearing anomolies for each ear
 enum AnomolyStatus {
-    None,
-    Base,
-    Same,
-    Better,
-    Worse,
-    STS,
-    Warning
+    None = 0,
+    Base = 1,
+    Same = 2,
+    Better = 3,
+    Worse = 4,
+    STS = 5,
+    Warning = 6
 }
 
 class EarAnomolyStatus {

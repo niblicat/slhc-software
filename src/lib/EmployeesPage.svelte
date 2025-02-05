@@ -229,10 +229,10 @@
             const formData = new FormData();
             formData.append('employee', selectedEmployee.data.employeeID);
             formData.append('year', year);
-            formData.append('age', selectedAge.toString());
+            formData.append('age', selectedAge.toString()); //will probably need to send DOB in order to calculate age depending on year....
             formData.append('sex', selectedEmployee.data.sex);
 
-            const response = await fetch('/dashboard?/calculateSTS', {
+            const response = await fetch('/dashboard?/calculateSTS', { 
                 method: 'POST',
                 body: formData,
             });

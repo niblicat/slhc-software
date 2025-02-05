@@ -681,80 +681,167 @@ export const actions: Actions = {
             success: true,
         });
     }, 
-    calculateSTS: async ({ request, fetch }) => {  // Use event-provided `fetch`
+    // calculateSTS: async ({ request, fetch }) => {  // Use event-provided `fetch`
+    //     const formData = await request.formData();
+    //     const employeeID = formData.get('employee') as string;
+    //     const year = parseInt(formData.get('year') as string, 10);
+    //     const age = parseInt(formData.get('age') as string, 10); //probably going to need to calculate this depending on the year of the test
+    //     const sex = formData.get('sex') as string;
+
+    //     let RightBaselineHearingData: number[];
+    //     let RightNewHearingData: number[];
+    //     let LeftBaselineHearingData: number[];
+    //     let LeftNewHearingData: number[];
+
+    //     const extractFrequencies = (earData: Record<string, any>): number[] => {
+    //         const { ear, ...frequencies } = earData; // Exclude the 'ear' property
+    //         const values = Object.values(frequencies).map(num => Number(num) || 0); // Convert to numbers and handle NaN cases
+    //         return values.length === 7 ? values : [...values, ...Array(7 - values.length).fill(0)]; // Ensure exactly 7 elements
+    //     }; 
+    
+    //     if (!employeeID || !year || !age || !sex) {
+    //         return json({ success: false, error: "Invalid input" });
+    //     }
+
+    //     console.log(`Employee ID: ${employeeID}, sex: ${sex}, Year: ${year}, age: ${age}`);
+    
+    //     const hearingFormData = new FormData();
+    //     hearingFormData.append('employeeID', employeeID);
+    //     hearingFormData.append('year', year.toString());
+    //     const hearingResponse = await fetch('/dashboard?/fetchHearingData', {
+    //         method: 'POST',
+    //         body: hearingFormData,
+    //     });
+
+    //     const hearingData = await hearingResponse.json();
+    //     const result = JSON.parse(JSON.parse(hearingData.data)[0]);
+ 
+    //     if (result["success"]) {
+    //         const { baselineData, newData } = result.hearingData;
+    //         console.log("BASELINE", baselineData, "NEW", newData);
+
+    //         RightBaselineHearingData = extractFrequencies(baselineData.rightEar);
+    //         RightNewHearingData = extractFrequencies(newData.rightEar);
+    //         LeftBaselineHearingData = extractFrequencies(baselineData.leftEar);
+    //         LeftNewHearingData = extractFrequencies(newData.leftEar);
+    //     } 
+    //     else {
+    //         console.log("Error fetching hearing data for STS calculation");
+    //         return { success: false, message: "Failed fetching hearing data for STS calculation due to error" };
+    //     }
+
+    //     // Convert sex string to enum
+    //     const personSex = sex === "Male" ? PersonSex.Male : sex === "Female" ? PersonSex.Female : PersonSex.Other;
+    
+    //     // Convert fetched data into HearingScreening objects
+    //     const screenings = [
+    //         new HearingScreening(
+    //             result.hearingData.baselineYear,
+    //             new HearingDataOneEar(...RightBaselineHearingData), 
+    //             new HearingDataOneEar(...LeftBaselineHearingData)
+    //         ),
+    //         new HearingScreening(
+    //             year,
+    //             new HearingDataOneEar(...RightNewHearingData),
+    //             new HearingDataOneEar(...LeftNewHearingData)
+    //         )
+    //     ];      
+    
+    //     // Create UserHearingScreeningHistory instance
+    //     const userHearingHistory = new UserHearingScreeningHistory(age, personSex, year, screenings);
+    
+    //     // Generate hearing report
+    //     const hearingReport = userHearingHistory.GenerateHearingReport();
+
+    //     //console.log(`SCREENINGS: ${JSON.stringify(screenings)}, HISTORY: ${userHearingHistory}`);
+    
+    //     console.log("REPORT: ", hearingReport);
+    
+    //     return JSON.stringify({
+    //         success: true, 
+    //         hearingReport
+    //     });
+    // },
+
+    calculateSTS: async ({ request }) => { 
         const formData = await request.formData();
         const employeeID = formData.get('employee') as string;
         const year = parseInt(formData.get('year') as string, 10);
         const age = parseInt(formData.get('age') as string, 10); //probably going to need to calculate this depending on the year of the test
         const sex = formData.get('sex') as string;
 
-        let RightBaselineHearingData: number[] = [];
-        let RightNewHearingData: number[] = [];
-        let LeftBaselineHearingData: number[] = [];
-        let LeftNewHearingData: number[] = [];
-
-        const extractFrequencies = (earData: Record<string, any>): number[] => {
-            const { ear, ...frequencies } = earData; // Exclude the 'ear' property
-            const values = Object.values(frequencies).map(num => Number(num) || 0); // Convert to numbers and handle NaN cases
-            return values.length === 7 ? values : [...values, ...Array(7 - values.length).fill(0)]; // Ensure exactly 7 elements
-        }; 
-    
         if (!employeeID || !year || !age || !sex) {
             return json({ success: false, error: "Invalid input" });
         }
 
         console.log(`Employee ID: ${employeeID}, sex: ${sex}, Year: ${year}, age: ${age}`);
     
-        const hearingFormData = new FormData();
-        hearingFormData.append('employeeID', employeeID);
-        hearingFormData.append('year', year.toString());
-        const hearingResponse = await fetch('/dashboard?/fetchHearingData', {
-            method: 'POST',
-            body: hearingFormData,
-        });
+        try {
+            const dataQuery = await sql`
+                SELECT d.Hz_500, d.Hz_1000, d.Hz_2000, d.Hz_3000, d.Hz_4000, d.Hz_6000, d.Hz_8000, h.ear, h.year
+                FROM Has h
+                JOIN Data d ON h.data_id = d.data_id
+                WHERE h.employee_id = ${employeeID}
+                ORDER BY h.year ASC;
+            `;
+            console.log("query: ", JSON.stringify(dataQuery));
 
-        const hearingData = await hearingResponse.json();
-        const result = JSON.parse(JSON.parse(hearingData.data)[0]);
- 
-        if (result["success"]) {
-            const { baselineData, newData } = result.hearingData;
-            console.log("BASELINE", baselineData, "NEW", newData);
+            // Group data by year
+            const hearingDataByYear: Record<number, { leftEar: number[], rightEar: number[] }> = {};
+            console.log("hearingDataByYear: ", hearingDataByYear);
 
-            RightBaselineHearingData = extractFrequencies(baselineData.rightEar);
-            RightNewHearingData = extractFrequencies(newData.rightEar);
-            LeftBaselineHearingData = extractFrequencies(baselineData.leftEar);
-            LeftNewHearingData = extractFrequencies(newData.leftEar);
-        } 
-        else {
-            console.log("Error fetching hearing data for STS calculation");
-            return { success: false, message: "Failed fetching hearing data for STS calculation due to error" };
-        }
+            dataQuery.rows.forEach(row => {
+                const yearKey = Number(row.year);
+                const earSide = row.ear.trim().toLowerCase();  // Normalize ear value
+            
+                console.log(`Processing year: ${yearKey}, ear: ${earSide}, data:`, row);
+            
+                if (!hearingDataByYear[yearKey]) {
+                    hearingDataByYear[yearKey] = { leftEar: new Array(7).fill(0), rightEar: new Array(7).fill(0) };
+                }
+            
+                const frequencies = [
+                    Number(row.hz_500) || 0, 
+                    Number(row.hz_1000) || 0, 
+                    Number(row.hz_2000) || 0, 
+                    Number(row.hz_3000) || 0, 
+                    Number(row.hz_4000) || 0, 
+                    Number(row.hz_6000) || 0, 
+                    Number(row.hz_8000) || 0
+                ];
+                
+                console.log(`Frequencies for ${earSide} ear in ${yearKey}:`, frequencies);
+            
+                if (earSide === 'right') {
+                    hearingDataByYear[yearKey].rightEar = frequencies;
+                } else if (earSide === 'left') {
+                    hearingDataByYear[yearKey].leftEar = frequencies;
+                } else {
+                    console.warn(`Unexpected ear value: ${row.ear}`);
+                }
+            });
+            
+            console.log("Final grouped data:", JSON.stringify(hearingDataByYear, null, 2));
 
+        // Convert fetched data into HearingScreening objects
+        const screenings: HearingScreening[] = Object.entries(hearingDataByYear).map(([year, ears]) => 
+            new HearingScreening(
+                Number(year),
+                new HearingDataOneEar(...ears.leftEar),
+                new HearingDataOneEar(...ears.rightEar)
+            )
+        );   
+        
+        console.log("SCREENINGS: ", screenings);
+        
         // Convert sex string to enum
         const personSex = sex === "Male" ? PersonSex.Male : sex === "Female" ? PersonSex.Female : PersonSex.Other;
     
-        // Convert fetched data into HearingScreening objects
-        const screenings = [
-            new HearingScreening(
-                result.hearingData.baselineYear,
-                new HearingDataOneEar(...RightBaselineHearingData), 
-                new HearingDataOneEar(...LeftBaselineHearingData)
-            ),
-            new HearingScreening(
-                year,
-                new HearingDataOneEar(...RightNewHearingData),
-                new HearingDataOneEar(...LeftNewHearingData)
-            )
-        ];      
-    
         // Create UserHearingScreeningHistory instance
         const userHearingHistory = new UserHearingScreeningHistory(age, personSex, year, screenings);
-    
         // Generate hearing report
         const hearingReport = userHearingHistory.GenerateHearingReport();
 
-        //console.log(`SCREENINGS: ${JSON.stringify(screenings)}, HISTORY: ${userHearingHistory}`);
-    
         console.log("REPORT: ", hearingReport);
     
         return JSON.stringify({
@@ -762,5 +849,10 @@ export const actions: Actions = {
             hearingReport
         });
     }
-    
+    catch (error: any) {
+        console.log(error.message);
+        console.log('Failed to calculate STS status');
+        return { success: false, message: 'Failed to calculate STS status due to error' };
+    }
+    }
 };
