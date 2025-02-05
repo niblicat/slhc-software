@@ -13,7 +13,7 @@
 
 
 <Avatar id="avatar-menu" class="cursor-pointer shadow-sm shadow-black"
-    src={user.avatar.replace(/=.*/, '')} size="md" />
+    src={user.avatar.replace(/=(.*)/, '')} size="md" />
 <Dropdown placement="bottom" triggeredBy="#avatar-menu">
     <DropdownHeader>
         <span class="block text-sm">{user.name}</span>
@@ -25,5 +25,3 @@
         <DropdownItem on:click={() => signIn("google")} class="hover:text-gray-700 hover:no-underline">Log In</DropdownItem>
     {/if}
 </Dropdown>
-
-<form id="logout-form" action="/signout" method="POST" style="display: none;"></form>

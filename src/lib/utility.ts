@@ -3,6 +3,16 @@ import { redirect, type RequestEvent, type Server, type ServerLoadEvent } from "
 import { sql } from "@vercel/postgres";
 import type { Admin, Employee } from "./MyTypes";
 
+export function isNumber(value?: string | number): boolean {
+    return ((value != null) &&
+            (value !== '') &&
+            !isNaN(Number(value.toString())));
+}
+
+export function isDate(value: unknown): value is Date {
+    return value instanceof Date && !isNaN(+value);
+}
+
 export enum AdminStatus {
     NotListed,
     NoPerms,
@@ -127,12 +137,12 @@ export async function getEmployeesFromDatabase(): Promise<Employee[]> {
     const employeeTable = await sql`SELECT * FROM Employee;`;
 
     const employees: Employee[] = employeeTable.rows.map(row => ({
+        activeStatus: row.last_active,
         employeeID: row.employee_id,
         firstName: row.first_name,
         lastName: row.last_name,
         email: row.email,
         dob: row.date_of_birth,
-        activeStatus: row.last_active,
         sex: row.sex
     }));
 
@@ -145,7 +155,7 @@ export async function getAdminsFromDatabase(): Promise<Admin[]> {
     const admins: Admin[] = adminTable.rows.map(row => ({
         name: row.name,
         email: row.userstring,
-        googleID: row.id,
+        id: row.id,
         isOP: row.isop,
         selected: false
     }));

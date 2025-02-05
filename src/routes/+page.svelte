@@ -38,16 +38,13 @@
 
 </script>
 
-<CustomNavbar
-{user}
-hasSidebar={false} 
-sidebarOpen={sidebarOpen}
-on:toggle={toggleSidebar} 
-/>
+<CustomNavbar {user} hasSidebar={false} 
+    sidebarOpen={sidebarOpen} toggle={toggleSidebar} />
 
 <div id="content" class="h-dvh bg-gray-100 pt-16">
     {#if loginStatus != LoginStatus.None}
-        <Alert color={badLogin ? "red" : "yellow"}>
+        <Alert color={badLogin ? "red" : "yellow"} 
+            class="ml-10 mr-10">
             {loginMessages[loginStatus]}
         </Alert>
     {/if}
