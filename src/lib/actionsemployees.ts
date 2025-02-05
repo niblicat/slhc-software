@@ -1,4 +1,6 @@
 import { sql } from '@vercel/postgres';
+import { UserHearingScreeningHistory, HearingScreening, HearingDataOneEar, PersonSex } from "./interpret";
+
 
 interface Request {
     formData: () => Promise<FormData>;
@@ -332,4 +334,95 @@ export async function modifyEmployeeStatus(request: Request) {
     return JSON.stringify({
         success: true,
     });
+}
+
+export async function calculateSTS(request: Request) {
+    const formData = await request.formData();
+    const employeeID = formData.get('employee') as string;
+    const year = parseInt(formData.get('year') as string, 10);
+    const age = parseInt(formData.get('age') as string, 10); //probably going to need to calculate this depending on the year of the test
+    const sex = formData.get('sex') as string;
+
+    if (!employeeID || !year || !age || !sex) {
+        return json({ success: false, error: "Invalid input" });
+    }
+
+    console.log(`Employee ID: ${employeeID}, sex: ${sex}, Year: ${year}, age: ${age}`);
+
+    try {
+        const dataQuery = await sql`
+            SELECT d.Hz_500, d.Hz_1000, d.Hz_2000, d.Hz_3000, d.Hz_4000, d.Hz_6000, d.Hz_8000, h.ear, h.year
+            FROM Has h
+            JOIN Data d ON h.data_id = d.data_id
+            WHERE h.employee_id = ${employeeID}
+            ORDER BY h.year ASC;
+        `;
+        console.log("query: ", JSON.stringify(dataQuery));
+
+        // Group data by year
+        const hearingDataByYear: Record<number, { leftEar: number[], rightEar: number[] }> = {};
+        console.log("hearingDataByYear: ", hearingDataByYear);
+
+        dataQuery.rows.forEach(row => {
+            const yearKey = Number(row.year);
+            const earSide = row.ear.trim().toLowerCase();  // Normalize ear value
+        
+            console.log(`Processing year: ${yearKey}, ear: ${earSide}, data:`, row);
+        
+            if (!hearingDataByYear[yearKey]) {
+                hearingDataByYear[yearKey] = { leftEar: new Array(7).fill(0), rightEar: new Array(7).fill(0) };
+            }
+        
+            const frequencies = [
+                Number(row.hz_500) || 0, 
+                Number(row.hz_1000) || 0, 
+                Number(row.hz_2000) || 0, 
+                Number(row.hz_3000) || 0, 
+                Number(row.hz_4000) || 0, 
+                Number(row.hz_6000) || 0, 
+                Number(row.hz_8000) || 0
+            ];
+            
+            //console.log(`Frequencies for ${earSide} ear in ${yearKey}:`, frequencies);
+        
+            if (earSide === 'right') {
+                hearingDataByYear[yearKey].rightEar = frequencies;
+            } else if (earSide === 'left') {
+                hearingDataByYear[yearKey].leftEar = frequencies;
+            } else {
+                console.warn(`Unexpected ear value: ${row.ear}`);
+            }
+        });
+        
+    // Convert fetched data into HearingScreening objects
+    const screenings: HearingScreening[] = Object.entries(hearingDataByYear).map(([year, ears]) => 
+        new HearingScreening(
+            Number(year),
+            new HearingDataOneEar(...ears.leftEar),
+            new HearingDataOneEar(...ears.rightEar)
+        )
+    );   
+    
+    //console.log("SCREENINGS: ", screenings);
+    
+    // Convert sex string to enum
+    const personSex = sex === "Male" ? PersonSex.Male : sex === "Female" ? PersonSex.Female : PersonSex.Other;
+
+    // Create UserHearingScreeningHistory instance
+    const userHearingHistory = new UserHearingScreeningHistory(age, personSex, year, screenings);
+    // Generate hearing report
+    const hearingReport = userHearingHistory.GenerateHearingReport();
+
+    console.log("REPORT: ", hearingReport);
+
+    return JSON.stringify({
+        success: true, 
+        hearingReport
+    });
+}
+catch (error: any) {
+    console.log(error.message);
+    console.log('Failed to calculate STS status');
+    return { success: false, message: 'Failed to calculate STS status due to error' };
+}
 }
