@@ -810,7 +810,7 @@ export const actions: Actions = {
                     Number(row.hz_8000) || 0
                 ];
                 
-                console.log(`Frequencies for ${earSide} ear in ${yearKey}:`, frequencies);
+                //console.log(`Frequencies for ${earSide} ear in ${yearKey}:`, frequencies);
             
                 if (earSide === 'right') {
                     hearingDataByYear[yearKey].rightEar = frequencies;
@@ -821,8 +821,6 @@ export const actions: Actions = {
                 }
             });
             
-            console.log("Final grouped data:", JSON.stringify(hearingDataByYear, null, 2));
-
         // Convert fetched data into HearingScreening objects
         const screenings: HearingScreening[] = Object.entries(hearingDataByYear).map(([year, ears]) => 
             new HearingScreening(
@@ -832,7 +830,7 @@ export const actions: Actions = {
             )
         );   
         
-        console.log("SCREENINGS: ", screenings);
+        //console.log("SCREENINGS: ", screenings);
         
         // Convert sex string to enum
         const personSex = sex === "Male" ? PersonSex.Male : sex === "Female" ? PersonSex.Female : PersonSex.Other;

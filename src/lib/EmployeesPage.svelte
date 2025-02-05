@@ -8,6 +8,8 @@
     import EditIcon from './EditIcon.svelte';
     import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
     //import addEmployee from './InsertEmployeePage.svelte'; 
+    import { AnomolyStatus } from "./interpret";
+
 
     import type { Employee } from './MyTypes';
     import { invalidateAll } from '$app/navigation';
@@ -32,7 +34,8 @@
     let selectedDOB = $state("No data selected");
     let selectedAge = $state("No data selected");
     let selectedStatus = $state("No data selected");
-    let STSstatus = $state("No data selected");
+    let STSstatusRight = $state("No data selected");
+    let STSstatusLeft = $state("No data selected");
     let selectedSex = $state("No data selected");
 
 
@@ -244,10 +247,22 @@
     
             if (result["success"]) {
                 success = true;
-                STSstatus = JSON.stringify(result.hearingReport);
-                console.log("STS Report:", STSstatus);
-            }
-            else {
+
+                // Find the test result that matches the selected year
+                const selectedYearReport = result.hearingReport.find((report: any) => report.reportYear === parseInt(year, 10));
+
+                if (selectedYearReport) {
+                    STSstatusRight = GetAnomolyStatusText(selectedYearReport.rightStatus);
+                    STSstatusLeft = GetAnomolyStatusText(selectedYearReport.leftStatus);
+
+                    console.log(`STS Report for ${year} - RIGHT:`, STSstatusRight);
+                    console.log(`STS Report for ${year} - LEFT:`, STSstatusLeft);
+                } else {
+                    console.warn(`No hearing report found for year: ${year}`);
+                    STSstatusRight = "No Data";
+                    STSstatusLeft = "No Data";
+                }
+            } else {
                 throw new Error(serverResponse.error || "Failed to calculate STS");
             }
 
@@ -255,6 +270,11 @@
             console.error('Error fetching hearing data:', error);
             displayError('Error fetching hearing data');
         }
+    };
+
+    // Function to get the readable status
+    const GetAnomolyStatusText = (status: AnomolyStatus): string => {
+        return AnomolyStatus[status] || "Unknown";
     };
 
     // Helper function to extract frequencies
@@ -817,7 +837,8 @@
                 <EditIcon on:edit={() => showActiveStatusChangeModal(selectedEmployee.data)}/>
             {/if} 
         </p> <br>
-        <p class="text-3xl">STS Status: {STSstatus}</p> <br>
+        <p class="text-3xl">STS Status Right: {STSstatusRight}</p> <br>
+        <p class="text-3xl">STS Status Left: {STSstatusLeft}</p> <br>
     </section>
 
     <!-- Chart Section -->

@@ -24,7 +24,7 @@ function findAverage(...args: number[]) {
 }
 
 // used to identify hearing anomolies for each ear
-enum AnomolyStatus {
+export enum AnomolyStatus {
     None = 0,
     Base = 1,
     Same = 2,
