@@ -7,10 +7,7 @@
     import { Footer } from 'flowbite-svelte';
     import EditIcon from './EditIcon.svelte';
     import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
-    //import addEmployee from './InsertEmployeePage.svelte'; 
     import { AnomolyStatus } from "./interpret";
-
-
     import type { Employee } from './MyTypes';
     import { invalidateAll } from '$app/navigation';
 	import { controllers } from 'chart.js';
@@ -39,7 +36,6 @@
     let STSstatusRight = $state("No data selected");
     let STSstatusLeft = $state("No data selected");
     let selectedSex = $state("No data selected");
-
 
     let modifiedLeftFrequencies = $state({
         hz500: '',
@@ -274,7 +270,7 @@
         }
     };
 
-    // Function to get the readable status
+    // Helper function to get the readable status
     const GetAnomolyStatusText = (status: AnomolyStatus): string => {
         return AnomolyStatus[status] || "Unknown";
     };

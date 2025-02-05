@@ -113,22 +113,15 @@ export async function fetchHearingData(request: Request) {
     const employeeID = formData.get('employeeID') as string;
     const year = formData.get('year') as string;
 
-    // Fetch employee_id for the selected user
-    const employeeIdQuery = await sql`SELECT employee_id FROM Employee WHERE CONCAT(first_name, ' ', last_name) = ${employeeID};`;
-    if (employeeIdQuery.rows.length === 0) {
-        throw new Error("User not found");
-    }
 
-    const employeeId = employeeIdQuery.rows[0].employee_id;
-
-    console.log(`Employee NAME: ${employeeID}, EmployeeID: ${employeeId}, Year: ${year}`);
+    console.log(`Employee ID: ${employeeID} Year: ${year}`);
 
     try {
         // Get the oldest available year for the employee
         const baselineYearQuery = await sql`
             SELECT MIN(year) AS baseline_year
             FROM Has
-            WHERE employee_id = ${employeeId};
+            WHERE employee_id = ${employeeID};
         `;
         const baselineYear = baselineYearQuery.rows[0]?.baseline_year;
 
@@ -137,7 +130,7 @@ export async function fetchHearingData(request: Request) {
             SELECT d.Hz_500, d.Hz_1000, d.Hz_2000, d.Hz_3000, d.Hz_4000, d.Hz_6000, d.Hz_8000, h.ear
             FROM Has h
             JOIN Data d ON h.data_id = d.data_id
-            WHERE h.employee_id = ${employeeId} AND h.year = ${baselineYear};
+            WHERE h.employee_id = ${employeeID} AND h.year = ${baselineYear};
         `;
 
         // Fetch hearing data for the new year
@@ -145,7 +138,7 @@ export async function fetchHearingData(request: Request) {
             SELECT d.Hz_500, d.Hz_1000, d.Hz_2000, d.Hz_3000, d.Hz_4000, d.Hz_6000, d.Hz_8000, h.ear
             FROM Has h
             JOIN Data d ON h.data_id = d.data_id
-            WHERE h.employee_id = ${employeeId} AND h.year = ${year};
+            WHERE h.employee_id = ${employeeID} AND h.year = ${year};
         `;
 
         const baselineData = {
