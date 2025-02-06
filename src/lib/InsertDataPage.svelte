@@ -4,25 +4,21 @@
     import { Dropdown, Search, Button } from 'flowbite-svelte';
     import { ChevronDownOutline } from 'flowbite-svelte-icons';
     import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
-    import { sql } from '@vercel/postgres';
 
     import type { Employee } from './MyTypes';
-    import AdminPage from './AdminPage.svelte';
-	import { invalidateAll } from '$app/navigation';
-	import ErrorMessage from './ErrorMessage.svelte';
-	import { error } from '@sveltejs/kit';
-	import { isNumber } from './utility';
-	import SuccessMessage from './SuccessMessage.svelte';
+    import { invalidateAll } from '$app/navigation';
+    import ErrorMessage from './ErrorMessage.svelte';
+    import { isNumber } from './utility';
+    import SuccessMessage from './SuccessMessage.svelte';
 
     interface Props {
         employees?: Array<Employee>,
-        showEmployeesDropdown?: boolean,
-        showYears?: boolean,
         year?: string,
         employee?: Employee
+        allowModify?: boolean
     }
 
-    let { employees = [], showYears = true, showEmployeesDropdown = false, year, employee }: Props = $props();
+    let { employees = [], year, employee, allowModify = false }: Props = $props();
 
     const undefinedEmployee: Employee = {
         employeeID: "-1",
@@ -70,7 +66,7 @@
     let nameMenuOpen = $state(false);
 
     let inputValueYear = $state("");
-    let leftFrequencies = $state({
+    const blankFrequencies = {
         hz500: "",
         hz1000: "",
         hz2000: "",
@@ -78,16 +74,56 @@
         hz4000: "",
         hz6000: "",
         hz8000: ""
-    });
-    let rightFrequencies = $state({
-        hz500: "",
-        hz1000: "",
-        hz2000: "",
-        hz3000: "",
-        hz4000: "",
-        hz6000: "",
-        hz8000: ""
-    });
+    };
+
+    let leftFrequencies = $state(blankFrequencies);
+    let rightFrequencies = $state(blankFrequencies);
+
+    $effect(() => {
+        // need to get hearing data for both ears ear
+        // put that hearing data into the left and right frequencies
+        if (employee && year) fetchHearingDataForYearFromServer(employee.employeeID, year);
+    })
+
+
+    let lastPulledLeftFrequencies = $state(blankFrequencies);
+    let lastPulledRightFrequencies = $state(blankFrequencies);
+
+    function assignFrequencies(leftEar: any, rightEar: any) {
+        leftFrequencies = leftEar;
+        lastPulledLeftFrequencies = leftEar;
+        rightFrequencies = rightEar;
+        lastPulledRightFrequencies = rightEar;
+    }
+
+    async function fetchHearingDataForYearFromServer(employeeID: string, year: string) {
+        try {
+            const formData = new FormData();
+            formData.append('employeeID', employeeID);
+            formData.append('year', year);
+
+            const response = await fetch('/dashboard?/fetchHearingDataForYear', {
+                method: 'POST',
+                body: formData,
+            });
+            
+            const serverResponse = await response.json();
+            const result = JSON.parse(JSON.parse(serverResponse.data)[0]);
+            
+            if (result["success"]) {
+                const { year, leftEar, rightEar } = result.hearingData;
+                assignFrequencies(leftEar, rightEar);
+
+            } 
+            else {
+                displayError('Failed to fetch hearing data for the selected year');
+            }
+        }
+        catch (error) {
+            console.error('Error fetching hearing data:', error);
+            displayError('Error fetching hearing data');
+        }
+    }
 
     let success = $state(true);
     let errorMessage = $state("");
@@ -102,7 +138,7 @@
         return Object.fromEntries(
             Object.entries(frequencies).map(([key, value]) => [
                 key, 
-                value.trim().toUpperCase() === "CNT" ? null : value
+                typeof value === 'string' && value.trim().toUpperCase() === "CNT" ? null : value
             ])
         );
     }
@@ -172,6 +208,8 @@
         formData.append('leftEarFrequencies', JSON.stringify(preprocessFrequencies(leftFrequencies))); // Left ear data
         formData.append('rightEarFrequencies', JSON.stringify(preprocessFrequencies(rightFrequencies))); // Right ear data
 
+        formData.append('modify', allowModify.toString()); // Right ear data
+
         const appendedEmployeeID = employee ? employee.employeeID : selectedEmployee.data.employeeID;
         formData.append('id', appendedEmployeeID); // Pass id
         const appendedYear = year ? year : inputValueYear;
@@ -204,114 +242,122 @@
         }
     }
 
+    function assignColorBasedOnValue(freq: string, oldFreq: string): "base" | "green" | "red" | undefined {
+        if (!(isNumber(freq) || freq == "CNT")) {
+            console.log(freq)
+            return "red";
+        }
+        const freqInt = parseInt(freq);
+        if (freqInt < -10 || freqInt > 90) {
+            return "red";
+        }
+        if (freq != oldFreq) {
+            return "green";
+        }
+        return "base";
+    }
+
 </script>
 
-<p class="center text-2xl">Add New Data</p>
+<div class="flex justify-center p-4 text-2xl">
+    {#if allowModify}
+        Modify Data
+    {:else}
+        Add New Data
+    {/if}
+
+</div>
 
 <SuccessMessage {success} {successMessage} />
 <ErrorMessage {success} {errorMessage} />
 
-<div class="dropdown-container flex-container form"> 
-    {#if showEmployeesDropdown}
-        <!-- Select Employee Dropdown -->
-        <div style="width: 300px;">
-            <Label for="employee" class="block mb-2">Select Employee</Label>
-            <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base flex justify-between items-center" style="width:300px">{selectedEmployee.name}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
-            <Dropdown bind:open={nameMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
-            <div  class="p-3">
-                <Search size="md" bind:value={inputValueName}/>
+{employee?.firstName}
+<br>
+{JSON.stringify(lastPulledLeftFrequencies)}
+<br>
+{JSON.stringify(leftFrequencies)}
+
+{#if !employee && !year}
+    <div class="flex justify-center gap-4 w-4/5 p-5 m-auto"> 
+        {#if !employee}
+            <!-- Select Employee Dropdown -->
+            <div class="w-m">
+                <Label for="employee" class="block mb-2">Select Employee</Label>
+                <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base flex justify-between items-center" style="width:300px">{selectedEmployee.name}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
+                <Dropdown bind:open={nameMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
+                <div  class="p-3">
+                    <Search size="md" bind:value={inputValueName}/>
+                </div>
+                    {#each filtered_employees as filtedEmployee}
+                        <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+                            <button type="button" class="w-full text-left" onclick={() => selectEmployee(filtedEmployee)}>
+                                {filtedEmployee.name}
+                            </button>
+                        </li>
+                    {/each}
+                </Dropdown>
             </div>
-                {#each filtered_employees as filtedEmployee}
-                    <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
-                        <button type="button" class="w-full text-left" onclick={() => selectEmployee(filtedEmployee)}>
-                            {filtedEmployee.name}
-                        </button>
-                    </li>
-                {/each}
-            </Dropdown>
-        </div>
-    {/if}
-    
-    {#if showYears}
-        <!-- Add Year Input -->
-        <div style="width: 300px; margin-left: 16px;">
-            <Label for="year" class="block mb-2">Add Year</Label>
-            <ButtonGroup class="w-full">
-                <Input id="year" placeholder="1957" 
-                    bind:value={inputValueYear} on:keydown={checkYearAvailabilityKeydown} />
-                <Button color="blue" on:click={checkYearAvailability}>
-                    Check
-                </Button>
-            </ButtonGroup>
-        </div>
-    {/if}
-</div>
+        {/if}
+        
+        {#if !year}
+            <!-- Add Year Input -->
+            <div class="w-m ml-16">
+                <Label for="year" class="block mb-2">Add Year</Label>
+                <ButtonGroup class="w-full">
+                    <Input id="year" placeholder="1957" 
+                        bind:value={inputValueYear} on:keydown={checkYearAvailabilityKeydown} />
+                    <Button color="blue" on:click={checkYearAvailability}>
+                        Check
+                    </Button>
+                </ButtonGroup>
+            </div>
+        {/if}
+    </div>
+{/if}
 
 {#if showDataFields}
-    <Table> <!--  style="width: 90%; text-align: center; margin: auto;" -->
-        <TableHead>
-            <TableHeadCell></TableHeadCell>
-            <TableHeadCell>500 Hz</TableHeadCell>
-            <TableHeadCell>1000 Hz</TableHeadCell>
-            <TableHeadCell>2000 Hz</TableHeadCell>
-            <TableHeadCell>3000 Hz</TableHeadCell>
-            <TableHeadCell>4000 Hz</TableHeadCell>
-            <TableHeadCell>6000 Hz</TableHeadCell>
-            <TableHeadCell>8000 Hz</TableHeadCell>
-        </TableHead>
-        <TableBody tableBodyClass="divide-y">
-        <TableBodyRow>
-            <TableBodyCell>Left Ear</TableBodyCell>
-            <TableBodyCell><Input bind:value={leftFrequencies.hz500} placeholder="500" required /></TableBodyCell>
-            <TableBodyCell><Input bind:value={leftFrequencies.hz1000} placeholder="1000" required /></TableBodyCell>
-            <TableBodyCell><Input bind:value={leftFrequencies.hz2000} placeholder="2000" required /></TableBodyCell>
-            <TableBodyCell><Input bind:value={leftFrequencies.hz3000} placeholder="3000" required /></TableBodyCell>
-            <TableBodyCell><Input bind:value={leftFrequencies.hz4000} placeholder="4000" required /></TableBodyCell>
-            <TableBodyCell><Input bind:value={leftFrequencies.hz6000} placeholder="6000" required /></TableBodyCell>
-            <TableBodyCell><Input bind:value={leftFrequencies.hz8000} placeholder="8000" required /></TableBodyCell>
-        </TableBodyRow>
-        <TableBodyRow>
-            <TableBodyCell>Right Ear</TableBodyCell>
-            <TableBodyCell><Input bind:value={rightFrequencies.hz500} placeholder="500" required /></TableBodyCell>
-            <TableBodyCell><Input bind:value={rightFrequencies.hz1000} placeholder="1000" required /></TableBodyCell>
-            <TableBodyCell><Input bind:value={rightFrequencies.hz2000} placeholder="2000" required /></TableBodyCell>
-            <TableBodyCell><Input bind:value={rightFrequencies.hz3000} placeholder="3000" required /></TableBodyCell>
-            <TableBodyCell><Input bind:value={rightFrequencies.hz4000} placeholder="4000" required /></TableBodyCell>
-            <TableBodyCell><Input bind:value={rightFrequencies.hz6000} placeholder="6000" required /></TableBodyCell>
-            <TableBodyCell><Input bind:value={rightFrequencies.hz8000} placeholder="8000" required /></TableBodyCell>
-        </TableBodyRow>
-        </TableBody>
-    </Table>
+    <div class="flex-column justify-center mx-4">
+        <Table>
+            <TableHead>
+                <TableHeadCell></TableHeadCell>
+                <TableHeadCell>500 Hz</TableHeadCell>
+                <TableHeadCell>1000 Hz</TableHeadCell>
+                <TableHeadCell>2000 Hz</TableHeadCell>
+                <TableHeadCell>3000 Hz</TableHeadCell>
+                <TableHeadCell>4000 Hz</TableHeadCell>
+                <TableHeadCell>6000 Hz</TableHeadCell>
+                <TableHeadCell>8000 Hz</TableHeadCell>
+            </TableHead>
+            <TableBody tableBodyClass="divide-y">
+            <TableBodyRow>
+                <TableBodyCell>Left Ear</TableBodyCell>
+                <TableBodyCell><Input bind:value={leftFrequencies.hz500} color={assignColorBasedOnValue(leftFrequencies.hz500, lastPulledLeftFrequencies.hz500)} placeholder={lastPulledLeftFrequencies.hz500} required /></TableBodyCell>
+                <TableBodyCell><Input bind:value={leftFrequencies.hz1000} color={assignColorBasedOnValue(leftFrequencies.hz1000, lastPulledLeftFrequencies.hz1000)} placeholder={lastPulledLeftFrequencies.hz1000} required /></TableBodyCell>
+                <TableBodyCell><Input bind:value={leftFrequencies.hz2000} color={assignColorBasedOnValue(leftFrequencies.hz2000, lastPulledLeftFrequencies.hz2000)} placeholder={lastPulledLeftFrequencies.hz2000} required /></TableBodyCell>
+                <TableBodyCell><Input bind:value={leftFrequencies.hz3000} color={assignColorBasedOnValue(leftFrequencies.hz3000, lastPulledLeftFrequencies.hz3000)} placeholder={lastPulledLeftFrequencies.hz3000} required /></TableBodyCell>
+                <TableBodyCell><Input bind:value={leftFrequencies.hz4000} color={assignColorBasedOnValue(leftFrequencies.hz4000, lastPulledLeftFrequencies.hz4000)} placeholder={lastPulledLeftFrequencies.hz4000} required /></TableBodyCell>
+                <TableBodyCell><Input bind:value={leftFrequencies.hz6000} color={assignColorBasedOnValue(leftFrequencies.hz6000, lastPulledLeftFrequencies.hz6000)} placeholder={lastPulledLeftFrequencies.hz6000} required /></TableBodyCell>
+                <TableBodyCell><Input bind:value={leftFrequencies.hz8000} color={assignColorBasedOnValue(leftFrequencies.hz8000, lastPulledLeftFrequencies.hz8000)} placeholder={lastPulledLeftFrequencies.hz8000} required /></TableBodyCell>
+            </TableBodyRow>
+            <TableBodyRow>
+                <TableBodyCell>Right Ear</TableBodyCell>
+                <TableBodyCell><Input bind:value={rightFrequencies.hz500} color={assignColorBasedOnValue(rightFrequencies.hz500, lastPulledRightFrequencies.hz500)} placeholder={lastPulledRightFrequencies.hz500} required /></TableBodyCell>
+                <TableBodyCell><Input bind:value={rightFrequencies.hz1000} color={assignColorBasedOnValue(rightFrequencies.hz1000, lastPulledRightFrequencies.hz1000)} placeholder={lastPulledRightFrequencies.hz1000} required /></TableBodyCell>
+                <TableBodyCell><Input bind:value={rightFrequencies.hz2000} color={assignColorBasedOnValue(rightFrequencies.hz2000, lastPulledRightFrequencies.hz2000)} placeholder={lastPulledRightFrequencies.hz2000} required /></TableBodyCell>
+                <TableBodyCell><Input bind:value={rightFrequencies.hz3000} color={assignColorBasedOnValue(rightFrequencies.hz3000, lastPulledRightFrequencies.hz3000)} placeholder={lastPulledRightFrequencies.hz3000} required /></TableBodyCell>
+                <TableBodyCell><Input bind:value={rightFrequencies.hz4000} color={assignColorBasedOnValue(rightFrequencies.hz4000, lastPulledRightFrequencies.hz4000)} placeholder={lastPulledRightFrequencies.hz4000} required /></TableBodyCell>
+                <TableBodyCell><Input bind:value={rightFrequencies.hz6000} color={assignColorBasedOnValue(rightFrequencies.hz6000, lastPulledRightFrequencies.hz6000)} placeholder={lastPulledRightFrequencies.hz6000} required /></TableBodyCell>
+                <TableBodyCell><Input bind:value={rightFrequencies.hz8000} color={assignColorBasedOnValue(rightFrequencies.hz8000, lastPulledRightFrequencies.hz8000)} placeholder={lastPulledRightFrequencies.hz8000} required /></TableBodyCell>
+            </TableBodyRow>
+            </TableBody>
+        </Table>
+    </div>
 
-    <div class="form">
+    <div class="m-auto w-3/5 p-5 text-center">
         <Button 
-            class="bg-light-bluegreen hover:bg-dark-bluegreen text-black" 
-            style="width:200px" 
+            class="bg-light-bluegreen hover:bg-dark-bluegreen text-black w-1/4" 
             on:click={addHearingData}>
             Submit
         </Button>
     </div>
 {/if}
-
-<style>
-    /* TODO: Turn these into tailwind classes */
-    .center {
-        margin: auto;
-        width: 50%;
-        padding: 10px;
-        text-align: center;
-    }
-    .form {
-        margin: auto;
-        width: 60%;
-        padding: 20px;
-        text-align: center;
-    }
-    .flex-container {
-        display: flex;
-        justify-content: center;
-        gap: 16px; 
-        width: 80%; 
-        margin: auto;
-    }
-</style>

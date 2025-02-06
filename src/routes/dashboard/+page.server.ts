@@ -1,13 +1,14 @@
 import type { Actions, PageServerLoad } from './$types';
 import { getAdminsFromDatabase, getEmployeesFromDatabase, turnAwayNonAdmins } from '$lib/utility';
 import { addHearingData, checkYearAvailability, modifyHearingData } from '$lib/actionshearingdata';
-import { fetchEmployeeInfo, fetchHearingData, fetchYears, modifyEmployeeDOB, modifyEmployeeEmail, modifyEmployeeName, modifyEmployeeStatus, calculateSTS} from '$lib/actionsemployees';
+import { fetchEmployeeInfo, fetchHearingData, fetchHearingDataForYear, fetchYears, modifyEmployeeDOB, modifyEmployeeEmail, modifyEmployeeName, modifyEmployeeStatus, calculateSTS } from '$lib/actionsemployees';
 import { addEmployee } from '$lib/actionsemployeeadd';
 import { deleteAdmins, modifyAdminName, modifyAdminPermissions } from '$lib/actionsadmins';
 
 export const load: PageServerLoad = async ( event ) => {
     await turnAwayNonAdmins(event);
 
+    // TODO: error handling
     const employees = await getEmployeesFromDatabase();
     const admins = await getAdminsFromDatabase();
 
@@ -20,10 +21,10 @@ export const load: PageServerLoad = async ( event ) => {
 // Actions for login and registration
 export const actions: Actions = {
     // actionsadmins.ts
-    modifyAdminPermissions: async ({request}) => {
+    modifyAdminPermissions: async ({ request }) => {
         return modifyAdminPermissions(request);
     },
-    modifyAdminName: async ({request}) => {
+    modifyAdminName: async ({ request }) => {
         return modifyAdminName(request);
     },
     deleteAdmins: async ({ request }) => {
@@ -50,7 +51,7 @@ export const actions: Actions = {
     // ================================================
 
     // actionsemployees.ts
-    fetchYears: async ({request}) => {
+    fetchYears: async ({ request }) => {
         return fetchYears(request);
     },
     fetchEmployeeInfo: async ({ request }) => {
@@ -59,16 +60,19 @@ export const actions: Actions = {
     fetchHearingData: async ({ request }) => {
        return fetchHearingData(request);
     },
-    modifyEmployeeName: async ({request}) => {
+    fetchHearingDataForYear: async ({ request }) => {
+        return fetchHearingDataForYear(request);
+     },
+    modifyEmployeeName: async ({ request }) => {
         return modifyEmployeeName(request);
     },
-    modifyEmployeeEmail: async ({request}) => {
+    modifyEmployeeEmail: async ({ request }) => {
         return modifyEmployeeEmail(request);
     },
-    modifyEmployeeDOB: async ({request}) => {
+    modifyEmployeeDOB: async ({ request }) => {
         return modifyEmployeeDOB(request);
     },
-    modifyEmployeeStatus: async ({request}) => {
+    modifyEmployeeStatus: async ({ request }) => {
         return modifyEmployeeStatus(request);
     },
     calculateSTS: async ({ request }) => { 

@@ -48,14 +48,15 @@
     {#if activeURLHash == "#employees"}
         <EmployeesPage {employees} />
     {:else if activeURLHash == "#mailings"}
-        <MailingPage/>
+        <MailingPage />
     {:else if activeURLHash == "#admin"}
         <AdminPage {admins} />
     {:else if activeURLHash == "#insert"}
         <InsertEmployeePage showTitle />
     {:else if activeURLHash == "#data"}
-        <InsertDataPage {employees} showEmployeesDropdown={true} 
-            showYears={true} />
+        <InsertDataPage {employees} />
+    {:else if activeURLHash == "#edit"}
+        <InsertDataPage employee={employees[1]}  year="2025" allowModify />
     {:else}
         <!-- User who is not logged in should be redirected to home (no hash) -->
         <div class="flex justify-center p-4 text-2xl">Welcome to the dashboard</div>

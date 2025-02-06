@@ -1,6 +1,7 @@
 import { sql } from '@vercel/postgres';
 import { UserHearingScreeningHistory, HearingScreening, HearingDataOneEar, PersonSex } from "./interpret";
-
+import { getHearingDataFromDatabaseRow } from './utility';
+import type { HearingDataSingle } from './MyTypes';
 
 interface Request {
     formData: () => Promise<FormData>;
@@ -114,7 +115,6 @@ export async function fetchHearingData(request: Request) {
     const employeeID = formData.get('employeeID') as string;
     const year = formData.get('year') as string;
 
-
     //console.log(`Employee ID: ${employeeID} Year: ${year}`);
 
     try {
@@ -173,6 +173,55 @@ export async function fetchHearingData(request: Request) {
                 newData,
             },
         });
+    }
+    catch (error: any) {
+        const errorMessage = "Could not fetch hearing data: " 
+            + (error.message ?? "no error message provided by server");
+        console.error(errorMessage);
+        return JSON.stringify({ success: false, message: errorMessage });
+    }
+}
+
+export async function fetchHearingDataForYear(request: Request) {
+    const formData = await request.formData();
+    const employeeID = formData.get('employeeID') as string;
+    const year = formData.get('year') as string;
+
+    console.log(`EmployeeID: ${employeeID}, Year: ${year}`);
+
+    try {
+        // Fetch hearing data for the new year
+        const hearingDataQuery = await sql`
+            SELECT d.Hz_500, d.Hz_1000, d.Hz_2000, d.Hz_3000, d.Hz_4000, d.Hz_6000, d.Hz_8000, h.ear
+            FROM Has h
+            JOIN Data d ON h.data_id = d.data_id
+            WHERE h.employee_id = ${employeeID} AND h.year = ${year};
+        `;
+
+        const earData = {
+            rightEar: hearingDataQuery.rows.filter(row => row.ear === 'right')[0] ?? null,
+            leftEar: hearingDataQuery.rows.filter(row => row.ear === 'left')[0] ?? null,
+        };
+
+        if (!earData.rightEar && !earData.leftEar) {
+            const errorMessage = `There exists no hearing data for the year ${year}`;
+            console.error(errorMessage);
+            return JSON.stringify({ success: false, message: errorMessage });
+        }
+
+        const parsedLeftEar: HearingDataSingle = await getHearingDataFromDatabaseRow(earData.leftEar);
+        const parsedRightEar: HearingDataSingle = await getHearingDataFromDatabaseRow(earData.rightEar);
+
+        const dataReturn = {
+            success: true,
+            hearingData: {
+                year: year,
+                leftEar: parsedLeftEar,
+                rightEar: parsedRightEar
+            },
+        }
+
+        return JSON.stringify(dataReturn);
     }
     catch (error: any) {
         const errorMessage = "Could not fetch hearing data: " 

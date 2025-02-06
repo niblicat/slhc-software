@@ -1,7 +1,7 @@
 import type { Session } from "@auth/sveltekit";
 import { redirect, type RequestEvent, type Server, type ServerLoadEvent } from "@sveltejs/kit"
-import { sql } from "@vercel/postgres";
-import type { Admin, Employee } from "./MyTypes";
+import { sql, type QueryResult, type QueryResultRow } from "@vercel/postgres";
+import type { Admin, Employee, HearingDataSingle } from "./MyTypes";
 
 export function isNumber(value?: string | number): boolean {
     return ((value != null) &&
@@ -149,6 +149,20 @@ export async function getEmployeesFromDatabase(): Promise<Employee[]> {
     return  employees;
 }
 
+export async function getHearingDataFromDatabaseRow(row: QueryResultRow): Promise<HearingDataSingle> {
+    const parsedHearingData: HearingDataSingle = {
+        hz500: row["hz_500"],
+        hz1000: row["hz_1000"],
+        hz2000: row["hz_2000"],
+        hz3000: row["hz_3000"],
+        hz4000: row["hz_4000"],
+        hz6000: row["hz_6000"],
+        hz8000: row["hz_8000"]
+    };
+
+    return parsedHearingData;
+}
+
 export async function getAdminsFromDatabase(): Promise<Admin[]> {
     const adminTable = await sql`SELECT * FROM Administrator;`;
 
@@ -162,3 +176,8 @@ export async function getAdminsFromDatabase(): Promise<Admin[]> {
 
     return admins;
 }
+
+export function extractFrequencies(earData: Record<string, any>): number[] {
+    const { ear, ...frequencies } = earData; // Exclude the 'ear' property
+    return Object.values(frequencies) as number[];  // Return all frequency values as an array of numbers
+};

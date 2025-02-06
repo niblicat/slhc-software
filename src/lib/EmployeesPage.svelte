@@ -12,6 +12,7 @@
     import { invalidateAll } from '$app/navigation';
 	import { controllers } from 'chart.js';
 	import InsertEmployeePage from './InsertEmployeePage.svelte';
+    import { extractFrequencies } from './utility';
 
     let chart: any;
 
@@ -32,28 +33,20 @@
     let selectedEmail = $state("No data selected");
     let selectedDOB = $state("No data selected");
     let selectedStatus = $state("No data selected");
-    let STSstatusRight = $state("No data selected");
-    let STSstatusLeft = $state("No data selected");
-    let selectedSex = $state("No data selected");
+    let STSstatus = "No data selection";
 
-    let modifiedLeftFrequencies = $state({
-        hz500: '',
-        hz1000: '',
-        hz2000: '',
-        hz3000: '',
-        hz4000: '',
-        hz6000: '',
-        hz8000: ''
-    });
-    let modifiedRightFrequencies = $state({
-        hz500: '',
-        hz1000: '',
-        hz2000: '',
-        hz3000: '',
-        hz4000: '',
-        hz6000: '',
-        hz8000: ''
-    });
+    const blankFrequencies = {
+        hz500: "",
+        hz1000: "",
+        hz2000: "",
+        hz3000: "",
+        hz4000: "",
+        hz6000: "",
+        hz8000: ""
+    };
+
+    let modifiedLeftFrequencies = $state(blankFrequencies);
+    let modifiedRightFrequencies = $state(blankFrequencies);
 
     let inputValueName: string = $state("");
     let inputValueYear = $state("");
@@ -304,24 +297,24 @@
 
         // Populate modal with existing hearing data (if available)
         modifiedLeftFrequencies = {
-            hz500: LeftNewHearingData[0]?.toString() || '',
-            hz1000: LeftNewHearingData[1]?.toString() || '',
-            hz2000: LeftNewHearingData[2]?.toString() || '',
-            hz3000: LeftNewHearingData[3]?.toString() || '',
-            hz4000: LeftNewHearingData[4]?.toString() || '',
-            hz6000: LeftNewHearingData[5]?.toString() || '',
-            hz8000: LeftNewHearingData[6]?.toString() || ''
+            hz500: LeftNewHearingData[0]?.toString() ?? '',
+            hz1000: LeftNewHearingData[1]?.toString() ?? '',
+            hz2000: LeftNewHearingData[2]?.toString() ?? '',
+            hz3000: LeftNewHearingData[3]?.toString() ?? '',
+            hz4000: LeftNewHearingData[4]?.toString() ?? '',
+            hz6000: LeftNewHearingData[5]?.toString() ?? '',
+            hz8000: LeftNewHearingData[6]?.toString() ?? ''
         };
 
         modifiedRightFrequencies = {
-            hz500: RightNewHearingData[0]?.toString() || '',
-            hz1000: RightNewHearingData[1]?.toString() || '',
-            hz2000: RightNewHearingData[2]?.toString() || '',
-            hz3000: RightNewHearingData[3]?.toString() || '',
-            hz4000: RightNewHearingData[4]?.toString() || '',
-            hz6000: RightNewHearingData[5]?.toString() || '',
-            hz8000: RightNewHearingData[6]?.toString() || ''
-        };``
+            hz500: RightNewHearingData[0]?.toString() ?? '',
+            hz1000: RightNewHearingData[1]?.toString() ?? '',
+            hz2000: RightNewHearingData[2]?.toString() ?? '',
+            hz3000: RightNewHearingData[3]?.toString() ?? '',
+            hz4000: RightNewHearingData[4]?.toString() ?? '',
+            hz6000: RightNewHearingData[5]?.toString() ?? '',
+            hz8000: RightNewHearingData[6]?.toString() ?? ''
+        };
 
         editDataModal = true;
     }
@@ -489,6 +482,7 @@
     }
 
     async function fetchUpdatedHearingData(employeeID: string, year: string) {
+        // ! employeeID and year from the parameters are unused
         try {
             const formData = new FormData();
             formData.append('employeeID', selectedEmployee.data.employeeID);

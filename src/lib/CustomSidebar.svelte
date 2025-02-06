@@ -11,6 +11,8 @@
     let clickOutsideLock = false;
     const clickOutsideDelayMilliseconds = 500;
 
+    const showExtraPages = true;
+
     $effect(() => {
         if (sidebarOpen) {
             clickOutsideLock = true;
@@ -55,12 +57,17 @@
                         <SidebarItem on:click={sidebarToggleDispatch} label="Mailings" href="#mailings">
                             <MailBoxSolid/>
                         </SidebarItem>
-                        <SidebarItem on:click={sidebarToggleDispatch} label="Insert Employees" href="#insert">
-                            <ArrowRightToBracketOutline/>
-                        </SidebarItem>
-                        <SidebarItem on:click={sidebarToggleDispatch} label="Insert Data" href="#data">
-                            <ArrowRightToBracketOutline/>
-                        </SidebarItem>
+                        {#if showExtraPages} 
+                            <SidebarItem on:click={sidebarToggleDispatch} label="Insert Employees" href="#insert">
+                                <ArrowRightToBracketOutline/>
+                            </SidebarItem>
+                            <SidebarItem on:click={sidebarToggleDispatch} label="Modify Data" href="#edit">
+                                <ArrowRightToBracketOutline/>
+                            </SidebarItem>
+                            <SidebarItem on:click={sidebarToggleDispatch} label="Insert Data" href="#data">
+                                <ArrowRightToBracketOutline/>
+                            </SidebarItem>
+                        {/if}
                     </SidebarGroup>
                 </SidebarWrapper>
             </Sidebar>
