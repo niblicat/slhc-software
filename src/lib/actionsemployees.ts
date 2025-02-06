@@ -67,7 +67,7 @@ export async function fetchEmployeeInfo(request: Request) {
     try {
         // Query employee data
         const employeeQuery = await sql`
-            SELECT email, date_of_birth, last_active 
+            SELECT email, date_of_birth, last_active, sex
             FROM Employee 
             WHERE employee_id = ${employeeId};
         `;
@@ -79,12 +79,13 @@ export async function fetchEmployeeInfo(request: Request) {
         const employee = employeeQuery.rows[0];
         const employmentStatus = employee.last_active ? 'Inactive' : 'Active';
 
-        console.log(`Employee email: ${employee.email}, Employment Status: ${employmentStatus}, Employee: ${employeeID}, DOB: ${employee.date_of_birth}`);
+        console.log(`Employee email: ${employee.email}, Employment Status: ${employmentStatus}, Employee: ${employeeID}, DOB: ${employee.date_of_birth}, SEX: ${employee.sex}`);
 
         const employeeData = {
             email: employee.email,
             dob: employee.date_of_birth,
             employmentStatus,
+            sex: employee.sex
         }
 
         const dataReturnTest = {
