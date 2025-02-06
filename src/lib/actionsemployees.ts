@@ -28,14 +28,14 @@ export async function fetchYears(request: Request) {
 
         const availableYears = yearsQuery.rows.map(row => row.year);
 
-        console.log(`Employee: ${employeeID}, Employee ID: ${employeeId}, Years: ${availableYears}`);
+        //console.log(`Employee: ${employeeID}, Employee ID: ${employeeId}, Years: ${availableYears}`);
         
         const yearsReturn = {
             success: true,
             years: availableYears
         }
 
-        console.log(JSON.stringify(yearsReturn));
+        //console.log(JSON.stringify(yearsReturn));
 
         return JSON.stringify({
             success: true,
@@ -62,7 +62,7 @@ export async function fetchEmployeeInfo(request: Request) {
 
     const employeeId = employeeIdQuery.rows[0].employee_id;
 
-    console.log(`Employee NAME: ${employeeID}, Employee: ${employeeId}`);
+    //console.log(`Employee NAME: ${employeeID}, Employee: ${employeeId}`);
 
     try {
         // Query employee data
@@ -79,7 +79,7 @@ export async function fetchEmployeeInfo(request: Request) {
         const employee = employeeQuery.rows[0];
         const employmentStatus = employee.last_active ? 'Inactive' : 'Active';
 
-        console.log(`Employee email: ${employee.email}, Employment Status: ${employmentStatus}, Employee: ${employeeID}, DOB: ${employee.date_of_birth}, SEX: ${employee.sex}`);
+       //console.log(`Employee email: ${employee.email}, Employment Status: ${employmentStatus}, Employee: ${employeeID}, DOB: ${employee.date_of_birth}, SEX: ${employee.sex}`);
 
         const employeeData = {
             email: employee.email,
@@ -93,7 +93,7 @@ export async function fetchEmployeeInfo(request: Request) {
             employee: employeeData
         }
 
-        console.log(JSON.stringify(dataReturnTest));
+        //JSON.stringify(dataReturnTest));
 
         // Return only the necessary data in a plain object format
         return JSON.stringify({
@@ -115,7 +115,7 @@ export async function fetchHearingData(request: Request) {
     const year = formData.get('year') as string;
 
 
-    console.log(`Employee ID: ${employeeID} Year: ${year}`);
+    //console.log(`Employee ID: ${employeeID} Year: ${year}`);
 
     try {
         // Get the oldest available year for the employee
@@ -162,7 +162,7 @@ export async function fetchHearingData(request: Request) {
             },
         }
 
-        console.log(JSON.stringify(dataReturnTest));
+        //console.log(JSON.stringify(dataReturnTest));
 
         return JSON.stringify({
             success: true,
@@ -196,7 +196,7 @@ export async function modifyEmployeeName(request: Request) {
 
     const employeeId = employeeIdQuery.rows[0].employee_id;
 
-    console.log(`Employee NAME: ${employeeID}, EmployeeID: ${employeeId}, First: ${newFirstName}, Last: ${newLastName}`);
+    //console.log(`Employee NAME: ${employeeID}, EmployeeID: ${employeeId}, First: ${newFirstName}, Last: ${newLastName}`);
 
     try {
         const resultFirst = await sql`UPDATE Employee SET first_name = ${newFirstName} WHERE employee_id=${employeeId};`
@@ -234,7 +234,7 @@ export async function modifyEmployeeEmail(request: Request) {
 
     const employeeId = employeeIdQuery.rows[0].employee_id;
 
-    console.log(`Employee NAME: ${employeeID}, EmployeeID: ${employeeId}, email: ${newEmail}`);
+    //console.log(`Employee NAME: ${employeeID}, EmployeeID: ${employeeId}, email: ${newEmail}`);
 
     try {
         const result = await sql`UPDATE Employee SET email = ${newEmail} WHERE employee_id=${employeeId};`
@@ -267,7 +267,7 @@ export async function modifyEmployeeDOB(request: Request) {
 
     const employeeId = employeeIdQuery.rows[0].employee_id;
 
-    console.log(`Employee NAME: ${employeeID}, EmployeeID: ${employeeId}, DOB: ${newDOB}`);
+    //console.log(`Employee NAME: ${employeeID}, EmployeeID: ${employeeId}, DOB: ${newDOB}`);
 
     try {
         const result = await sql`UPDATE Employee SET date_of_birth = ${newDOB} WHERE employee_id=${employeeId};`
@@ -301,7 +301,7 @@ export async function modifyEmployeeStatus(request: Request) {
     const employeeId = employeeIdQuery.rows[0].employee_id;
 
     const lastActiveValue = newActiveStatus === "" ? null : newActiveStatus;
-    console.log(`Employee NAME: ${employeeID}, EmployeeID: ${employeeId}, status: ${lastActiveValue}`);
+   // console.log(`Employee NAME: ${employeeID}, EmployeeID: ${employeeId}, status: ${lastActiveValue}`);
 
     try {
         if (lastActiveValue !== null) {
@@ -334,16 +334,33 @@ export async function calculateSTS(request: Request) {
     const formData = await request.formData();
     const employeeID = formData.get('employee') as string;
     const year = parseInt(formData.get('year') as string, 10);
-    const age = parseInt(formData.get('age') as string, 10); //probably going to need to calculate this depending on the year of the test
     const sex = formData.get('sex') as string;
 
-    if (!employeeID || !year || !age || !sex) {
-        return json({ success: false, error: "Invalid input" });
+    // get dob from database 
+    const employeeQuery = await sql`SELECT date_of_birth FROM Employee WHERE employee_id = ${employeeID};`;
+    if (employeeQuery.rows.length === 0) {
+        throw new Error("User not found");
+    }
+    const employee = employeeQuery.rows[0];
+    const dob = employee.date_of_birth;
+    
+    // age calculation for the selected year
+    const yearDate = new Date(year, 0 , 1); // January 1st of the given year // may need to track entire date in database?
+    const dobDate = new Date(dob);
+    let age = yearDate.getFullYear() - dobDate.getFullYear();
+    
+    if ( // Check if the birthday has occurred this year
+        yearDate.getMonth() < dobDate.getMonth() || 
+        (yearDate.getMonth() === dobDate.getMonth() && yearDate.getDate() < dobDate.getDate())
+    ) {
+        age--;
     }
 
-    console.log(`Employee ID: ${employeeID}, sex: ${sex}, Year: ${year}, age: ${age}`);
+    // console.log("DOB: ", dob, "dobDate: ", dobDate, "Year: ", year, "yearDate: ", yearDate)
+    // console.log(`Employee ID: ${employeeID}, sex: ${sex}, Year: ${year}, DOB: ${dob}, age: ${age}`);
 
-    try {
+    try { 
+        // get all frequencies, ear, and year
         const dataQuery = await sql`
             SELECT d.Hz_500, d.Hz_1000, d.Hz_2000, d.Hz_3000, d.Hz_4000, d.Hz_6000, d.Hz_8000, h.ear, h.year
             FROM Has h
@@ -351,17 +368,14 @@ export async function calculateSTS(request: Request) {
             WHERE h.employee_id = ${employeeID}
             ORDER BY h.year ASC;
         `;
-        console.log("query: ", JSON.stringify(dataQuery));
+        //console.log("query: ", JSON.stringify(dataQuery));
 
-        // Group data by year
+        // create an empty object to store hearing data grouped by year
         const hearingDataByYear: Record<number, { leftEar: number[], rightEar: number[] }> = {};
-        console.log("hearingDataByYear: ", hearingDataByYear);
 
-        dataQuery.rows.forEach(row => {
+        dataQuery.rows.forEach(row => { // Loop through each row of the query result to group data by year and store frequency thresholds for each ear separately
             const yearKey = Number(row.year);
             const earSide = row.ear.trim().toLowerCase();  // Normalize ear value
-        
-            console.log(`Processing year: ${yearKey}, ear: ${earSide}, data:`, row);
         
             if (!hearingDataByYear[yearKey]) {
                 hearingDataByYear[yearKey] = { leftEar: new Array(7).fill(0), rightEar: new Array(7).fill(0) };
@@ -392,12 +406,18 @@ export async function calculateSTS(request: Request) {
     const screenings: HearingScreening[] = Object.entries(hearingDataByYear).map(([year, ears]) => 
         new HearingScreening(
             Number(year),
-            new HearingDataOneEar(...ears.leftEar),
-            new HearingDataOneEar(...ears.rightEar)
+            new HearingDataOneEar(
+                ears.leftEar[0], ears.leftEar[1], ears.leftEar[2], ears.leftEar[3], 
+                ears.leftEar[4], ears.leftEar[5], ears.leftEar[6]
+            ),
+            new HearingDataOneEar(
+                ears.rightEar[0], ears.rightEar[1], ears.rightEar[2], ears.rightEar[3], 
+                ears.rightEar[4], ears.rightEar[5], ears.rightEar[6]
+            )            
         )
     );   
     
-    //console.log("SCREENINGS: ", screenings);
+    console.log("SCREENINGS: ", screenings);
     
     // Convert sex string to enum
     const personSex = sex === "Male" ? PersonSex.Male : sex === "Female" ? PersonSex.Female : PersonSex.Other;

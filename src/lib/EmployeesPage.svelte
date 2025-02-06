@@ -31,7 +31,6 @@
     let selectedYear = $state("No year selected");
     let selectedEmail = $state("No data selected");
     let selectedDOB = $state("No data selected");
-    let selectedAge = $state("No data selected");
     let selectedStatus = $state("No data selected");
     let STSstatusRight = $state("No data selected");
     let STSstatusLeft = $state("No data selected");
@@ -154,10 +153,9 @@
                 selectedDOB = dataResult.employee.dob
                     ? new Date(dataResult.employee.dob).toISOString().split('T')[0]
                     : "No selection made";
-                selectedAge = calculateAge(selectedDOB);
                 selectedSex = dataResult.employee.sex
             }
-            else {
+            else { 
                 selectedEmail = "Error fetching data: not a data success";
                 selectedDOB = "Error fetching data: not a data success";
                 selectedStatus = "Error fetching data: not a data success";
@@ -192,27 +190,6 @@
         }
     };
 
-    const calculateAge = (dobString: string | null): string => {
-        if (!dobString) return "No selection made";
-
-        const today = new Date();
-        const dob = new Date(dobString);
-
-        if (isNaN(dob.getTime())) return "Invalid Date";
-
-        let age = today.getFullYear() - dob.getFullYear();
-
-        // Check if the birthday has occurred this year
-        if (
-            today.getMonth() < dob.getMonth() || 
-            (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate())
-        ) {
-            age--;
-        }
-
-        return age.toString();
-    };
-
     let filteredYears = $derived.by(() => {
         let filterable = yearItems;
         let filter = inputValueYear
@@ -229,8 +206,7 @@
 
             const formData = new FormData();
             formData.append('employee', selectedEmployee.data.employeeID);
-            formData.append('year', year);
-            formData.append('age', selectedAge.toString()); //will probably need to send DOB in order to calculate age depending on year....
+            formData.append('year', selectedYear);
             formData.append('sex', selectedEmployee.data.sex);
 
             const response = await fetch('/dashboard?/calculateSTS', { 
@@ -434,7 +410,6 @@
                 selectedDOB = selectedEmployee.data.dob
                     ? new Date(selectedEmployee.data.dob).toISOString().split('T')[0]
                     : "No selection made";
-                selectedAge = calculateAge(selectedDOB);
             }
             else {
                 displayError(result["message"]);
@@ -761,7 +736,6 @@
                 <EditIcon on:edit={() => showDOBChangeModal(selectedEmployee.data)}/> 
             {/if} 
         </p> <br>
-        <p>Age: {selectedAge}</p> <br>
         <p>Sex: {selectedSex}</p> <br>
         <p>Employment Status: {selectedStatus} <!-- inactive to active is not working // double check --> 
             {#if selectedEmployee.data.employeeID !== "-1"} 
