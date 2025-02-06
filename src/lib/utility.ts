@@ -142,7 +142,8 @@ export async function getEmployeesFromDatabase(): Promise<Employee[]> {
         firstName: row.first_name,
         lastName: row.last_name,
         email: row.email,
-        dob: row.date_of_birth
+        dob: row.date_of_birth,
+        sex: row.sex
     }));
 
     return  employees;

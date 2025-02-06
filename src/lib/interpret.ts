@@ -1,11 +1,14 @@
 // interpret.ts
 // Used to intepret user data and detect if there has been STS
 
-import { base } from "$service-worker";
-import { left } from "@popperjs/core";
+// import { base } from "$service-worker";
+// import { left } from "@popperjs/core";
 import { error } from "@sveltejs/kit";
+import {AGE_CORRECTION_TABLE_MALE, AGE_CORRECTION_TABLE_FEMALE} from './agetable'
+import type {HertzCorrectionForAge} from './agetable'
 
-enum PersonSex {
+
+export enum PersonSex {
     Female,
     Male,
     Other
@@ -21,14 +24,14 @@ function findAverage(...args: number[]) {
 }
 
 // used to identify hearing anomolies for each ear
-enum AnomolyStatus {
-    None,
-    Base,
-    Same,
-    Better,
-    Worse,
-    STS,
-    Warning
+export enum AnomolyStatus {
+    None = 0,
+    Base = 1,
+    Same = 2,
+    Better = 3,
+    Worse = 4,
+    STS = 5,
+    Warning = 6
 }
 
 class EarAnomolyStatus {
@@ -47,7 +50,7 @@ class EarAnomolyStatus {
     }
 }
 
-class HearingDataOneEar {
+export class HearingDataOneEar {
     hz500: number;
     hz1000: number;
     hz2000: number;
@@ -67,7 +70,7 @@ class HearingDataOneEar {
     }
 }
 
-class HearingScreening {
+export class HearingScreening {
     year: number;
     leftEar: HearingDataOneEar;
     rightEar: HearingDataOneEar;
@@ -79,7 +82,7 @@ class HearingScreening {
     }
 }
 
-class UserHearingScreeningHistory {
+export class UserHearingScreeningHistory {
     age: number;
     sex: PersonSex;
     currentYear: number;
@@ -274,3 +277,11 @@ class UserHearingScreeningHistory {
         return average;
     }
 }
+
+interface HearingDataEntry {
+    year: number;
+    left: { hz500: number; hz1000: number; hz2000: number; hz3000: number; hz4000: number; hz6000: number; hz8000: number };
+    right: { hz500: number; hz1000: number; hz2000: number; hz3000: number; hz4000: number; hz6000: number; hz8000: number };
+}
+
+
