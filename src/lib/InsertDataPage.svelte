@@ -16,9 +16,10 @@
         year?: string,
         employee?: Employee
         allowModify?: boolean
+        showTitle?: boolean
     }
 
-    let { employees = [], year, employee, allowModify = false }: Props = $props();
+    let { employees = [], year, employee, allowModify = false, showTitle = false }: Props = $props();
 
     const undefinedEmployee: Employee = {
         employeeID: "-1",
@@ -281,23 +282,18 @@
 
 </script>
 
-<div class="flex justify-center p-4 text-2xl">
-    {#if allowModify}
-        Modify Data
-    {:else}
-        Add New Data
-    {/if}
-
-</div>
+{#if showTitle}
+    <div class="flex justify-center p-4 text-2xl">
+        {#if allowModify}
+            Modify Data
+        {:else}
+            Add New Data
+        {/if}
+    </div>
+{/if}
 
 <SuccessMessage {success} {successMessage} />
 <ErrorMessage {success} {errorMessage} />
-
-{employee?.firstName}
-<br>
-{JSON.stringify(lastPulledLeftFrequencies)}
-<br>
-{JSON.stringify(leftFrequencies)}
 
 {#if !employee && !year}
     <div class="flex justify-center gap-4 w-4/5 p-5 m-auto"> 
