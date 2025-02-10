@@ -151,13 +151,13 @@ export async function getEmployeesFromDatabase(): Promise<Employee[]> {
 
 export async function getHearingDataFromDatabaseRow(row: QueryResultRow): Promise<HearingDataSingle> {
     const parsedHearingData: HearingDataSingle = {
-        hz500: row["hz_500"],
-        hz1000: row["hz_1000"],
-        hz2000: row["hz_2000"],
-        hz3000: row["hz_3000"],
-        hz4000: row["hz_4000"],
-        hz6000: row["hz_6000"],
-        hz8000: row["hz_8000"]
+        hz500: row["hz_500"] ?? "CNT",
+        hz1000: row["hz_1000"] ?? "CNT",
+        hz2000: row["hz_2000"] ?? "CNT",
+        hz3000: row["hz_3000"] ?? "CNT",
+        hz4000: row["hz_4000"] ?? "CNT",
+        hz6000: row["hz_6000"] ?? "CNT",
+        hz8000: row["hz_8000"] ?? "CNT"
     };
 
     return parsedHearingData;

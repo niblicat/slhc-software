@@ -121,6 +121,7 @@
             
             if (result["success"]) {
                 const { year, leftEar, rightEar } = result.hearingData;
+                console.log(leftEar);
                 assignFrequencies(leftEar, rightEar);
 
             } 

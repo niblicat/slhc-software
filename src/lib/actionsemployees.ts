@@ -112,10 +112,16 @@ export async function fetchEmployeeInfo(request: Request) {
 
 export async function fetchHearingData(request: Request) {
     const formData = await request.formData();
-    const employeeID = formData.get('employeeID') as string;
+    const employeeID = formData.get('id') as string;
     const year = formData.get('year') as string;
 
-    //console.log(`Employee ID: ${employeeID} Year: ${year}`);
+    // Fetch employee_id for the selected user
+    const employeeIdQuery = await sql`SELECT employee_id FROM Employee WHERE CONCAT(first_name, ' ', last_name) = ${employeeID};`;
+    if (employeeIdQuery.rows.length === 0) {
+        throw new Error("User not found");
+    }
+
+    console.log(`EmployeeID: ${employeeID}, Year: ${year}`);
 
     try {
         // Get the oldest available year for the employee
@@ -143,13 +149,13 @@ export async function fetchHearingData(request: Request) {
         `;
 
         const baselineData = {
-            rightEar: baselineDataQuery.rows.filter(row => row.ear === 'right')[0] || null,
-            leftEar: baselineDataQuery.rows.filter(row => row.ear === 'left')[0] || null,
+            rightEar: baselineDataQuery.rows.filter(row => row.ear === 'right')[0] ?? null,
+            leftEar: baselineDataQuery.rows.filter(row => row.ear === 'left')[0] ?? null,
         };
 
         const newData = {
-            rightEar: newDataQuery.rows.filter(row => row.ear === 'right')[0] || null,
-            leftEar: newDataQuery.rows.filter(row => row.ear === 'left')[0] || null,
+            rightEar: newDataQuery.rows.filter(row => row.ear === 'right')[0] ?? null,
+            leftEar: newDataQuery.rows.filter(row => row.ear === 'left')[0] ?? null,
         };
 
         const dataReturnTest = {
@@ -243,13 +249,11 @@ export async function modifyEmployeeName(request: Request) {
         throw new Error("User not found");
     }
 
-    const employeeId = employeeIdQuery.rows[0].employee_id;
-
-    //console.log(`Employee NAME: ${employeeID}, EmployeeID: ${employeeId}, First: ${newFirstName}, Last: ${newLastName}`);
+    console.log(`EmployeeID: ${employeeID}, First: ${newFirstName}, Last: ${newLastName}`);
 
     try {
-        const resultFirst = await sql`UPDATE Employee SET first_name = ${newFirstName} WHERE employee_id=${employeeId};`
-        const resultLast = await sql`UPDATE Employee SET last_name = ${newLastName} WHERE employee_id=${employeeId};`
+        const resultFirst = await sql`UPDATE Employee SET first_name = ${newFirstName} WHERE employee_id=${employeeID};`
+        const resultLast = await sql`UPDATE Employee SET last_name = ${newLastName} WHERE employee_id=${employeeID};`
         
         if (resultFirst.rowCount === 0) {
             return { success: false, message: 'First name was not updated. Employee ID might be incorrect.' };
@@ -281,12 +285,10 @@ export async function modifyEmployeeEmail(request: Request) {
         throw new Error("User not found");
     }
 
-    const employeeId = employeeIdQuery.rows[0].employee_id;
-
-    //console.log(`Employee NAME: ${employeeID}, EmployeeID: ${employeeId}, email: ${newEmail}`);
+    console.log(`EmployeeID: ${employeeID}, email: ${newEmail}`);
 
     try {
-        const result = await sql`UPDATE Employee SET email = ${newEmail} WHERE employee_id=${employeeId};`
+        const result = await sql`UPDATE Employee SET email = ${newEmail} WHERE employee_id=${employeeID};`
         
         if (result.rowCount === 0) {
             return { success: false, message: 'Email was not updated. Employee ID might be incorrect.' };
@@ -347,23 +349,21 @@ export async function modifyEmployeeStatus(request: Request) {
         throw new Error("User not found");
     }
 
-    const employeeId = employeeIdQuery.rows[0].employee_id;
-
     const lastActiveValue = newActiveStatus === "" ? null : newActiveStatus;
-   // console.log(`Employee NAME: ${employeeID}, EmployeeID: ${employeeId}, status: ${lastActiveValue}`);
+    console.log(`EmployeeID: ${employeeID}, status: ${lastActiveValue}`);
 
     try {
         if (lastActiveValue !== null) {
             await sql`
                 UPDATE Employee 
                 SET last_active = ${lastActiveValue}
-                WHERE employee_id = ${employeeId};
+                WHERE employee_id = ${employeeID};
             `;
         } else {
             await sql`
                 UPDATE Employee 
                 SET last_active = NULL
-                WHERE employee_id = ${employeeId};
+                WHERE employee_id = ${employeeID};
             `;
         }
     } 
