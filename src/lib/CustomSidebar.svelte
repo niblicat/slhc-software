@@ -57,17 +57,6 @@
                         <SidebarItem on:click={sidebarToggleDispatch} label="Mailings" href="#mailings">
                             <MailBoxSolid/>
                         </SidebarItem>
-                        {#if showExtraPages} 
-                            <SidebarItem on:click={sidebarToggleDispatch} label="Insert Employees" href="#insert">
-                                <ArrowRightToBracketOutline/>
-                            </SidebarItem>
-                            <SidebarItem on:click={sidebarToggleDispatch} label="Modify Data" href="#edit">
-                                <ArrowRightToBracketOutline/>
-                            </SidebarItem>
-                            <SidebarItem on:click={sidebarToggleDispatch} label="Insert Data" href="#data">
-                                <ArrowRightToBracketOutline/>
-                            </SidebarItem>
-                        {/if}
                     </SidebarGroup>
                 </SidebarWrapper>
             </Sidebar>

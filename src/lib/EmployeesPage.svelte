@@ -482,7 +482,7 @@
 
 <div class="relative dropdown-container flex space-x-4" style="margin-top: 20px; margin-left: 20px;"> 
     <!-- User Dropdown -->
-    <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base flex justify-between items-center" style="width:300px">{selectedEmployee.name}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
+    <Button color="primary" style="width:300px">{selectedEmployee.name}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
     <Dropdown bind:open={nameMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
         <div  class="p-3">
             <Search size="md" bind:value={inputValueName}/>
@@ -497,7 +497,7 @@
     </Dropdown>
 
     <!-- Year Dropdown -->
-    <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base flex justify-between items-center" style="width:300px">{selectedYear}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
+    <Button color="primary" style="width:300px">{selectedYear}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
     <Dropdown bind:open={yearMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
         <div  class="p-3">
             <Search size="md" bind:value={inputValueYear}/>
@@ -536,7 +536,7 @@
     
     </p>
     <svelte:fragment slot="footer">
-    <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => modifyEmployeeName()}>Confirm</Button>
+    <Button color="primary" on:click={() => modifyEmployeeName()}>Confirm</Button>
     <Button class="bg-red-200 hover:bg-red-300 text-black">Cancel</Button>
     </svelte:fragment>
 </Modal>
@@ -550,8 +550,8 @@
         <Input type="text" id="email" placeholder={selectedEmployee.data.email} bind:value={newEmail} required />
     </p>
     <svelte:fragment slot="footer">
-    <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => modifyEmployeeEmail()}>Confirm</Button>
-    <Button class="bg-red-200 hover:bg-red-300 text-black">Cancel</Button>
+    <Button color="primary" on:click={() => modifyEmployeeEmail()}>Confirm</Button>
+    <Button color="red">Cancel</Button>
     </svelte:fragment>
 </Modal>
 
@@ -564,8 +564,8 @@
         <Input type="date" id="dob" placeholder={selectedEmployee.data.dob} bind:value={newDOB} required />
     </p>
     <svelte:fragment slot="footer">
-    <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => modifyEmployeeDOB()}>Confirm</Button>
-    <Button class="bg-red-200 hover:bg-red-300 text-black">Cancel</Button>
+    <Button color="primary" on:click={() => modifyEmployeeDOB()}>Confirm</Button>
+    <Button color="red">Cancel</Button>
     </svelte:fragment>
 </Modal>
 
@@ -584,8 +584,8 @@
         {/if}
     </p>
     <svelte:fragment slot="footer">
-    <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => modifyEmploymentStatus()}>Confirm</Button>
-    <Button class="bg-red-200 hover:bg-red-300 text-black">Cancel</Button>
+    <Button color="primary" on:click={() => modifyEmploymentStatus()}>Confirm</Button>
+    <Button color="red">Cancel</Button>
     </svelte:fragment>
 </Modal>
 
@@ -593,7 +593,7 @@
     <InsertDataPage employee={selectedEmployee.data} year={selectedYear} allowModify />
 
     <svelte:fragment slot="footer">
-        <Button class="bg-red-200 hover:bg-red-300 text-black"
+        <Button color="red"
             on:click={() => editDataModal = false}>
             Cancel
         </Button>
@@ -604,7 +604,7 @@
     <InsertDataPage employee={selectedEmployee.data} />
 
     <svelte:fragment slot="footer">
-        <Button class="bg-red-200 hover:bg-red-300 text-black"
+        <Button color="red"
             on:click={() => addDataModal = false}>
             Cancel
         </Button>
@@ -614,7 +614,7 @@
 <Modal title="Add Employee" bind:open={addEmployeeModal}>
     <InsertEmployeePage />
     <svelte:fragment slot="footer">
-        <Button class="bg-red-200 hover:bg-red-300 text-black"
+        <Button color="red"
             on:click={() => addEmployeeModal = false}>
             Cancel
         </Button>
@@ -676,9 +676,9 @@
             />
         {/if}
         <ButtonGroup class="*:!ring-primary-700">
-            <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base" style="width:175px" on:click={() => toggleChart('left')}>Left</Button>
-            <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base" style="width:175px" on:click={() => toggleChart('right')}>Right</Button> 
-            <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base" style="width:175px" on:click={() => toggleChart('both')}>Both</Button> 
+            <Button color="blue" style="width:175px" on:click={() => toggleChart('left')}>Left</Button>
+            <Button color="red" style="width:175px" on:click={() => toggleChart('right')}>Right</Button> 
+            <Button color="purple" style="width:175px" on:click={() => toggleChart('both')}>Both</Button> 
         </ButtonGroup>
     </div>
 </div>
@@ -687,8 +687,8 @@
     <hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
     <div class="sm:flex sm:items-center sm:justify-between">
         <ButtonGroup class="*:!ring-primary-700" style="width:100%">
-            <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-lg" style="width:50%">Print</Button>
-            <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-lg" style="width:50%">Send Letter</Button>
+            <Button color="primary" style="width:50%">Print</Button>
+            <Button color="primary" style="width:50%">Send Letter</Button>
         </ButtonGroup>
     </div>
  </Footer>

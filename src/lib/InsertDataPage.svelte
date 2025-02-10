@@ -10,6 +10,7 @@
     import ErrorMessage from './ErrorMessage.svelte';
     import SuccessMessage from './SuccessMessage.svelte';
     import { isNumber, validateFrequenciesLocally } from './utility';
+	import PageTitle from './PageTitle.svelte';
 
     interface Props {
         employees?: Array<Employee>,
@@ -282,13 +283,7 @@
 
 </script>
 {#if showTitle}
-    <div class="flex justify-center p-4 text-2xl">
-        {#if allowModify}
-            Modify Data
-        {:else}
-            Add New Data
-        {/if}
-    </div>
+    <PageTitle title={allowModify ? "Modify Data" : "Add New Data"} sub />
 {/if}
 
 <SuccessMessage {success} {successMessage} />
@@ -300,7 +295,7 @@
             <!-- Select Employee Dropdown -->
             <div class="w-m">
                 <Label for="employee" class="block mb-2">Select Employee</Label>
-                <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base flex justify-between items-center" style="width:300px">{selectedEmployee.name}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
+                <Button color="primary" class="text-base flex justify-between items-center" style="width:300px">{selectedEmployee.name}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
                 <Dropdown bind:open={nameMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
                 <div  class="p-3">
                     <Search size="md" bind:value={inputValueName}/>
@@ -322,7 +317,7 @@
                 <ButtonGroup class="w-full">
                     <Input id="year" placeholder="1957" 
                         bind:value={inputValueYear} on:keydown={checkYearAvailabilityKeydown} />
-                    <Button color="blue" on:click={checkYearAvailability}>
+                    <Button color="primary" on:click={checkYearAvailability}>
                         Check
                     </Button>
                 </ButtonGroup>

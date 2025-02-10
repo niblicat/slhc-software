@@ -51,12 +51,6 @@
         <MailingPage />
     {:else if activeURLHash == "#admin"}
         <AdminPage {admins} />
-    {:else if activeURLHash == "#insert"}
-        <InsertEmployeePage showTitle />
-    {:else if activeURLHash == "#data"}
-        <InsertDataPage {employees} />
-    {:else if activeURLHash == "#edit"}
-        <InsertDataPage employee={employees[1]}  year="2025" allowModify />
     {:else}
         <!-- User who is not logged in should be redirected to home (no hash) -->
         <div class="flex justify-center p-4 text-2xl">Welcome to the dashboard</div>
