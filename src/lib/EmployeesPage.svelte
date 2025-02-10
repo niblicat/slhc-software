@@ -8,7 +8,7 @@
     import EditIcon from './EditIcon.svelte';
     import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
     import { AnomolyStatus } from "./interpret";
-    import type { Employee } from './MyTypes';
+    import type { Employee, EmployeeSearchable } from './MyTypes';
     import { invalidateAll } from '$app/navigation';
 	import { controllers } from 'chart.js';
 	import InsertEmployeePage from './InsertEmployeePage.svelte';
@@ -80,12 +80,6 @@
         activeStatus: "Undefined",
         sex: "Undefined"
     };
-
-    // used to make it easier to access employees from their full name
-    type EmployeeSearchable = {
-        name: string, // full name
-        data: Employee
-    }
 
     // employee map that is search friendly
     // name will hold first and last so it's easier to search
