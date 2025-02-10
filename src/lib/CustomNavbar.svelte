@@ -32,8 +32,10 @@
 {/if}
 
 <Navbar color="primary" class="fixed flex justify-between items-center h-16 z-30">
-    <NavBrand href="/dashboard" class="flex-grow text-center">
-        <span class="relative flex-1 text-3xl font-bold">SIUE SLHC Employee Hearing Panel</span>
+    <NavBrand href="/dashboard" class="w-full text-center">
+        <span class="m-auto relative inline-block overflow-hidden whitespace-nowrap text-3xl font-bold text-[clamp(0.75rem,_3vw,_2rem)]">
+            SIUE SLHC Employee Hearing Panel
+        </span>
     </NavBrand>
     <CustomAvatar {user} />
 </Navbar>
