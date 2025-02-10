@@ -281,7 +281,6 @@
     }
 
 </script>
-
 {#if showTitle}
     <div class="flex justify-center p-4 text-2xl">
         {#if allowModify}
@@ -295,7 +294,7 @@
 <SuccessMessage {success} {successMessage} />
 <ErrorMessage {success} {errorMessage} />
 
-{#if !employee && !year}
+{#if !employee || !year}
     <div class="flex justify-center gap-4 w-4/5 p-5 m-auto"> 
         {#if !employee}
             <!-- Select Employee Dropdown -->
@@ -316,11 +315,10 @@
                 </Dropdown>
             </div>
         {/if}
-        
         {#if !year}
             <!-- Add Year Input -->
             <div class="w-m ml-16">
-                <Label for="year" class="block mb-2">Add Year</Label>
+                <Label for="year" class="block mb-2">Year of Data Recording</Label>
                 <ButtonGroup class="w-full">
                     <Input id="year" placeholder="1957" 
                         bind:value={inputValueYear} on:keydown={checkYearAvailabilityKeydown} />
@@ -373,7 +371,7 @@
 
     <div class="m-auto w-3/5 p-5 text-center">
         <Button 
-            class="bg-light-bluegreen hover:bg-dark-bluegreen text-black w-1/4" 
+            color="primary"
             on:click={addHearingData}>
             Submit
         </Button>

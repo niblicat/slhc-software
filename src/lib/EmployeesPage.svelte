@@ -1,7 +1,7 @@
 <script lang="ts">
 
     import { ButtonGroup, Button, Search, Modal, Label, Input, Radio } from 'flowbite-svelte';
-    import { ChevronDownOutline, UserRemoveSolid, UserAddSolid } from 'flowbite-svelte-icons';
+    import { ChevronDownOutline, UserRemoveSolid, UserAddSolid, CirclePlusSolid, EditSolid } from 'flowbite-svelte-icons';
     import { Dropdown } from 'flowbite-svelte';
     import ScatterPlot from './ScatterPlot.svelte';
     import { Footer } from 'flowbite-svelte';
@@ -246,6 +246,7 @@
     let emailModal = $state(false);
     let DOBmodal = $state(false);
     let activeStatusModal = $state(false);
+    let addDataModal = $state(false);
     let editDataModal = $state(false);
     let addEmployeeModal = $state(false);
 
@@ -287,6 +288,10 @@
         }
 
         editDataModal = true;
+    }
+
+    function showAddDataModal() {
+        addDataModal = true;
     }
 
     async function modifyEmployeeName(): Promise<void> {
@@ -506,10 +511,13 @@
         {/each}
     </Dropdown>
 
-    <Button on:click={() => showAddEmployeeModal()} class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base flex justify-between items-center" style="width:55px"><UserAddSolid/></Button>
+    <Button on:click={() => showAddEmployeeModal()} color="primary"><UserAddSolid /></Button>
     
+    {#if selectedEmployee.name !== "No employee selected"} 
+        <Button on:click={() => showAddDataModal()} color="primary"><CirclePlusSolid /></Button>
+    {/if} 
     {#if selectedYear !== "No year selected"} 
-        <Button on:click={() => showEditDataModal()} class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-base flex justify-between items-center" style="width:200px">Edit Employee's Data</Button>
+        <Button on:click={() => showEditDataModal()} color="primary"><EditSolid /></Button>
     {/if} 
 </div>
 
@@ -587,6 +595,17 @@
     <svelte:fragment slot="footer">
         <Button class="bg-red-200 hover:bg-red-300 text-black"
             on:click={() => editDataModal = false}>
+            Cancel
+        </Button>
+    </svelte:fragment>
+</Modal>
+
+<Modal size="xl" title={`Add Hearing Data for ${selectedEmployee.name}`} bind:open={addDataModal}> 
+    <InsertDataPage employee={selectedEmployee.data} />
+
+    <svelte:fragment slot="footer">
+        <Button class="bg-red-200 hover:bg-red-300 text-black"
+            on:click={() => addDataModal = false}>
             Cancel
         </Button>
     </svelte:fragment>
