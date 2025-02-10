@@ -33,7 +33,9 @@
     let selectedEmail = $state("No data selected");
     let selectedDOB = $state("No data selected");
     let selectedStatus = $state("No data selected");
-    let STSstatus = "No data selection";
+    let STSstatusRight = $state("No data selected");
+    let STSstatusLeft = $state("No data selected");
+    let selectedSex = $state("No data selected");
 
     const blankFrequencies = {
         hz500: "",
@@ -242,12 +244,6 @@
     // Helper function to get the readable status
     const GetAnomolyStatusText = (status: AnomolyStatus): string => {
         return AnomolyStatus[status] || "Unknown";
-    };
-
-    // Helper function to extract frequencies
-    const extractFrequencies = (earData: Record<string, any>): number[] => {
-        const { ear, ...frequencies } = earData; // Exclude the 'ear' property
-        return Object.values(frequencies) as number[];  // Return all frequency values as an array of numbers
     };
 
     //DATA MODIFICATION STUFF

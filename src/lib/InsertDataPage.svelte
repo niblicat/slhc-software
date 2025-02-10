@@ -5,7 +5,7 @@
     import { ChevronDownOutline } from 'flowbite-svelte-icons';
     import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
 
-    import type { Employee, HearingDataSingle } from './MyTypes';
+    import type { Employee, EmployeeSearchable, HearingDataSingle } from './MyTypes';
     import { invalidateAll } from '$app/navigation';
     import ErrorMessage from './ErrorMessage.svelte';
     import SuccessMessage from './SuccessMessage.svelte';
@@ -26,7 +26,8 @@
         lastName: "Undefined",
         email: "Undefined",
         dob: "Undefined",
-        activeStatus: "Undefined"
+        activeStatus: "Undefined",
+        sex: "Undefined"
     };
 
     const undefinedEmployeeSearchable: EmployeeSearchable = $state({
@@ -35,10 +36,7 @@
     });
 
     // used to make it easier to access employees from their full name
-    type EmployeeSearchable = {
-        name: string, // full name
-        data: Employee
-    }
+
 
     // employee map that is search friendly
     // name will hold first and last so it's easier to search

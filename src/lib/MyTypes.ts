@@ -8,6 +8,11 @@ export type Employee = {
     sex: string
 };
 
+export type EmployeeSearchable = {
+    name: string, // full name
+    data: Employee
+}
+
 export type Admin = {
     name: string,
     email: string,
