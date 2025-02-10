@@ -38,8 +38,7 @@
 
 </script>
 
-<CustomNavbar {user} hasSidebar={false} 
-    sidebarOpen={sidebarOpen} toggle={toggleSidebar} />
+<CustomNavbar {user} sidebarOpen={sidebarOpen} toggle={toggleSidebar} />
 
 <div id="content" class="h-dvh bg-gray-100 pt-16">
     {#if loginStatus != LoginStatus.None}

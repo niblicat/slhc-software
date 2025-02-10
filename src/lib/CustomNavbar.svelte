@@ -7,13 +7,13 @@
 	import { BarsOutline, CloseOutline } from 'flowbite-svelte-icons';
 
     interface Props {
-        hasSidebar: any;
+        hasSidebar?: any;
         sidebarOpen: any;
         user: UserSimple;
         toggle: any;
     }
 
-    let { hasSidebar, sidebarOpen, user, toggle }: Props = $props();
+    let { hasSidebar = false, sidebarOpen, user, toggle }: Props = $props();
 
     function sidebarToggleDispatch() {
         toggle();
@@ -22,9 +22,9 @@
 </script>
 
 {#if hasSidebar}
-    <Button color="primary" class="fixed top-2.5 left-2.5 z-50 w-8 h-10" on:click={sidebarToggleDispatch}>
+    <Button color="primary" class="fixed top-2.5 left-5 z-50 w-8 h-10" on:click={sidebarToggleDispatch}>
         {#if sidebarOpen}
-            <CloseOutline size="xl" color="red" />
+            <CloseOutline size="xl" />
         {:else}
             <BarsOutline size="xl" />
         {/if}

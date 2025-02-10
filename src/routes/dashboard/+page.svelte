@@ -38,7 +38,7 @@
 
 </script>
 
-<CustomNavbar {user} hasSidebar={true} 
+<CustomNavbar {user} hasSidebar
     sidebarOpen={sidebarOpen} toggle={toggleSidebar} />
 
 <CustomSidebar sidebarOpen={sidebarOpen}
