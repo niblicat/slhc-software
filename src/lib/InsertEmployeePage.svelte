@@ -4,6 +4,7 @@
     import ErrorMessage from './ErrorMessage.svelte';
     import SuccessMessage from './SuccessMessage.svelte';
 	import { isDate } from './utility';
+	import PageTitle from './PageTitle.svelte';
 
     let firstName = $state("");
     let lastName = $state("");
@@ -118,45 +119,48 @@
         }
     }
 
+    const formClasses = "mx-auto w-[60%] p-2.5"
+
+
 </script>
 
-<div bind:this={top}></div>
+<div aria-hidden="true" bind:this={top}></div>
 
 {#if showTitle}
-    <div class="center text-2xl">Add a New Employee</div>
+    <PageTitle title="Add a New Employee" sub />
 {/if}
 
 <SuccessMessage {success} {successMessage} />
 <ErrorMessage {success} {errorMessage} />
 
-<div class="mb-6 form">
+<div class="{formClasses}">
     <Label for="firstName" class="block mb-2">Employee First Name</Label>
     <Input id="firstName" bind:value={firstName} placeholder="First Name" required />
 </div>
 
-<div class="mb-6 form">
+<div class="mb-6 {formClasses}">
     <Label for="lastName" class="block mb-2">Employee Last Name</Label>
     <Input id="lastName" bind:value={lastName} placeholder="Last Name" required />
 </div>
 
-<div class="mb-6 form">
+<div class="mb-6 {formClasses}">
     <Label for="email" class="block mb-2">Employee Email</Label>
     <Input id="email" type="email" bind:value={email} placeholder="email@company.com" required />
 </div>
 
-<div class="mb-6 form">
+<div class="mb-6 {formClasses}">
     <Label for="dateOfBirth" class="block mb-2">Employee Date of Birth</Label>
     <Input id="dateOfBirth" type="date" bind:value={dateOfBirth} required />
 </div>
 
-<div class="form">
+<div class="{formClasses}">
     <Label for="sex" class="block mb-2">Sex</Label>
     <Radio name="sex" value="male" bind:group={sex}>Male</Radio>
     <Radio name="sex" value="female" bind:group={sex}>Female</Radio>
     <Radio name="sex" value="other" bind:group={sex}>Other</Radio>
 </div>
 
-<div class="form">
+<div class="{formClasses}">
     <Label for="employmentStatus" class="block mb-2">Employment Status</Label>
     <Radio name="employmentStatus" value="false" bind:group={isInactive}>Active</Radio>
     <Radio name="employmentStatus" value="true" bind:group={isInactive}>Inactive</Radio>
@@ -164,38 +168,21 @@
 
 
 {#if isInactiveBool}
-    <div class="mb-6 form">
+    <div class="mb-6 {formClasses}">
         <Label for="lastActive" class="block mb-2">Last Active Date</Label>
         <Input id="lastActive" type="date" bind:value={lastActive} />
     </div>
 {/if}
 
 
-<div class="form">
+<div class="{formClasses}">
     <Button 
-        class="bg-light-bluegreen hover:bg-dark-bluegreen text-black" 
-        style="width:200px" 
+        color="primary"
+        class="w-[60%]" 
         on:click={addEmployee}>
         Submit
     </Button>
     </div>
 
     <div>
-    
 </div>
-
-<!-- TODO: Turn these into tailwind classes -->
-<style>
-    .center {
-        margin: auto;
-        width: 50%;
-        padding: 10px;
-        text-align: center;
-    }
-
-    .form {
-        margin: auto;
-        width: 60%;
-        padding: 10px;
-    }
-</style>

@@ -1,14 +1,14 @@
 <script lang="ts">
     import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Checkbox, Modal, Button, Tooltip } from 'flowbite-svelte';
     import EditIcon from './EditIcon.svelte';
-    import { createEventDispatcher } from 'svelte';
 
-    import { Input, Label, Helper } from 'flowbite-svelte';
+    import { Input, Label } from 'flowbite-svelte';
 	import { invalidateAll } from '$app/navigation';
 
     import type { Admin, AdminSelectable } from './MyTypes.ts';
 	import { InfoCircleOutline } from 'flowbite-svelte-icons';
 	import ErrorMessage from './ErrorMessage.svelte';
+	import PageTitle from './PageTitle.svelte';
 
     interface Props {
         admins: Array<Admin>;
@@ -207,10 +207,9 @@
         <Input type="text" id="name" placeholder={selectedAdmin.name} bind:value={newName} required />
     </p>
     
-    <!-- TODO: CHANGE THESE COLOURS -->
     <svelte:fragment slot="footer">
-        <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => modifyAdminName(selectedAdmin)}>Confirm</Button>
-        <Button class="bg-red-200 hover:bg-red-300 text-black">Cancel</Button>
+        <Button color="primary" on:click={() => modifyAdminName(selectedAdmin)}>Confirm</Button>
+        <Button color="red">Cancel</Button>
     </svelte:fragment>
 </Modal>
 
@@ -219,10 +218,9 @@
         <span class="text-red-600">Are you sure you want to revoke the permissions of {selectedAdmin.name} ({selectedAdmin.email})?</span>
     </p>
     
-    <!-- TODO: CHANGE THESE COLOURS -->
     <svelte:fragment slot="footer">
-        <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => modifyAdminPermissions(selectedAdmin)}>Yes</Button>
-        <Button class="bg-red-200 hover:bg-red-300 text-black">No</Button>
+        <Button color="primary" on:click={() => modifyAdminPermissions(selectedAdmin)}>Yes</Button>
+        <Button color="red">No</Button>
     </svelte:fragment>
 </Modal>
 
@@ -234,10 +232,9 @@
         <span class="text-red-600">Are you sure you want to make {selectedAdmin.name} ({selectedAdmin.email}) an admin?</span>
     </p>
     
-    <!-- TODO: CHANGE THESE COLOURS -->
     <svelte:fragment slot="footer">
-        <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => modifyAdminPermissions(selectedAdmin)}>Yes</Button>
-        <Button class="bg-red-200 hover:bg-red-300 text-black">No</Button>
+        <Button color="primary" on:click={() => modifyAdminPermissions(selectedAdmin)}>Yes</Button>
+        <Button color="red">No</Button>
     </svelte:fragment>
 </Modal>
 
@@ -249,22 +246,17 @@
     <br>
     <span class="text-red-600">Are you sure you want to remove these admins?</span>
     
-    <!-- TODO: CHANGE THESE COLOURS -->
     <svelte:fragment slot="footer">
-        <Button class="bg-blue-200 hover:bg-blue-300 text-black" on:click={() => deleteSelectedUsers()}>Yes</Button>
-        <Button class="bg-red-200 hover:bg-red-300 text-black">No</Button>
+        <Button color="primary" on:click={() => deleteSelectedUsers()}>Yes</Button>
+        <Button color="red">No</Button>
     </svelte:fragment>
 </Modal>
 
-<!-- figure out if this should be main -->
+<PageTitle title="Admin Management" caption="Modify the priviledges of anyone who has attempted to sign in." />
+<ErrorMessage {success} {errorMessage} />
+
 <div class="flex-column justify-center mx-4">
-    
     <Table hoverable={true} class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-        <caption class="p-5 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800">
-            Admin Approval
-            <p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">Modify the priviledges of anyone who has attempted to sign in.</p>
-            <ErrorMessage {success} {errorMessage} />
-          </caption>
         <TableHead>
             <TableHeadCell class="!p-4">
               <Checkbox on:click={() => massSelect()} checked={!doSelectAll}/>
@@ -306,10 +298,9 @@
 
     <br>
 
-    <!-- TODO: ADD OPTION TO DELETE SELECTED USERS -->
     {#if selectedAdmins.length > 0}
         <div>
-            <Button color="red" on:click={showAdminDeletionModal} class="bg-red-200 hover:bg-red-300 text-black">Delete selected users</Button>
+            <Button color="red" on:click={showAdminDeletionModal}>Delete selected users</Button>
         </div>
     {/if}
 </div>
