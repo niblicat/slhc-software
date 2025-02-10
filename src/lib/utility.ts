@@ -181,3 +181,18 @@ export function extractFrequencies(earData: Record<string, any>): number[] {
     const { ear, ...frequencies } = earData; // Exclude the 'ear' property
     return Object.values(frequencies) as number[];  // Return all frequency values as an array of numbers
 };
+
+export function validateFrequencies(frequencies: Record<string, string | number>): boolean {
+    return Object.values(frequencies).every(value => 
+        value === "CNT" || 
+        (!isNaN(parseInt(value as string, 10)) && parseInt(value as string, 10) >= -10 && parseInt(value as string, 10) <= 90)
+    );
+}
+export function validateFrequenciesLocally(frequenciesLeft: HearingDataSingle, frequenciesRight: HearingDataSingle): boolean {
+    const validateFrequencies = (freqs: HearingDataSingle) =>
+        Object.values(freqs).every(value => 
+            value === "CNT" || 
+            (!isNaN(parseInt(value as string, 10)) && parseInt(value as string, 10) >= -10 && parseInt(value as string, 10) <= 90)
+        );
+    return validateFrequencies(frequenciesLeft) && validateFrequencies(frequenciesRight);
+}

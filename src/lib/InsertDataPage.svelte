@@ -9,7 +9,7 @@
     import { invalidateAll } from '$app/navigation';
     import ErrorMessage from './ErrorMessage.svelte';
     import SuccessMessage from './SuccessMessage.svelte';
-    import { isNumber } from './utility';
+    import { isNumber, validateFrequenciesLocally } from './utility';
 
     interface Props {
         employees?: Array<Employee>,
@@ -221,6 +221,10 @@
     async function addHearingData() {
         if (compareFrequencieEquality(lastPulledLeftFrequencies, leftFrequencies) && compareFrequencieEquality(lastPulledRightFrequencies, rightFrequencies)) {
             displayError("There were no changes to push!");
+            return;
+        }
+        if (!validateFrequenciesLocally(leftFrequencies, rightFrequencies)) {
+            displayError("The values you submitted are out of range or invalid. Choose values between -10 and 90 or 'CNT'.")
             return;
         }
 
