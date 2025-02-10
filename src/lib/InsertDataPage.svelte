@@ -5,11 +5,11 @@
     import { ChevronDownOutline } from 'flowbite-svelte-icons';
     import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
 
-    import type { Employee } from './MyTypes';
+    import type { Employee, HearingDataSingle } from './MyTypes';
     import { invalidateAll } from '$app/navigation';
     import ErrorMessage from './ErrorMessage.svelte';
-    import { isNumber } from './utility';
     import SuccessMessage from './SuccessMessage.svelte';
+    import { isNumber } from './utility';
 
     interface Props {
         employees?: Array<Employee>,
@@ -66,7 +66,7 @@
     let nameMenuOpen = $state(false);
 
     let inputValueYear = $state("");
-    const blankFrequencies = {
+    const blankFrequencies: HearingDataSingle = {
         hz500: "",
         hz1000: "",
         hz2000: "",
@@ -96,6 +96,15 @@
         lastPulledRightFrequencies = rightEar;
     }
 
+    function compareFrequencieEquality(freq1: HearingDataSingle, freq2: HearingDataSingle): boolean {
+        // Iterate through each frequency key and check if they are the same in both sets
+        return Object.keys(freq1).every((key) => {
+            // Type assertion to tell TypeScript the key is a valid key of HearingDataSingle
+            return freq1[key as keyof HearingDataSingle] === freq2[key as keyof HearingDataSingle];
+        });
+    }
+
+
     async function fetchHearingDataForYearFromServer(employeeID: string, year: string) {
         try {
             const formData = new FormData();
@@ -116,7 +125,7 @@
 
             } 
             else {
-                displayError('Failed to fetch hearing data for the selected year');
+                displayError(`Failed to fetch hearing data for the selected year... ${result["message"] ?? "No error message supplied."}`);
             }
         }
         catch (error) {
@@ -132,6 +141,11 @@
     function displayError(message: string) {
         errorMessage = message;
         success = false;
+    }
+
+    function displaySuccess(message: string) {
+        successMessage = message;
+        success = true;
     }
 
     function preprocessFrequencies(frequencies: Record<string, string>) {
@@ -204,11 +218,14 @@
     }
 
     async function addHearingData() {
+        if (compareFrequencieEquality(lastPulledLeftFrequencies, leftFrequencies) && compareFrequencieEquality(lastPulledRightFrequencies, rightFrequencies)) {
+            displayError("There were no changes to push!");
+            return;
+        }
+
         const formData = new FormData();
         formData.append('leftEarFrequencies', JSON.stringify(preprocessFrequencies(leftFrequencies))); // Left ear data
         formData.append('rightEarFrequencies', JSON.stringify(preprocessFrequencies(rightFrequencies))); // Right ear data
-
-        formData.append('modify', allowModify.toString()); // Right ear data
 
         const appendedEmployeeID = employee ? employee.employeeID : selectedEmployee.data.employeeID;
         formData.append('id', appendedEmployeeID); // Pass id
@@ -218,7 +235,9 @@
         // Debug: Log form data
         console.log('Form data to be sent:', Object.fromEntries(formData.entries()));
 
-        const response = await fetch('/dashboard?/addHearingData', {
+        const location = allowModify ? '/dashboard?/modifyHearingData' : '/dashboard?/addHearingData';
+
+        const response = await fetch(location, {
             method: 'POST',
             body: formData,
         });
@@ -230,7 +249,7 @@
             const result = JSON.parse(JSON.parse(serverResponse.data)[0]);
 
             if (result["success"]) {
-                success = true;
+                displaySuccess("Successfully pushed changes to database.");
                 await invalidateAll();
             } else {
                 displayError(result["message"] ?? "Failed to add employee data.");

@@ -31,11 +31,11 @@ export type UserSimple = {
 }
 
 export type HearingDataSingle = {
-    hz500?: number,
-    hz1000?: number,
-    hz2000?: number,
-    hz3000?: number,
-    hz4000?: number,
-    hz6000?: number,
-    hz8000?: number
+    hz500: string,
+    hz1000: string,
+    hz2000: string,
+    hz3000: string,
+    hz4000: string,
+    hz6000: string,
+    hz8000: string
 }

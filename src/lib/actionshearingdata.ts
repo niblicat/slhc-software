@@ -33,9 +33,6 @@ export async function addHearingData(request: Request) {
     const year = parseInt(formData.get('year') as string, 10);
     const leftEarFrequencies = JSON.parse(formData.get('leftEarFrequencies') as string);
     const rightEarFrequencies = JSON.parse(formData.get('rightEarFrequencies') as string);
-    const allowModify: boolean = JSON.parse(formData.get('modify') as string) == "true";
-
-    // TODO: ADD MODIFY!!!!
 
     const validateFrequencies = (frequencies: Record<string, string | number>) =>
         Object.values(frequencies).every(value => 
@@ -158,7 +155,7 @@ export async function addHearingData(request: Request) {
 
 export async function modifyHearingData(request: Request) {
     const formData = await request.formData();
-    const user = formData.get('user') as string;
+    const id = formData.get('id') as string;
     const year = parseInt(formData.get('year') as string, 10);
     const leftEarFrequencies = JSON.parse(formData.get('leftEarFrequencies') as string);
     const rightEarFrequencies = JSON.parse(formData.get('rightEarFrequencies') as string);
@@ -175,25 +172,17 @@ export async function modifyHearingData(request: Request) {
     }
 
     try {
-        // Fetch employee_id for the selected user
-        const userIdQuery = await sql`SELECT employee_id FROM Employee WHERE CONCAT(first_name, ' ', last_name) = ${user};`;
-        if (userIdQuery.rows.length === 0) {
-            throw new Error("User not found");
-        }
-
-        const employeeId = userIdQuery.rows[0].employee_id;
-
         // Check if hearing data exists for this employee, year, and ear
         const existingLeftData = await sql`
             SELECT d.data_id FROM Data d
             JOIN Has h ON d.data_id = h.data_id
-            WHERE h.employee_id = ${employeeId} AND h.year = ${year} AND h.ear = 'left';
+            WHERE h.employee_id = ${id} AND h.year = ${year} AND h.ear = 'left';
         `;
 
         const existingRightData = await sql`
             SELECT d.data_id FROM Data d
             JOIN Has h ON d.data_id = h.data_id
-            WHERE h.employee_id = ${employeeId} AND h.year = ${year} AND h.ear = 'right';
+            WHERE h.employee_id = ${id} AND h.year = ${year} AND h.ear = 'right';
         `;
 
         const transformFrequencies = (frequencies: Record<string, string | number>) => {
@@ -203,7 +192,7 @@ export async function modifyHearingData(request: Request) {
                     value === "CNT" || value === null ? null : parseInt(value as string, 10),
                 ])
             );
-        };            
+        };
 
         const leftEarFrequenciesTransformed = transformFrequencies(leftEarFrequencies);
         const rightEarFrequenciesTransformed = transformFrequencies(rightEarFrequencies);      
@@ -232,7 +221,7 @@ export async function modifyHearingData(request: Request) {
             // Insert into Has table
             await sql`
                 INSERT INTO Has (employee_id, data_id, year, ear)
-                VALUES (${employeeId}, ${leftEarDataId}, ${year}, 'left');
+                VALUES (${id}, ${leftEarDataId}, ${year}, 'left');
             `;
         }
 
@@ -260,7 +249,7 @@ export async function modifyHearingData(request: Request) {
             // Insert into Has table
             await sql`
                 INSERT INTO Has (employee_id, data_id, year, ear)
-                VALUES (${employeeId}, ${rightEarDataId}, ${year}, 'right');
+                VALUES (${id}, ${rightEarDataId}, ${year}, 'right');
             `;
         }
 
