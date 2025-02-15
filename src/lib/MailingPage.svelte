@@ -43,6 +43,14 @@
         const employeeList = createEmployeeList(); // Get the list of all employees
         const csvContent = createCSV(employeeList); // Generate CSV content
 
+        let enrichedEmployeeList = [];
+
+        for (const employee of employeeList) {
+            try {
+                const response = await fetch('/dashboard?/fetchHearingData', )
+            }
+        }
+
         if (employeeList.length > 0) {
             downloadCSV(csvContent); // Call the function to download the CSV
         } else {
@@ -77,6 +85,8 @@
             <TableHeadCell>Email</TableHeadCell>
             <TableHeadCell>ID</TableHeadCell>
             <TableHeadCell>Date of Birth</TableHeadCell>
+            <!-- <TableHeadCell>Date</TableHeadCell> -->
+            <!-- <TableHeadCell>Data</TableHeadCell> -->
         </TableHead>
         <TableBody tableBodyClass="divide-y">
             {#each employees as employee (employee.employeeID)}
@@ -88,10 +98,10 @@
                         {employee.email}
                     </TableBodyCell>
                     <TableBodyCell>
-                        {new Date(employee.dob).toLocaleDateString('en-US')}
+                        {employee.employeeID}
                     </TableBodyCell>
                     <TableBodyCell>
-                        {employee.employeeID}
+                        {new Date(employee.dob).toLocaleDateString('en-US')}
                     </TableBodyCell>
                 </TableBodyRow>
             {/each}

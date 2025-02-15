@@ -693,20 +693,26 @@ export const actions: Actions = {
     exportEmployeeData: async ({ request }) => {
         const formData = await request.formData();
         const employeeID = formData.get('employeeID') as string;
-        const first_name = formData.get('first_name') as string;
-        const last_name = formData.get('last_name') as string;
-        const email = formData.get('email') as string;
-
+        // const first_name = formData.get('first_name') as string;
+        // const last_name = formData.get('last_name') as string;
+        // const email = formData.get('email') as string;
+    
         try {
-            // Query to get all employee and hearing data
-            const employeeDataQuery = await sql`
+            // Query to get employee data for both ears (left and right) from the most recent year
+            const employeePersonalDataQuery = await sql`
                 SELECT
                     e.employee_id,
                     e.first_name,
                     e.last_name,
                     e.email,
                     e.date_of_birth,
-                    e.last_active,
+                    e.last_active, 
+                FROM Employee e
+                Where e.employee_id = ${employeeID};
+            `;
+
+            const employeeEarDataQuery = await sql `
+                SELECT
                     h.year,
                     h.ear,
                     d.Hz_500,
@@ -715,26 +721,34 @@ export const actions: Actions = {
                     d.Hz_3000,
                     d.Hz_4000,
                     d.Hz_6000,
-                    d.Hz_8000 
-                FROM Employee e
-                LEFT JOIN Has h ON e.employee_id = h.employee_id
-                LEFT JOIN Data d ON h.data_id = d.data_id
-                ORDER BY e.employee_id, h.year, h.ear;
+                    d.Hz_8000
+                FROM Has h
+                Join Data d On h.data_id = d.data_id
+                WHERE h.employee_id = ${employeeID}
+                AND h.year = (
+                    SELECT MAX(year) FROM Has WHERE employee_id = ${employeeID}
+                )
+                ORDER BY h.ear;
             `;
-    
-            const employeeData = employeeDataQuery.rows[0];
 
+            const employeePersonalData = employeePersonalDataQuery.rows;
+            const employeeEarData = employeeEarDataQuery.rows;
+    
+            // Log the employee data to the console for debugging
+            // console.log("Employee Data:", employeePersonalData);
+    
+            // Return the extracted data
             const dataReturnTest = {
                 success: true,
-                employeeData
-            }
-
-            console.log(JSON.stringify(dataReturnTest));
-
-            JSON.stringify({
+                personal: employeePersonalData,
+                ears: employeeEarData
+            };
+    
+            return JSON.stringify({
                 success: true,
-                data: employeeData.rows
-            });  
+                data: dataReturnTest
+            });
+    
         } catch (error: any) {
             console.error('Error fetching employee data:', error.message);
             return JSON.stringify({
