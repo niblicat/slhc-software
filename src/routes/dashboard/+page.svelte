@@ -38,30 +38,19 @@
 
 </script>
 
-<CustomNavbar
-{user}
-hasSidebar={true} 
-sidebarOpen={sidebarOpen}
-toggle={toggleSidebar} 
-/>
+<CustomNavbar {user} hasSidebar
+    sidebarOpen={sidebarOpen} toggle={toggleSidebar} />
 
-<CustomSidebar
-sidebarOpen={sidebarOpen}
-activeUrl={activeURLHash}
-toggle={toggleSidebar}
-/>
+<CustomSidebar sidebarOpen={sidebarOpen}
+    activeUrl={activeURLHash} toggle={toggleSidebar} />
 
 <div id="content" class="h-dvh bg-gray-100 pt-16">
     {#if activeURLHash == "#employees"}
         <EmployeesPage {employees} />
     {:else if activeURLHash == "#mailings"}
-        <MailingPage {employees} />
+        <MailingPage employees={employees}/>
     {:else if activeURLHash == "#admin"}
         <AdminPage {admins} />
-    {:else if activeURLHash == "#insert"}
-        <InsertEmployeePage/>
-    {:else if activeURLHash == "#data"}
-        <InsertDataPage {employees}/>
     {:else}
         <!-- User who is not logged in should be redirected to home (no hash) -->
         <div class="flex justify-center p-4 text-2xl">Welcome to the dashboard</div>
