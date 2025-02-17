@@ -7,7 +7,7 @@
     import { Footer } from 'flowbite-svelte';
     import EditIcon from './EditIcon.svelte';
     import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
-    import { AnomolyStatus } from "./interpret";
+    import { AnomalyStatus } from "./interpret";
     import type { Employee } from './MyTypes';
     import { invalidateAll } from '$app/navigation';
 	import { controllers } from 'chart.js';
@@ -226,8 +226,8 @@
                 const selectedYearReport = result.hearingReport.find((report: any) => report.reportYear === parseInt(year, 10));
 
                 if (selectedYearReport) {
-                    STSstatusRight = GetAnomolyStatusText(selectedYearReport.rightStatus);
-                    STSstatusLeft = GetAnomolyStatusText(selectedYearReport.leftStatus);
+                    STSstatusRight = GetAnomalyStatusText(selectedYearReport.rightStatus);
+                    STSstatusLeft = GetAnomalyStatusText(selectedYearReport.leftStatus);
 
                     console.log(`STS Report for ${year} - RIGHT:`, STSstatusRight);
                     console.log(`STS Report for ${year} - LEFT:`, STSstatusLeft);
@@ -247,8 +247,8 @@
     };
 
     // Helper function to get the readable status
-    const GetAnomolyStatusText = (status: AnomolyStatus): string => {
-        return AnomolyStatus[status] || "Unknown";
+    const GetAnomalyStatusText = (status: AnomalyStatus): string => {
+        return AnomalyStatus[status] || "Unknown";
     };
 
     // Helper function to extract frequencies
