@@ -742,8 +742,8 @@
                 <EditIcon on:edit={() => showActiveStatusChangeModal(selectedEmployee.data)}/>
             {/if} 
         </p> <br>
-        <p class="text-3xl">STS Status Right: {STSstatusRight}</p> <br>
         <p class="text-3xl">STS Status Left: {STSstatusLeft}</p> <br>
+        <p class="text-3xl">STS Status Right: {STSstatusRight}</p> <br>
     </section>
 
     <!-- Chart Section -->

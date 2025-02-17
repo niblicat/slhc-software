@@ -101,15 +101,16 @@ export class UserHearingScreeningHistory {
      */
     private GetStatusForEar(baselineEarData: HearingDataOneEar, beforeEarData: HearingDataOneEar, afterEarData: HearingDataOneEar, correction: HertzCorrectionForAge): AnomolyStatus {
         // Get the status for one ear
-        let unweighedAverageChange = this.GetAverageDecibalChangeForOneEar(beforeEarData, afterEarData);
-        let weighedAverageChange = this.GetAverageDecibalChangeForOneEarForMainLevels(baselineEarData, afterEarData, correction);
+        let unweighedAverageChange = this.GetAverageDecibalChangeForOneEar(beforeEarData, afterEarData); //compares current year and year prior (main 3 points WITHOUT AGE)
+        let weighedAverageChange = this.GetAverageDecibalChangeForOneEarForMainLevels(baselineEarData, afterEarData, correction); // compared current year and baseline WITH AGE (only main 3 points)
+
 
         // a larger value is worse
-        if (weighedAverageChange >= 10) return AnomolyStatus.STS;
+        if (weighedAverageChange >= 10) return AnomolyStatus.STS; //with age
         if (unweighedAverageChange >= 10) return AnomolyStatus.Warning;
-        else if (unweighedAverageChange >= 5) return AnomolyStatus.Worse;
-        else if (unweighedAverageChange == 0) return AnomolyStatus.Same;
-        else return AnomolyStatus.Better;
+        else if (unweighedAverageChange >= 3) return AnomolyStatus.Worse; // i think 3 is the correct turning point
+        else if (unweighedAverageChange <= -3) return AnomolyStatus.Better; //not sure about -3
+        else return AnomolyStatus.Same;
     }
 
     /**
@@ -202,8 +203,14 @@ export class UserHearingScreeningHistory {
             let baselineLeftAge = baselineLeftScreening.year - this.currentYear + this.age;
             let baselineRightAge = baselineRightScreening.year - this.currentYear + this.age;
 
+            console.log("current year of report: ", this.screenings[i].year);
+            console.log("current age of report: ", this.age);
+            console.log("left baseline year: ", baselineLeftScreening.year, "left baseline age: ", baselineLeftAge, "right baseline year: ", baselineRightScreening.year, " right baseline age: ", baselineRightAge);
+
             let ageCorrectionLeft = this.GetAgeCorrectiveDecibalAdjustment(baselineLeftAge);
             let ageCorrectionRight = this.GetAgeCorrectiveDecibalAdjustment(baselineRightAge);
+
+            console.log("left age correction: ", ageCorrectionLeft, " right age correction: ", ageCorrectionRight);
 
             let leftAnomolyStatus = this.GetStatusForEar(baselineLeftScreening.leftEar, previousScreening.leftEar, afterScreening.leftEar, ageCorrectionLeft);
             let rightAnomolyStatus = this.GetStatusForEar(baselineRightScreening.rightEar, previousScreening.rightEar, afterScreening.rightEar, ageCorrectionRight);
@@ -253,7 +260,15 @@ export class UserHearingScreeningHistory {
         let diff3000 = hdata2.hz3000 - hdata1.hz3000 - ageCorrection.hz3000;
         let diff4000 = hdata2.hz4000 - hdata1.hz4000 - ageCorrection.hz4000;
 
+        console.log("DATA BASELINE: ", hdata1);
+        console.log("DATA NEW: ", hdata2);
+
+        console.log("2000 data2-data1-correction:", diff2000, " = ", hdata2.hz2000, " - ", hdata1.hz2000, " - ", ageCorrection.hz2000);
+        console.log("3000 data2-data1-correction:", diff3000, " = ", hdata2.hz3000, " - ", hdata1.hz4000, " - ", ageCorrection.hz3000);
+        console.log("4000 data2-data1-correction:", diff4000, " = ", hdata2.hz4000, " - ", hdata1.hz4000, " - ", ageCorrection.hz4000);
+
         let average = findAverage(diff2000, diff3000, diff4000);
+        console.log("weighted average:", average);
 
         return average;
     }
@@ -264,15 +279,28 @@ export class UserHearingScreeningHistory {
      */
     private GetAverageDecibalChangeForOneEar(hdata1: HearingDataOneEar, hdata2: HearingDataOneEar): number {
         // TODO: use age table?
-        let diff500 = hdata2.hz500 - hdata1.hz1000;
-        let diff1000 = hdata2.hz1000 - hdata1.hz1000;
+        // let diff500 = hdata2.hz500 - hdata1.hz500;
+        // let diff1000 = hdata2.hz1000 - hdata1.hz1000;
         let diff2000 = hdata2.hz2000 - hdata1.hz2000;
         let diff3000 = hdata2.hz3000 - hdata1.hz3000;
         let diff4000 = hdata2.hz4000 - hdata1.hz4000;
-        let diff6000 = hdata2.hz6000 - hdata1.hz6000;
-        let diff8000 = hdata2.hz8000 - hdata1.hz8000;
+        // let diff6000 = hdata2.hz6000 - hdata1.hz6000;
+        // let diff8000 = hdata2.hz8000 - hdata1.hz8000;
 
-        let average = findAverage(diff500, diff1000, diff2000, diff3000, diff4000, diff6000, diff8000);
+        // let average = findAverage(diff500, diff1000, diff2000, diff3000, diff4000, diff6000, diff8000);
+        let average = findAverage(diff2000, diff3000, diff4000);
+
+        console.log("DATA YEAR BEFORE: ", hdata1);
+        console.log("DATA NEW: ", hdata2);
+
+        // console.log("unweighted 500: ", diff500, " = ", hdata2.hz500, " - ", hdata1.hz500);
+        // console.log("unweighted 1000: ", diff1000, " = ", hdata2.hz1000, " - ", hdata1.hz1000);
+        console.log("unweighted 2000: ", diff2000, " = ", hdata2.hz2000, " - ", hdata1.hz2000);
+        console.log("unweighted 3000: ", diff3000, " = ", hdata2.hz3000, " - ", hdata1.hz3000);
+        console.log("unweighted 4000: ", diff4000, " = ", hdata2.hz4000, " - ", hdata1.hz4000);
+        // console.log("unweighted 6000: ", diff6000, " = ", hdata2.hz6000, " - ", hdata1.hz6000);
+        // console.log("unweighted 8000: ", diff8000, " = ", hdata2.hz8000, " - ", hdata1.hz8000);
+        console.log("unweighted average: ", average);
 
         return average;
     }
