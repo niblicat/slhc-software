@@ -108,8 +108,8 @@ export class UserHearingScreeningHistory {
 
         // a larger value is worse
         if (weighedAverageChange >= 10) return AnomalyStatus.STS;
-        if (weighedAverageChange <= -7) return AnomalyStatus.Improvement; // baseline redefinition (-7 may be different number)
         if (yearPriorAverageChange >= 10) return AnomalyStatus.Warning;
+        else if (weighedAverageChange <= -7) return AnomalyStatus.Improvement; // baseline redefinition (-7 may be different number)
         else if (yearPriorAverageChange >= 3) return AnomalyStatus.Worse; // i think +/-3 is the correct turning point
         else if (yearPriorAverageChange <= -3) return AnomalyStatus.Better; 
         else return AnomalyStatus.Same;
@@ -210,7 +210,7 @@ export class UserHearingScreeningHistory {
             let currentAnomalyStatuses = new EarAnomalyStatus(leftAnomalyStatus, rightAnomalyStatus, afterScreening.year, bestLeftEarYear, bestRightEarYear);
             reportArray.push(currentAnomalyStatuses);
 
-            // update baselines after report has confirmed improvement (other iwse the new baseline will compare to itself for redefinition year) 
+            // update baselines after report has confirmed improvement (otherwise the new baseline will compare to itself for redefinition year) 
             if (this.ShouldUpdateBaseline(bestLeftEarAverage, newLeftEarAverage)) {
                 bestLeftEarIndex = i;
                 bestLeftEarAverage = newLeftEarAverage;
