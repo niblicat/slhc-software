@@ -101,9 +101,8 @@ export class UserHearingScreeningHistory {
      */
     private GetStatusForEar(baselineEarData: HearingDataOneEar, beforeEarData: HearingDataOneEar, afterEarData: HearingDataOneEar, correction: HertzCorrectionForAge): AnomolyStatus {
         // Get the status for one ear
-        let unweighedAverageChange = this.GetAverageDecibalChangeForOneEar(beforeEarData, afterEarData); //compares current year and year prior (main 3 points WITHOUT AGE)
-        let weighedAverageChange = this.GetAverageDecibalChangeForOneEarForMainLevels(baselineEarData, afterEarData, correction); // compared current year and baseline WITH AGE (only main 3 points)
-
+        let unweighedAverageChange = this.GetAverageDecibalChangeForOneEar(beforeEarData, afterEarData); // compares current year and YEAR PRIOR (only main 3 points WITHOUT AGE)
+        let weighedAverageChange = this.GetAverageDecibalChangeForOneEarForMainLevels(baselineEarData, afterEarData, correction); // compares current year and BASELINE (only main 3 points WITH AGE )
 
         // a larger value is worse
         if (weighedAverageChange >= 10) return AnomolyStatus.STS; //with age
