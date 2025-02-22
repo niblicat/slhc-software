@@ -8,16 +8,6 @@ export type Employee = {
     sex: string;
 };
 
-export type EmployeeSelectable = {
-    employeeID: string,
-    firstName: string,
-    lastName: string,
-    email: string,
-    dob: string,
-    activeStatus: string,
-    sex: string
-};
-
 export type EmployeeSearchable = {
     name: string, // full name
     data: Employee

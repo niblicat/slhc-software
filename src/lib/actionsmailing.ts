@@ -1,28 +1,29 @@
 import { sql } from '@vercel/postgres';
+import type { Employee, HearingDataSingle } from './MyTypes';
 
 interface Request {
     formData: () => Promise<FormData>;
 }
 
-interface EmployeeData {
-    employeeID: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    dateOfBirth: string;
-}
+// interface EmployeeData {
+//     employeeID: string;
+//     firstName: string;
+//     lastName: string;
+//     email: string;
+//     dateOfBirth: string;
+// }
 
-interface HearingData {
-    year: number;
-    ear: string;
-    hz500: number | null;
-    hz1000: number | null;
-    hz2000: number | null;
-    hz3000: number | null;
-    hz4000: number | null;
-    hz6000: number | null;
-    hz8000: number | null;
-}
+// interface HearingData {
+//     year: number,
+//     ear: string,
+//     hz500: string,
+//     hz1000: string,
+//     hz2000: string,
+//     hz3000: string,
+//     hz4000: string,
+//     hz6000: string,
+//     hz8000: string
+// }
 
 export async function extractAllEmployeeData(request: Request) {
     try {
@@ -30,17 +31,15 @@ export async function extractAllEmployeeData(request: Request) {
         await request.formData();
 
         const employeesQuery = await sql`
-            SELECT employee_id, first_name, last_name, email, date_of_birth, sex
+            SELECT first_name, last_name, email,
             FROM Employee
             ORDER BY last_name, first_name;
         `;
 
-        const employees: EmployeeData[] = employeesQuery.rows.map(row => ({
-            employeeID: row.employee_id,
+        const employees: Employee[] = employeesQuery.rows.map(row => ({
             firstName: row.first_name,
             lastName: row.last_name,
             email: row.email,
-            dateOfBirth: row.date_of_birth
         }));
 
         return JSON.stringify({ 
@@ -60,7 +59,7 @@ export async function extractHearingData(request: Request) {
         const employeeIDs = formData.get('employeeIDs') as string;
         const parsedEmployeeIDs = JSON.parse(employeeIDs);
 
-        let allHearingData: HearingData[] = [];
+        let allHearingData: HearingDataSingle[] = [];
 
         for (const singleID of parsedEmployeeIDs) {
             // Verify the employee exists
@@ -83,7 +82,7 @@ export async function extractHearingData(request: Request) {
                 ORDER BY h.year, h.ear;
             `;
 
-            const hearingData: HearingData[] = hearingDataQuery.rows.map(row => ({
+            const hearingData: HearingDataSingle[] = hearingDataQuery.rows.map(row => ({
                 id: singleID,
                 year: row.year,
                 ear: row.ear,
