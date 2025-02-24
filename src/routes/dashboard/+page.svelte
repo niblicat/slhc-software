@@ -1,17 +1,9 @@
-<svelte:head>
-	<link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet"/>
-    <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.css" rel="stylesheet" />
-
-</svelte:head>
-
 <script lang="ts">
     import { page } from '$app/state';
 	import CustomNavbar from '$lib/CustomNavbar.svelte';
 	import CustomSidebar from '$lib/CustomSidebar.svelte';
 	import EmployeesPage from '$lib/EmployeesPage.svelte';
     import MailingPage from '$lib/MailingPage.svelte';
-    import InsertEmployeePage from '$lib/InsertEmployeePage.svelte';
-    import InsertDataPage from '$lib/InsertDataPage.svelte';
     import AdminPage from '$lib/AdminPage.svelte';
 	import type { UserSimple } from '$lib/MyTypes.js';
 	import Information from '$lib/Information.svelte';

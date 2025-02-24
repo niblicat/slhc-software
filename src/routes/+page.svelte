@@ -1,7 +1,3 @@
-<svelte:head>
-    <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.css" rel="stylesheet" />
-</svelte:head>
-
 <script lang="ts">
     import { page } from '$app/state';
     import CustomNavbar from '$lib/CustomNavbar.svelte';
@@ -76,7 +72,7 @@
             Test Color 5
         </Button>
         <Button color="primary" on:click={() => alert("Remove this in production")}>
-            Test Color 6
+            Good Test Color 6
         </Button>
     </section>
 </div>
