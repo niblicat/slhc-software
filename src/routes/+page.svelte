@@ -7,7 +7,7 @@
     import CustomNavbar from '$lib/CustomNavbar.svelte';
     import type { UserSimple } from '$lib/MyTypes';
     import { LoginStatus, loginMessages } from '$lib/utility';
-    import { Alert } from 'flowbite-svelte';
+    import { Alert, Button } from 'flowbite-svelte';
 
     let { data } = $props();
 
@@ -62,3 +62,23 @@
         </div>
     </section>
 </div>
+
+
+<Button color="primary" class="!bg-primary-700 fixed top-2.5 left-5 z-50 w-8 h-10" on:click={() => alert("Remove this in production")}>
+    Test Color 1
+</Button>
+<Button color="primary" class="bg-primary-700 fixed top-2.5 left-5 z-50 w-8 h-10" on:click={() => alert("Remove this in production")}>
+    Test Color 2
+</Button>
+<Button color="primary" class="!bg-primary-200 fixed top-2.5 left-5 z-50 w-8 h-10" on:click={() => alert("Remove this in production")}>
+    Test Color 3
+</Button>
+<Button color="primary" class="bg-primary-200 fixed top-2.5 left-5 z-50 w-8 h-10" on:click={() => alert("Remove this in production")}>
+    Test Color 4
+</Button>
+<Button color="red" class="fixed top-2.5 left-5 z-50 w-8 h-10" on:click={() => alert("Remove this in production")}>
+    Test Color 5
+</Button>
+<Button color="primary" on:click={() => alert("Remove this in production")}>
+    Test Color 6
+</Button>
