@@ -683,16 +683,6 @@
     </div>
 </div>
 
- <Footer class="sticky bottom-0 w-full bg-white dark:bg-gray-900">
-    <hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
-    <div class="sm:flex sm:items-center sm:justify-between">
-        <ButtonGroup class="*:!ring-primary-700" style="width:100%">
-            <Button color="primary" style="width:50%">Print</Button>
-            <Button color="primary" style="width:50%">Send Letter</Button>
-        </ButtonGroup>
-    </div>
- </Footer>
-
 <style>
     .flex-container {
         display: flex;
