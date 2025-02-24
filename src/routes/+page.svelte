@@ -56,23 +56,5 @@
             <img src="landingpage/SIUE_logo_2024.png" alt="SIUE Logo">
 
         </div>
-        <Button color="primary" class="!bg-primary-700" on:click={() => alert("Remove this in production")}>
-            Test Color 1
-        </Button>
-        <Button color="primary" class="bg-primary-700" on:click={() => alert("Remove this in production")}>
-            Test Color 2
-        </Button>
-        <Button color="primary" class="!bg-primary-200" on:click={() => alert("Remove this in production")}>
-            Test Color 3
-        </Button>
-        <Button color="primary" class="bg-primary-200" on:click={() => alert("Remove this in production")}>
-            Test Color 4
-        </Button>
-        <Button color="red" on:click={() => alert("Remove this in production")}>
-            Test Color 5
-        </Button>
-        <Button color="primary" on:click={() => alert("Remove this in production")}>
-            Good Test Color 6
-        </Button>
     </section>
 </div>
