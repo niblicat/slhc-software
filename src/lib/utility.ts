@@ -1,7 +1,7 @@
 import type { Session } from "@auth/sveltekit";
 import { redirect, type RequestEvent, type Server, type ServerLoadEvent } from "@sveltejs/kit"
-import { sql } from "@vercel/postgres";
-import type { Admin, Employee } from "./MyTypes";
+import { sql, type QueryResult, type QueryResultRow } from "@vercel/postgres";
+import type { Admin, Employee, HearingDataSingle } from "./MyTypes";
 
 export function isNumber(value?: string | number): boolean {
     return ((value != null) &&
@@ -149,6 +149,20 @@ export async function getEmployeesFromDatabase(): Promise<Employee[]> {
     return  employees;
 }
 
+export async function getHearingDataFromDatabaseRow(row: QueryResultRow): Promise<HearingDataSingle> {
+    const parsedHearingData: HearingDataSingle = {
+        hz500: row["hz_500"] ?? "CNT",
+        hz1000: row["hz_1000"] ?? "CNT",
+        hz2000: row["hz_2000"] ?? "CNT",
+        hz3000: row["hz_3000"] ?? "CNT",
+        hz4000: row["hz_4000"] ?? "CNT",
+        hz6000: row["hz_6000"] ?? "CNT",
+        hz8000: row["hz_8000"] ?? "CNT"
+    };
+
+    return parsedHearingData;
+}
+
 export async function getAdminsFromDatabase(): Promise<Admin[]> {
     const adminTable = await sql`SELECT * FROM Administrator;`;
 
@@ -161,4 +175,24 @@ export async function getAdminsFromDatabase(): Promise<Admin[]> {
     }));
 
     return admins;
+}
+
+export function extractFrequencies(earData: Record<string, any>): number[] {
+    const { ear, ...frequencies } = earData; // Exclude the 'ear' property
+    return Object.values(frequencies) as number[];  // Return all frequency values as an array of numbers
+};
+
+export function validateFrequencies(frequencies: Record<string, string | number>): boolean {
+    return Object.values(frequencies).every(value => 
+        value === "CNT" || 
+        (!isNaN(parseInt(value as string, 10)) && parseInt(value as string, 10) >= -10 && parseInt(value as string, 10) <= 90)
+    );
+}
+export function validateFrequenciesLocally(frequenciesLeft: HearingDataSingle, frequenciesRight: HearingDataSingle): boolean {
+    const validateFrequencies = (freqs: HearingDataSingle) =>
+        Object.values(freqs).every(value => 
+            value === "CNT" || 
+            (!isNaN(parseInt(value as string, 10)) && parseInt(value as string, 10) >= -10 && parseInt(value as string, 10) <= 90)
+        );
+    return validateFrequencies(frequenciesLeft) && validateFrequencies(frequenciesRight);
 }
