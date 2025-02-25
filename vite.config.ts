@@ -11,5 +11,12 @@ export default defineConfig(({ mode }) => {
 
     return {
         plugins: [sveltekit()],
+        server: {
+            fs: {
+                allow: [
+                    'static'
+                ]
+            }
+        }
     };
 });
