@@ -1,13 +1,9 @@
-<svelte:head>
-    <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.css" rel="stylesheet" />
-</svelte:head>
-
 <script lang="ts">
     import { page } from '$app/state';
     import CustomNavbar from '$lib/CustomNavbar.svelte';
     import type { UserSimple } from '$lib/MyTypes';
     import { LoginStatus, loginMessages } from '$lib/utility';
-    import { Alert } from 'flowbite-svelte';
+    import { Alert, Button } from 'flowbite-svelte';
 
     let { data } = $props();
 
