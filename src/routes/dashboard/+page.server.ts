@@ -4,7 +4,7 @@ import { addHearingData, checkYearAvailability, modifyHearingData } from '$lib/a
 import { fetchEmployeeInfo, fetchHearingData, fetchHearingDataForYear, fetchYears, modifyEmployeeDOB, modifyEmployeeEmail, modifyEmployeeName, modifyEmployeeStatus, calculateSTS } from '$lib/actionsemployees';
 import { addEmployee } from '$lib/actionsemployeeadd';
 import { deleteAdmins, modifyAdminName, modifyAdminPermissions } from '$lib/actionsadmins';
-import { extractAllEmployeeData, extractHearingData } from '$lib/actionsmailing';
+import { extractAllEmployeeData, extractHearingData, extractBaselineHearingData, extractRecentHearingData } from '$lib/actionsmailing';
 
 
 export const load: PageServerLoad = async ( event ) => {
@@ -14,7 +14,7 @@ export const load: PageServerLoad = async ( event ) => {
     const employees = await getEmployeesFromDatabase();
     const admins = await getAdminsFromDatabase();
 
-    // console.log("Loaded employees:", employees); 
+    // console.log("Loaded employees:", employees);
 
     return {
         employees: employees,
@@ -93,6 +93,12 @@ export const actions: Actions = {
     },
     exportToCSV: async ({ request }) => {
         return exportToCSV(request);
+    },
+    extractBaselineHearingData: async ({ request }) => {
+        return extractBaselineHearingData(request);
+    },
+    extractRecentHearingData: async ({ request }) => {
+        return extractRecentHearingData(request);
     }
     // ================================================
 };

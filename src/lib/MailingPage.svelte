@@ -36,8 +36,10 @@
 
     const createCSV = async (employeeList: Array<any>) => {
         const headers = [
-            "Employee ID", "First Name", "Last Name", "Email", "Date of Birth", "Sex", "Year",
-            "L-500", "L-1000", "L-2000", "L-3000", "L-4000", "L-6000", "L-8000",
+            "Employee_ID", "First Name", "Last_Name", "Email", "Date of Birth", "Sex", 
+            "BaseYear", "Base-L-500", "Base-L-1000", "Base-L-2000", "Base-L-3000", "Base-L-4000", "Base-L-6000", "Base-L-8000",
+            "Base-R-500", "Base-R-1000", "Base-R-2000", "Base-R-3000", "Base-R-4000", "Base-R-6000", "Base-R-8000",
+            "CurrentYear", "L-500", "L-1000", "L-2000", "L-3000", "L-4000", "L-6000", "L-8000",
             "R-500", "R-1000", "R-2000", "R-3000", "R-4000", "R-6000", "R-8000",
             "Left Status", "Right Status"
         ];
@@ -62,53 +64,25 @@
             for (const employee of employeeList) {
                 // Find all hearing data corresponding to this employee
                 const csvHearingData = result.hearingData.filter(data => data.id === employee.employeeID);
+                if (csvHearingData.length === 0) {
+                    console.log(`No hearing data found for employee ${employee.firstName} ${employee.lastName}`);
+                    continue;
+                }
 
+                // Find the baseline data
+                let baselineData = null;
+                let baselineYear = null;
+                let baselineLeftEarData = { hz500: 0, hz1000: 0, hz2000: 0, hz3000: 0, hz4000: 0, hz6000: 0, hz8000: 0 };
+                let baselineRightEarData = { hz500: 0, hz1000: 0, hz2000: 0, hz3000: 0, hz4000: 0, hz6000: 0, hz8000: 0 };
+                
                 // Group hearing data by year
-                const years = new Set(csvHearingData.map(data => data.year));
-
-                // Loop through each year to combine data for both ears
+                const years = [...new Set(csvHearingData.map(data => data.year))].sort();
+                
+                // Check each year to find baseline data (where both ears have 'Base' status)
                 for (const year of years) {
-                    let rowData = [
-                        employee.employeeID,
-                        employee.firstName,
-                        employee.lastName,
-                        employee.email,
-                        employee.dob,
-                        employee.sex,
-                        year, 
-                    ];
-
-                    // Initialize variables to store the hearing data for both ears
-                    let leftEarData = { hz500: 0, hz1000: 0, hz2000: 0, hz3000: 0, hz4000: 0, hz6000: 0, hz8000: 0 };
-                    let rightEarData = { hz500: 0, hz1000: 0, hz2000: 0, hz3000: 0, hz4000: 0, hz6000: 0, hz8000: 0 };
-
-                    // Filter data for the current year
                     const yearData = csvHearingData.filter(data => data.year === year);
-
-                    // Assign left and right ear data
-                    yearData.forEach(data => {
-                        if (data.ear === 'left') {
-                            leftEarData = { 
-                                hz500: data.hz500 ?? 0, hz1000: data.hz1000 ?? 0, hz2000: data.hz2000 ?? 0, 
-                                hz3000: data.hz3000 ?? 0, hz4000: data.hz4000 ?? 0, hz6000: data.hz6000 ?? 0, hz8000: data.hz8000 ?? 0 
-                            };
-                        } else if (data.ear === 'right') {
-                            rightEarData = { 
-                                hz500: data.hz500 ?? 0, hz1000: data.hz1000 ?? 0, hz2000: data.hz2000 ?? 0, 
-                                hz3000: data.hz3000 ?? 0, hz4000: data.hz4000 ?? 0, hz6000: data.hz6000 ?? 0, hz8000: data.hz8000 ?? 0 
-                            };
-                        }
-                    });
-
-                    // Append left and right ear hearing data to row
-                    rowData.push(
-                        leftEarData.hz500, leftEarData.hz1000, leftEarData.hz2000, leftEarData.hz3000,
-                        leftEarData.hz4000, leftEarData.hz6000, leftEarData.hz8000,
-                        rightEarData.hz500, rightEarData.hz1000, rightEarData.hz2000, rightEarData.hz3000,
-                        rightEarData.hz4000, rightEarData.hz6000, rightEarData.hz8000
-                    );
-
-                    // ADD STS CALCULATON !!! 
+                    
+                    // Get STS status for this year
                     const formData = new FormData();
                     formData.append('employeeID', employee.employeeID);
                     formData.append('year', String(year));
@@ -120,42 +94,135 @@
                     });
 
                     const serverResponse = await response.json();
-
                     const result = JSON.parse(JSON.parse(serverResponse.data)[0]);
-                    console.log(employee.firstName);
-                    console.log("RESULT: ", result);
+                    
                     if (result["success"]) {
-                        success = true;
-
-                        // Find the test result that matches the selected year
-                        const selectedYearReport = result.hearingReport.find((report: any) => report.reportYear === parseInt(String(year), 10));
+                        const selectedYearReport = result.hearingReport.find((report: any) => 
+                            report.reportYear === parseInt(String(year), 10)
+                        );
 
                         if (selectedYearReport) {
-                            STSstatusRight = GetAnomolyStatusText(selectedYearReport.rightStatus);
-                            STSstatusLeft = GetAnomolyStatusText(selectedYearReport.leftStatus);
-
-                            console.log(`STS Report for ${year} - LEFT:`, STSstatusLeft);
-                            console.log(`STS Report for ${year} - RIGHT:`, STSstatusRight);
-                        } else {
-                            console.warn(`No hearing report found for year: ${year}`);
-                            STSstatusRight = "No Data";
-                            STSstatusLeft = "No Data";
+                            const leftStatus = GetAnomolyStatusText(selectedYearReport.leftStatus);
+                            const rightStatus = GetAnomolyStatusText(selectedYearReport.rightStatus);
+                            
+                            // If this is baseline data, save it
+                            if (leftStatus === 'Base' && rightStatus === 'Base') {
+                                baselineYear = year;
+                                
+                                // Extract left and right ear data for baseline
+                                yearData.forEach(data => {
+                                    if (data.ear === 'left') {
+                                        baselineLeftEarData = { 
+                                            hz500: data.hz500 ?? 0, hz1000: data.hz1000 ?? 0, hz2000: data.hz2000 ?? 0, 
+                                            hz3000: data.hz3000 ?? 0, hz4000: data.hz4000 ?? 0, hz6000: data.hz6000 ?? 0, hz8000: data.hz8000 ?? 0 
+                                        };
+                                    } else if (data.ear === 'right') {
+                                        baselineRightEarData = { 
+                                            hz500: data.hz500 ?? 0, hz1000: data.hz1000 ?? 0, hz2000: data.hz2000 ?? 0, 
+                                            hz3000: data.hz3000 ?? 0, hz4000: data.hz4000 ?? 0, hz6000: data.hz6000 ?? 0, hz8000: data.hz8000 ?? 0 
+                                        };
+                                    }
+                                });
+                                
+                                // We found baseline data, break out of loop
+                                break;
+                            }
                         }
-                    } else {
-                        throw new Error(serverResponse.error ?? "Failed to calculate STS!!");
                     }
-                    rowData.push(STSstatusLeft, STSstatusRight);
-                    rows.push(rowData.join(','));
                 }
+                
+                // If we couldn't find baseline data, skip this employee
+                if (baselineYear === null) {
+                    console.log(`No baseline data found for employee ${employee.firstName} ${employee.lastName}`);
+                    continue;
+                }
+                
+                // Now get the most recent year's data
+                const mostRecentYear = years[years.length - 1];
+                const recentData = csvHearingData.filter(data => data.year === mostRecentYear);
+                
+                // Initialize variables to store the most recent hearing data for both ears
+                let recentLeftEarData = { hz500: 0, hz1000: 0, hz2000: 0, hz3000: 0, hz4000: 0, hz6000: 0, hz8000: 0 };
+                let recentRightEarData = { hz500: 0, hz1000: 0, hz2000: 0, hz3000: 0, hz4000: 0, hz6000: 0, hz8000: 0 };
+                let recentLeftStatus = "No Data";
+                let recentRightStatus = "No Data";
+                
+                // Extract left and right ear data for the most recent year
+                recentData.forEach(data => {
+                    if (data.ear === 'left') {
+                        recentLeftEarData = { 
+                            hz500: data.hz500 ?? 0, hz1000: data.hz1000 ?? 0, hz2000: data.hz2000 ?? 0, 
+                            hz3000: data.hz3000 ?? 0, hz4000: data.hz4000 ?? 0, hz6000: data.hz6000 ?? 0, hz8000: data.hz8000 ?? 0 
+                        };
+                    } else if (data.ear === 'right') {
+                        recentRightEarData = { 
+                            hz500: data.hz500 ?? 0, hz1000: data.hz1000 ?? 0, hz2000: data.hz2000 ?? 0, 
+                            hz3000: data.hz3000 ?? 0, hz4000: data.hz4000 ?? 0, hz6000: data.hz6000 ?? 0, hz8000: data.hz8000 ?? 0 
+                        };
+                    }
+                });
+                
+                // Get STS status for the most recent year
+                const recentFormData = new FormData();
+                recentFormData.append('employeeID', employee.employeeID);
+                recentFormData.append('year', String(mostRecentYear));
+                recentFormData.append('sex', employee.sex);
+
+                const recentResponse = await fetch('/dashboard?/calculateSTS', { 
+                    method: 'POST',
+                    body: recentFormData,
+                });
+
+                const recentServerResponse = await recentResponse.json();
+                const recentResult = JSON.parse(JSON.parse(recentServerResponse.data)[0]);
+                
+                if (recentResult["success"]) {
+                    const recentYearReport = recentResult.hearingReport.find((report: any) => 
+                        report.reportYear === parseInt(String(mostRecentYear), 10)
+                    );
+
+                    if (recentYearReport) {
+                        recentLeftStatus = GetAnomolyStatusText(recentYearReport.leftStatus);
+                        recentRightStatus = GetAnomolyStatusText(recentYearReport.rightStatus);
+                    }
+                }
+                
+                // Build the row with both baseline and most recent data
+                let rowData = [
+                    employee.employeeID,
+                    employee.firstName,
+                    employee.lastName,
+                    employee.email,
+                    employee.dob,
+                    employee.sex,
+                    baselineYear,
+                    baselineLeftEarData.hz500, baselineLeftEarData.hz1000, baselineLeftEarData.hz2000, baselineLeftEarData.hz3000,
+                    baselineLeftEarData.hz4000, baselineLeftEarData.hz6000, baselineLeftEarData.hz8000,
+                    baselineRightEarData.hz500, baselineRightEarData.hz1000, baselineRightEarData.hz2000, baselineRightEarData.hz3000,
+                    baselineRightEarData.hz4000, baselineRightEarData.hz6000, baselineRightEarData.hz8000,
+                    mostRecentYear,
+                    recentLeftEarData.hz500, recentLeftEarData.hz1000, recentLeftEarData.hz2000, recentLeftEarData.hz3000,
+                    recentLeftEarData.hz4000, recentLeftEarData.hz6000, recentLeftEarData.hz8000,
+                    recentRightEarData.hz500, recentRightEarData.hz1000, recentRightEarData.hz2000, recentRightEarData.hz3000,
+                    recentRightEarData.hz4000, recentRightEarData.hz6000, recentRightEarData.hz8000,
+                    recentLeftStatus, recentRightStatus
+                ];
+                
+                rows.push(rowData.join(','));
             }
-            //console.log("RETURN OUTPUT: ", rows);
+
+            if (rows.length === 0) {
+                console.log("No baseline data found for any employee.");
+                return "No data found that matches the criteria.";
+            }
+            
             return ([headers.join(','), ...rows].join('\n'));
         } 
         else {
-            throw new Error(serverResponse.error ?? "Failed to gnerate report");
+            throw new Error(serverResponse.error ?? "Failed to generate report");
         }
     };
-
+    
     // Helper function to get the readable status
     const GetAnomolyStatusText = (status: AnomolyStatus): string => {
         return AnomolyStatus[status] || "Unknown";
@@ -227,7 +294,7 @@
     <div class="sm:flex sm:items-center sm:justify-between">
         <ButtonGroup class="*:!ring-primary-700" style="width:100%">
             <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-lg" style="width:50%">
-                Send Letter
+                Download Template
             </Button>
             <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-lg" style="width:50%" on:click={handleExport}>
                 Export to CSV

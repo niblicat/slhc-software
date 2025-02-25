@@ -224,7 +224,7 @@ export async function fetchHearingDataForYear(request: Request) {
 
 export async function modifyEmployeeName(request: Request) {
     const formData = await request.formData();
-    const employeeID = formData.get('employee') as string;
+    const employeeID = formData.get('employeeID') as string;
     const newFirstName = formData.get('newFirstName') as string;
     const newLastName = formData.get('newLastName') as string;
 
@@ -259,7 +259,7 @@ export async function modifyEmployeeName(request: Request) {
 
 export async function modifyEmployeeEmail(request: Request) {
     const formData = await request.formData();
-    const employeeID = formData.get('employee') as string;
+    const employeeID = formData.get('employeeID') as string;
     const newEmail = formData.get('newEmail') as string;
 
     try {
