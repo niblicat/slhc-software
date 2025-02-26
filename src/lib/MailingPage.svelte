@@ -294,12 +294,12 @@
     <hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
     <div class="sm:flex sm:items-center sm:justify-between">
         <ButtonGroup class="*:!ring-primary-700" style="width:100%">
-            <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-lg" style="width:50%" href="/SLHC Email Template.docx">
+            <Button color="primary" class="w-[50%] cursor-pointer" href="/SLHC Email Template.docx">
                 Download Template
             </Button>
-            <Button class="bg-light-bluegreen hover:bg-dark-bluegreen text-black text-lg" style="width:50%" on:click={handleExport}>
+            <Button color="primary" class="w-[50%] cursor-pointer" on:click={handleExport}>
                 Export to CSV
-            </Button>            
+            </Button>
         </ButtonGroup>
     </div>
 </Footer>
