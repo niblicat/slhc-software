@@ -143,18 +143,6 @@ export async function fetchHearingData(request: Request) {
             leftEar: newDataQuery.rows.filter(row => row.ear === 'left')[0] ?? null,
         };
 
-        const dataReturnTest = {
-            success: true,
-            hearingData: {
-                baselineYear,
-                newYear: year,
-                baselineData,
-                newData,
-            },
-        }
-
-        //console.log(JSON.stringify(dataReturnTest));
-
         return JSON.stringify({
             success: true,
             hearingData: {
@@ -413,15 +401,14 @@ export async function calculateSTS(request: Request) {
             }
         
             const frequencies = [
-                Number(row.hz_500) || 0, 
-                Number(row.hz_1000) || 0, 
-                Number(row.hz_2000) || 0, 
-                Number(row.hz_3000) || 0, 
-                Number(row.hz_4000) || 0, 
-                Number(row.hz_6000) || 0, 
-                Number(row.hz_8000) || 0
+                Number(row.hz_500) ?? 0, 
+                Number(row.hz_1000) ?? 0, 
+                Number(row.hz_2000) ?? 0, 
+                Number(row.hz_3000) ?? 0, 
+                Number(row.hz_4000) ?? 0, 
+                Number(row.hz_6000) ?? 0, 
+                Number(row.hz_8000) ?? 0
             ];
-            
             
             //console.log(`Frequencies for ${earSide} ear in ${yearKey}:`, frequencies);
         
@@ -430,8 +417,8 @@ export async function calculateSTS(request: Request) {
             } else if (earSide === 'left') {
                 hearingDataByYear[yearKey].leftEar = frequencies;
             } else {
-                throw new Error(`Unexpected ear value: ${row.ear}`);
-                const errorMessage = "Unexpected ear value";
+                const errorMessage = `Unexpected ear value: ${row.ear}`;
+                throw new Error(errorMessage);
             }
         });
             
@@ -446,9 +433,9 @@ export async function calculateSTS(request: Request) {
                 new HearingDataOneEar(
                     ears.rightEar[0], ears.rightEar[1], ears.rightEar[2], ears.rightEar[3], 
                     ears.rightEar[4], ears.rightEar[5], ears.rightEar[6]
-                )            
+                )
             )
-        ); 
+        );
     
         //console.log("SCREENINGS: ", screenings);
         
@@ -460,8 +447,8 @@ export async function calculateSTS(request: Request) {
         // Generate hearing report
         const hearingReport = userHearingHistory.GenerateHearingReport();
         if (hearingReport.length === 0) {
-            throw new Error("Hearing report not generated");
-            const errorMessage = "Hearing report not generated";
+            const errorMessage = "Hearing report not generated.";
+            throw new Error(errorMessage);
         }
 
        console.log("REPORT: ", hearingReport);

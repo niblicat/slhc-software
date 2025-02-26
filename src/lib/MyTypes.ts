@@ -44,3 +44,10 @@ export type HearingDataSingle = {
     hz6000: string,
     hz8000: string
 }
+
+export type HearingData = {
+    year: number;
+    ear: string;
+    leftData: HearingDataSingle,
+    rightData: HearingDataSingle
+}

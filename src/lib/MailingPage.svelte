@@ -2,7 +2,7 @@
     import { ButtonGroup, Button, Footer } from 'flowbite-svelte';
     import type { Employee } from './MyTypes';
     import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Checkbox, Modal, Tooltip } from 'flowbite-svelte';
-    import { AnomolyStatus } from "./interpret";
+    import { AnomalyStatus } from "./interpret";
 
     interface Props {
         employees: Array<Employee>;
@@ -63,6 +63,7 @@
             // Loop over each employee to process their data
             for (const employee of employeeList) {
                 // Find all hearing data corresponding to this employee
+                // TODO: Add the type for data (hopefully, HearingData from MyTypes.ts)
                 const csvHearingData = result.hearingData.filter(data => data.id === employee.employeeID);
                 if (csvHearingData.length === 0) {
                     console.log(`No hearing data found for employee ${employee.firstName} ${employee.lastName}`);
@@ -102,8 +103,8 @@
                         );
 
                         if (selectedYearReport) {
-                            const leftStatus = GetAnomolyStatusText(selectedYearReport.leftStatus);
-                            const rightStatus = GetAnomolyStatusText(selectedYearReport.rightStatus);
+                            const leftStatus = GetAnomalyStatusText(selectedYearReport.leftStatus);
+                            const rightStatus = GetAnomalyStatusText(selectedYearReport.rightStatus);
                             
                             // If this is baseline data, save it
                             if (leftStatus === 'Base' && rightStatus === 'Base') {
@@ -182,8 +183,8 @@
                     );
 
                     if (recentYearReport) {
-                        recentLeftStatus = GetAnomolyStatusText(recentYearReport.leftStatus);
-                        recentRightStatus = GetAnomolyStatusText(recentYearReport.rightStatus);
+                        recentLeftStatus = GetAnomalyStatusText(recentYearReport.leftStatus);
+                        recentRightStatus = GetAnomalyStatusText(recentYearReport.rightStatus);
                     }
                 }
                 
@@ -224,8 +225,8 @@
     };
     
     // Helper function to get the readable status
-    const GetAnomolyStatusText = (status: AnomolyStatus): string => {
-        return AnomolyStatus[status] || "Unknown";
+    const GetAnomalyStatusText = (status: AnomalyStatus): string => {
+        return AnomalyStatus[status] || "Unknown";
     };
     
     // Handle export functionality

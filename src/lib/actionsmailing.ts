@@ -1,9 +1,10 @@
 import { sql } from '@vercel/postgres';
 
-interface Request {
-    formData: () => Promise<FormData>;
-}
+// interface Request {
+//     formData: () => Promise<FormData>;
+// }
 
+// TODO: Refactor to use Employee from MyTypes.ts instead
 interface EmployeeData {
     employeeID: string;
     firstName: string;
@@ -12,6 +13,7 @@ interface EmployeeData {
     dateOfBirth: string;
 }
 
+// TODO: Refactor to use HearingData from MyTypes.ts instead
 interface HearingData {
     year: number;
     ear: string;
@@ -30,7 +32,7 @@ export async function extractBaselineHearingData(request: Request) {
         const employeeIDs = formData.get('employeeIDs') as string;
         const parsedEmployeeIDs = JSON.parse(employeeIDs);
 
-        let baselineHearingData: BaselineHearingData[] = [];
+        let baselineHearingData: HearingData[] = [];
 
         for (const singleID of parsedEmployeeIDs) {
             // Verify the employee exists
@@ -59,7 +61,7 @@ export async function extractBaselineHearingData(request: Request) {
                 ORDER BY h.ear;
             `;
 
-            const hearingData: BaselineHearingData[] = baselineDataQuery.rows.map(row => ({
+            const hearingData: HearingData[] = baselineDataQuery.rows.map(row => ({
                 id: singleID,
                 year: row.year,
                 ear: row.ear,
