@@ -424,7 +424,7 @@
     }
 
 
-    async function fetchUpdatedHearingData(employeeID: string, year: string) {
+    export async function fetchUpdatedHearingData(employeeID: string, year: string) {
         // ! employeeID and year from the parameters are unused
         try {
             const formData = new FormData();

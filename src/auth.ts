@@ -1,4 +1,3 @@
- 
 import { SvelteKitAuth } from "@auth/sveltekit"
 import Google from "@auth/sveltekit/providers/google"
 import dotenv from 'dotenv';

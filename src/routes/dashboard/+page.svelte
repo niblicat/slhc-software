@@ -40,7 +40,7 @@
     {#if activeURLHash == "#employees"}
         <EmployeesPage {employees} />
     {:else if activeURLHash == "#mailings"}
-        <MailingPage />
+        <MailingPage employees={employees}/>
     {:else if activeURLHash == "#admin"}
         <AdminPage {admins} />
     {:else}

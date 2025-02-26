@@ -4,6 +4,8 @@ import { addHearingData, checkYearAvailability, modifyHearingData } from '$lib/a
 import { fetchEmployeeInfo, fetchHearingData, fetchHearingDataForYear, fetchYears, modifyEmployeeDOB, modifyEmployeeEmail, modifyEmployeeName, modifyEmployeeStatus, calculateSTS } from '$lib/actionsemployees';
 import { addEmployee } from '$lib/actionsemployeeadd';
 import { deleteAdmins, modifyAdminName, modifyAdminPermissions } from '$lib/actionsadmins';
+import { extractAllEmployeeData, extractHearingData, extractBaselineHearingData, extractRecentHearingData } from '$lib/actionsmailing';
+
 
 export const load: PageServerLoad = async ( event ) => {
     await turnAwayNonAdmins(event);
@@ -11,6 +13,8 @@ export const load: PageServerLoad = async ( event ) => {
     // TODO: error handling
     const employees = await getEmployeesFromDatabase();
     const admins = await getAdminsFromDatabase();
+
+    // console.log("Loaded employees:", employees);
 
     return {
         employees: employees,
@@ -77,9 +81,24 @@ export const actions: Actions = {
     },
     calculateSTS: async ({ request }) => { 
         return calculateSTS(request);
-    }
+    },
     // ================================================
 
     // actionsmailing.ts
-    // TODO: make actions for mailing
+    extractAllEmployeeData: async ({ request }) => {
+        return extractAllEmployeeData(request);
+    },
+    extractHearingData: async ({ request }) => {
+        return extractHearingData(request);
+    },
+    exportToCSV: async ({ request }) => {
+        return exportToCSV(request);
+    },
+    extractBaselineHearingData: async ({ request }) => {
+        return extractBaselineHearingData(request);
+    },
+    extractRecentHearingData: async ({ request }) => {
+        return extractRecentHearingData(request);
+    }
+    // ================================================
 };

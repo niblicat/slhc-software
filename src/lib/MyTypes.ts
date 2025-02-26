@@ -1,11 +1,11 @@
 export type Employee = {
-    employeeID: string,
-    firstName: string,
-    lastName: string,
-    email: string,
-    dob: string,
+    employeeID: string;
+    firstName: string;
+    lastName: string;
+    email: string;
     activeStatus: string,
-    sex: string
+    dob: string;
+    sex: string;
 };
 
 export type EmployeeSearchable = {
@@ -43,4 +43,11 @@ export type HearingDataSingle = {
     hz4000: string,
     hz6000: string,
     hz8000: string
+}
+
+export type HearingData = {
+    year: number;
+    ear: string;
+    leftData: HearingDataSingle,
+    rightData: HearingDataSingle
 }
