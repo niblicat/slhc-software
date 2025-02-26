@@ -1,8 +1,7 @@
-import { sql } from '@vercel/postgres';
+// actionsemployeeadd.ts
+// Contains server functions pertaining to adding employees
 
-interface Request {
-    formData: () => Promise<FormData>;
-}
+import { sql } from '@vercel/postgres';
 
 export async function addEmployee(request: Request) {
     const formData = await request.formData();
