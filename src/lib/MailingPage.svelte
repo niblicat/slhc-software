@@ -237,14 +237,13 @@
         loadingCSV = true;
         document.body.style.cursor='wait';
         const csvContent = await createCSV(employeeList); // Generate CSV content
-        document.body.style.cursor='auto';
-        loadingCSV = false;
-
         if (employeeList.length > 0) {
             downloadCSV(csvContent); // Call the function to download the CSV
         } else {
             displayError("No employees to export.");
         }
+        document.body.style.cursor='auto';
+        loadingCSV = false;
     }
 
     // Function to trigger file download
@@ -257,6 +256,17 @@
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
+    }
+
+    async function downloadTemplate() {
+        loadingTemplate = true;
+        const a = document.createElement('a');
+        a.href = "/SLHC Email Template.docx";
+        a.download = "SLHC Email Template.docx";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        loadingTemplate = false;
     }
 </script>
 
@@ -300,8 +310,8 @@
     <hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
     <div class="sm:flex sm:items-center sm:justify-between">
         <ButtonGroup class="*:!ring-primary-700" style="width:100%">
-            <Button color="primary" class="w-[50%] cursor-pointer" href="/SLHC Email Template.docx">
-                Download Template
+            <Button disabled={loadingTemplate} color="primary" class="w-[50%] {loadingTemplate ? "" : "cursor-pointer"}" on:click={downloadTemplate}>
+                {#if loadingTemplate}<Spinner class="me-3" size="4" color="white" />{/if}Download Template
             </Button>
             <Button disabled={loadingCSV} color="primary" class="w-[50%] {loadingCSV ? "" : "cursor-pointer"}" on:click={handleExport}>
                 {#if loadingCSV}<Spinner class="me-3" size="4" color="white" />{/if}Export to CSV
