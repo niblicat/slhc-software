@@ -1,6 +1,6 @@
 <script lang="ts">
 
-    import { ButtonGroup, Button, Search, Modal, Label, Input, Radio } from 'flowbite-svelte';
+    import { ButtonGroup, Button, Search, Modal, Label, Input, Radio, Tooltip } from 'flowbite-svelte';
     import { ChevronDownOutline, UserRemoveSolid, UserAddSolid, CirclePlusSolid, EditSolid, EditOutline } from 'flowbite-svelte-icons';
     import { Dropdown } from 'flowbite-svelte';
     import ScatterPlot from './ScatterPlot.svelte';
@@ -548,12 +548,15 @@
     </Dropdown>
 
     <Button class="cursor-pointer" on:click={() => showAddEmployeeModal()} color="primary"><UserAddSolid /></Button>
+    <Tooltip placement='bottom'>Add New Employee</Tooltip>
     
     {#if selectedEmployee.name !== "No employee selected"} 
         <Button class="cursor-pointer" on:click={() => showAddDataModal()} color="primary"><CirclePlusSolid /></Button>
+        <Tooltip placement='bottom'>Add New Data</Tooltip>
     {/if} 
     {#if selectedYear !== "No year selected"} 
         <Button class="cursor-pointer" on:click={() => showEditDataModal()} color="primary"><EditSolid /></Button>
+        <Tooltip placement='bottom'>Edit Current Data</Tooltip>
     {/if} 
 </div>
 
