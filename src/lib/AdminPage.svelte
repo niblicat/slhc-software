@@ -251,7 +251,7 @@
     </svelte:fragment>
 </Modal>
 
-<PageTitle title="Admin Management" caption="Modify the priviledges of anyone who has attempted to sign in." />
+<PageTitle title="Admin Management" caption="Modify the privileges of anyone who has attempted to sign in." />
 <ErrorMessage {success} {errorMessage} />
 
 <div class="flex-column justify-center mx-4">

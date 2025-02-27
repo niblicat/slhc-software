@@ -53,7 +53,7 @@
         </Accordion>
     </AccordionItem>
     <AccordionItem class="cursor-pointer">
-        <span slot="header">Learn about the Mailings Page Page</span>
+        <span slot="header">Learn about the Mailings Page</span>
         <Li>All employees are listed by their database-assigned Employee ID.</Li>
         <Li>Before starting your mail merge, ensure that your default email reader is set to <em>Outlook<em>.</Li>
         <Li>Below the employee information, you will find two buttons: "Create CSV" and "Download Template."</Li>
