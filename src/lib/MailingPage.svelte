@@ -280,27 +280,6 @@
       <PageTitle title="Mail Merge Management" caption="Begin the process of mailing out status notifications." />
       <ErrorMessage {success} {errorMessage} />
     </div>
-
-    <div class="absolute right-0 top-1/2 transform -translate-y-1/2 flex items-center space-x-1 mr-3">
-        <InfoCircleSolid class="text-gray-500 cursor-pointer" />
-        <Tooltip 
-            placement='left-start' 
-            style="z-index: 9999; max-width: 80vw; width: auto; overflow-y: auto"> <!-- TOOL TIP STILL WONT POP UP ON TOP-->
-            <Li>Employees are listed by Employee ID.</Li>
-            <Li>Set your default email reader to <em>Outlook</em> before starting.</Li>
-            <Li>Click "Create CSV" and "Download Template" buttons below the employee info.</Li>  
-            <Li>Download the <em>employees.csv</em> file, remembering the location.</Li>
-            <Li>Download the <em>SLHC Email Template</em> and open in Word. <b>Do not modify the template!</b></Li>
-            <Li>In Word, go to the "Mailings" tab and click "Start Mail Merge."</Li>
-            <Li>Choose "Letter" from the dropdown and close.</Li>
-            <Li>Click "Select Recipients," choose "Use an Existing List," and open the <em>employees.csv</em> file.</Li>
-            <Li>Optional: Edit the recipient list, or skip this step.</Li>
-            <Li>Optional: Click "Preview Results" to check how the data appears in the template.</Li>
-            <Li>Click "Finish & Merge," then "Merge to E-Mail." </Li>
-            <Li>Choose <em>Email</em> for "To," set the subject (e.g., "Hearing Test Results")</Li>
-            <Li>Then select <em>HTML Message</em> for "Send As."</Li>
-        </Tooltip>
-    </div>
 </div>
 
 <div class="flex-column justify-center mx-4">
