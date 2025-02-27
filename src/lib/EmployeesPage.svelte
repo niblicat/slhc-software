@@ -772,6 +772,7 @@
         flex: 1;  
         margin-right: 75px; 
         margin-top: 15px; 
+        margin-bottom: 40px;
         max-width: 550px; 
         text-align: center;
     }
