@@ -249,6 +249,7 @@
     let addDataModal = $state(false);
     let editDataModal = $state(false);
     let addEmployeeModal = $state(false);
+    let sexModal = $state(false);
 
     let newFirstName = $state("");
     let newLastName = $state("");
@@ -256,6 +257,7 @@
     let newDOB = $state("");
     let newActiveStatus = $state("");
     let isInactive = $state(false);
+    let newSex = $state("");
 
     function showNameChangeModal(employee: Employee) {
         newFirstName = employee.firstName;
@@ -272,6 +274,10 @@
                     ? new Date(newDOB).toISOString().split('T')[0]
                     : "No selection made";
         DOBmodal = true;
+    }
+    function showSexChangeModal(employee: Employee) {
+        newSex = employee.sex
+        sexModal = true;
     }
     function showActiveStatusChangeModal(employee: Employee) {
         activeStatusModal = true;
@@ -388,6 +394,37 @@
             displayError(errorMessage);
         }
     }
+
+    async function modifyEmployeeSex(): Promise<void> {
+        const formData = new FormData();
+        formData.append('employeeID', selectedEmployee.data.employeeID);
+        formData.append('newSex', newSex); 
+
+        const response = await fetch('/dashboard?/modifyEmployeeSex', {
+            method: 'POST',
+            body: formData,
+        });
+
+        try {
+            const serverResponse = await response.json();
+            console.log(response);
+
+            const result = JSON.parse(JSON.parse(serverResponse.data)[0]);
+    
+            if (result["success"]) {
+                success = true;
+                selectedEmployee.data.sex = newSex;
+            }
+            else {
+                displayError(result["message"]);
+            }
+        }
+        catch (error: any) {
+            let errorMessage = error.message;
+            displayError(errorMessage);
+        }
+    }
+
     async function modifyEmploymentStatus(): Promise<void> {
         const formData = new FormData();
         formData.append('employeeID', selectedEmployee.data.employeeID);
@@ -422,7 +459,6 @@
             displayError(errorMessage);
         }
     }
-
 
     export async function fetchUpdatedHearingData(employeeID: string, year: string) {
         // ! employeeID and year from the parameters are unused
@@ -569,6 +605,22 @@
     </svelte:fragment>
 </Modal>
 
+<Modal title="Change Employee Sex" bind:open={sexModal} autoclose>
+    <p>
+        <span>Please provide the updated sex for {selectedEmployee.data.firstName} {selectedEmployee.data.lastName}</span>
+        <br>
+        <br>
+        <Label for="newSex" class="mb-2">New Sex</Label>
+        <Radio name="sex" bind:group={newSex} value="male">Male</Radio>
+        <Radio name="sex" bind:group={newSex} value="female">Female</Radio>
+        <Radio name="sex" bind:group={newSex} value="other">Other</Radio>
+    </p>
+    <svelte:fragment slot="footer">
+    <Button class="cursor-pointer" color="primary" on:click={() => modifyEmployeeSex()}>Confirm</Button>
+    <Button class="cursor-pointer" color="red">Cancel</Button>
+    </svelte:fragment>
+</Modal>
+
 <Modal title="Change Employee Active Status" bind:open={activeStatusModal} autoclose>
     <p>
         <span>Please provide an updated employment status for {selectedEmployee.data.firstName} {selectedEmployee.data.lastName}</span>
@@ -647,7 +699,13 @@
                 </Button> 
             {/if} 
         </p> <br>
-        <p>Sex: {selectedSex}</p> <br>
+        <p>Sex: {selectedEmployee.data.sex}
+            {#if selectedEmployee.data.sex !== "Undefined"} 
+                <Button outline size="sm" class="p-1! cursor-pointer" on:click={() => showSexChangeModal(selectedEmployee.data)}>
+                    <EditOutline class="w-4 h-4" />
+                </Button> 
+            {/if} 
+        </p> <br>
         <p>Employment Status: {selectedStatus} <!-- inactive to active is not working // double check --> 
             {#if selectedEmployee.data.employeeID !== "-1"} 
                 <Button outline size="sm" class="p-1! cursor-pointer" on:click={() => showActiveStatusChangeModal(selectedEmployee.data)}>

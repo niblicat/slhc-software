@@ -343,6 +343,37 @@ export async function modifyEmployeeStatus(request: Request) {
     });
 }
 
+export async function modifyEmployeeSex(request: Request) {
+    const formData = await request.formData();
+    const employeeID = formData.get('employeeID') as string;
+    const newSex = formData.get('newSex') as string;
+
+    console.log(`EmployeeID: ${employeeID}, sex: ${newSex}`);
+
+    try {
+        // Check if employee exists in database
+        const employeeIDQuery = await sql`SELECT employee_id FROM Employee WHERE employee_id = ${employeeID};`;
+        if (employeeIDQuery.rows.length === 0) {
+            throw new Error("User not found");
+        }
+            await sql`
+                UPDATE Employee 
+                SET sex = ${newSex}
+                WHERE employee_id = ${employeeID};
+            `;
+    } 
+    catch (error: any) {
+        const errorMessage = "Failed to update employee's sex: " 
+            + (error.message ?? "no error message provided by server");
+        console.error(errorMessage);
+        return { success: false, message: errorMessage };
+    }
+
+    return JSON.stringify({
+        success: true,
+    });
+}
+
 export async function calculateSTS(request: Request) {
     const formData = await request.formData();
     const employeeID = formData.get('employeeID') as string;
