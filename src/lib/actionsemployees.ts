@@ -420,7 +420,7 @@ export async function calculateSTS(request: Request) {
         //console.log("query: ", JSON.stringify(dataQuery));
 
         // create an empty object to store hearing data grouped by year
-        const hearingDataByYear: Record<number, { leftEar: number[], rightEar: number[] }> = {};
+        const hearingDataByYear: Record<number, { leftEar: (number | null)[], rightEar: (number | null)[] }> = {};
 
         dataQuery.rows.forEach(row => { // Loop through each row of the query result to group data by year and store frequency thresholds for each ear separately
             const yearKey = Number(row.year);
@@ -431,13 +431,13 @@ export async function calculateSTS(request: Request) {
             }
         
             const frequencies = [
-                Number(row.hz_500) ?? 0, 
-                Number(row.hz_1000) ?? 0, 
-                Number(row.hz_2000) ?? 0, 
-                Number(row.hz_3000) ?? 0, 
-                Number(row.hz_4000) ?? 0, 
-                Number(row.hz_6000) ?? 0, 
-                Number(row.hz_8000) ?? 0
+                row.hz_500 === null ? null : Number(row.hz_500),
+                row.hz_1000 === null ? null : Number(row.hz_1000),
+                row.hz_2000 === null ? null : Number(row.hz_2000),
+                row.hz_3000 === null ? null : Number(row.hz_3000),
+                row.hz_4000 === null ? null : Number(row.hz_4000),
+                row.hz_6000 === null ? null : Number(row.hz_6000),
+                row.hz_8000 === null ? null : Number(row.hz_8000)
             ];
             
             //console.log(`Frequencies for ${earSide} ear in ${yearKey}:`, frequencies);
@@ -467,7 +467,7 @@ export async function calculateSTS(request: Request) {
             )
         );
     
-        //console.log("SCREENINGS: ", screenings);
+        console.log("SCREENINGS: ", screenings);
         
         // Convert sex string to enum
         const personSex = sex === "Male" ? PersonSex.Male : sex === "Female" ? PersonSex.Female : PersonSex.Other;
@@ -481,7 +481,7 @@ export async function calculateSTS(request: Request) {
             throw new Error(errorMessage);
         }
 
-       console.log("REPORT: ", hearingReport);
+    //    console.log("REPORT: ", hearingReport);
 
         return JSON.stringify({
             success: true, 

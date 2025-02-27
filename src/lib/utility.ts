@@ -184,10 +184,12 @@ export function extractFrequencies(earData: Record<string, any>): number[] {
 
 export function validateFrequencies(frequencies: Record<string, string | number>): boolean {
     return Object.values(frequencies).every(value => 
+        value === null || 
         value === "CNT" || 
         (!isNaN(parseInt(value as string, 10)) && parseInt(value as string, 10) >= -10 && parseInt(value as string, 10) <= 90)
     );
 }
+
 export function validateFrequenciesLocally(frequenciesLeft: HearingDataSingle, frequenciesRight: HearingDataSingle): boolean {
     const validateFrequencies = (freqs: HearingDataSingle) =>
         Object.values(freqs).every(value => 

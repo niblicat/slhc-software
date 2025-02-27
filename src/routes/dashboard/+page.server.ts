@@ -94,9 +94,6 @@ export const actions: Actions = {
     extractHearingData: async ({ request }) => {
         return extractHearingData(request);
     },
-    exportToCSV: async ({ request }) => {
-        return exportToCSV(request);
-    },
     extractBaselineHearingData: async ({ request }) => {
         return extractBaselineHearingData(request);
     },
