@@ -259,11 +259,11 @@
         <ErrorMessage {success} {errorMessage} />
     </div>
 
-    <div class="absolute right-0 top-1/2 transform -translate-y-1/2 flex items-center space-x-1 mr-3">
+    <div class="absolute right-0 top-1/2 transform -translate-y-1/2 flex items-center space-x-1 mr-3"> 
         <InfoCircleSolid class="text-gray-500 cursor-pointer" />
         <Tooltip 
             placement='left-start' 
-            style="z-index: 9999; max-width: 80vw; width: auto; overflow-y: auto">
+            style="z-index: 9999; max-width: 80vw; width: auto; overflow-y: auto"> <!-- TOOL TIP STILL WONT POP UP ON TOP-->
             <Li>Grant admin access by clicking the edit icon in the "Is Admin" column.</Li>
             <Li>Set "True" for admin access, "False" to revoke it.</Li>
             <Li>Edit an admin's name by clicking the edit icon and updating their name.</Li>
