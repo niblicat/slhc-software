@@ -1,19 +1,18 @@
 <script lang="ts">
 
     import { ButtonGroup, Button, Search, Modal, Label, Input, Radio, Tooltip } from 'flowbite-svelte';
-    import { ChevronDownOutline, UserRemoveSolid, UserAddSolid, CirclePlusSolid, EditSolid, EditOutline } from 'flowbite-svelte-icons';
+    import { ChevronDownOutline, UserRemoveSolid, UserAddSolid, CirclePlusSolid, EditSolid, EditOutline, InfoCircleSolid } from 'flowbite-svelte-icons';
     import { Dropdown } from 'flowbite-svelte';
     import ScatterPlot from './ScatterPlot.svelte';
-    import { Footer } from 'flowbite-svelte';
-    import EditIcon from './EditIcon.svelte';
     import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
     import { AnomalyStatus } from "./interpret";
     import type { Employee, EmployeeSearchable } from './MyTypes';
-    import { invalidateAll } from '$app/navigation';
-    import { controllers } from 'chart.js';
     import InsertEmployeePage from './InsertEmployeePage.svelte';
     import { extractFrequencies } from './utility';
     import InsertDataPage from './InsertDataPage.svelte';
+    import { Li } from "flowbite-svelte";
+    import PageTitle from './PageTitle.svelte';
+    import ErrorMessage from './ErrorMessage.svelte';
 
     let chart: any;
 
@@ -513,8 +512,41 @@
             displayError('Error fetching hearing data');
         }
     }
-
 </script>
+
+<div class="relative w-full">
+    <div class="flex items-center justify-center">
+        <PageTitle title="Employee Data Management" caption="View employee information and data." />
+        <ErrorMessage {success} {errorMessage} />
+    </div>
+    
+    <div class="absolute right-0 top-1/2 transform -translate-y-1/2 flex items-center space-x-1 mr-3">
+        <InfoCircleSolid class="text-gray-500 cursor-pointer" />
+        <Tooltip 
+            placement='left-start' 
+            style="z-index: 9999; max-width: 80vw; width: auto; overflow-y: auto">
+            <Li>Select an employee and year from the dropdowns.</Li>
+            <Li>Employee details appear on the left, and the graph on the right.</Li>
+            <Li>Click the edit button to modify an item.</Li>
+            <br>
+            To add employees:
+            <Li>Click the person icon next to the year dropdown.</Li>
+            <Li>Enter the employee’s details and last employment date if applicable.</Li>
+            <Li>Click "Submit" to add.</Li>
+            <br>
+            To add data:
+            <Li>Select an employee.</Li>
+            <Li>Click the plus icon to add data.</Li>
+            <Li>Enter the year, validate, and then submit data.</Li>
+            <Li>Input ear data (values: -10 to 90, or 'CNT').</Li>
+            <Li>Click "Submit" to add.</Li>
+            <br>
+            To edit data:
+            <Li>Select an employee and year, then click the pencil icon.</Li>
+            <Li>Update and submit the changes.</Li>        
+        </Tooltip>
+    </div>
+</div>
 
 <div class="relative dropdown-container flex space-x-4" style="margin-top: 20px; margin-left: 20px;"> 
     <!-- User Dropdown -->
@@ -559,7 +591,6 @@
         <Tooltip placement='bottom'>Edit Current Data</Tooltip>
     {/if} 
 </div>
-
 <!---------------------- DISPLAY INFO ---------------------->
 
 <!-- MODALS -->
