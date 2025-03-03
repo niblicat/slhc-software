@@ -521,15 +521,14 @@
     </div>
 </div>
 
-<div class="relative dropdown-container flex space-x-4" style="margin-top: 20px; margin-left: 20px;"> 
-    <!-- User Dropdown -->
-    <Button class="cursor-pointer" color="primary" style="width:300px">
+<div class="relative dropdown-container flex flex-wrap space-x-4 space-y-2 ml-[20px] mr-[20px]"> 
+
+    <Button class="cursor-pointer w-64 h-12" color="primary">
         {selectedEmployee.name}
         <ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" />
     </Button>
-    <Tooltip placement='bottom'>Select Employee</Tooltip>
     <Dropdown bind:open={nameMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
-        <div  class="p-3">
+        <div class="p-3">
             <Search size="md" bind:value={inputValueName}/>
         </div>
         {#each filteredEmployees as employee}
@@ -541,40 +540,38 @@
         {/each}
     </Dropdown>
 
-    <!-- Year Dropdown -->
-    <Button class="cursor-pointer" color="primary" style="width:300px">
-        {selectedYear}
-        <ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" />
-    </Button>
-    <Tooltip placement='bottom'>Select Year</Tooltip>
-    <Dropdown bind:open={yearMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
-        <div  class="p-3">
-            <Search size="md" bind:value={inputValueYear}/>
-        </div>
-        {#each filteredYears as year}
-            <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
-                <button type="button" class="w-full text-left cursor-pointer" onclick={() => selectYear(year)}>
-                    {year}
-                </button>
-            </li>
-        {/each}
-    </Dropdown>
+    {#if selectedEmployee.name !== "No employee selected"}
+        <Button class="cursor-pointer w-64 h-12" color="primary">
+            {selectedYear}
+            <ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" />
+        </Button>
+        <Dropdown bind:open={yearMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
+            <div class="p-3">
+                <Search size="md" bind:value={inputValueYear}/>
+            </div>
+            {#each filteredYears as year}
+                <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+                    <button type="button" class="w-full text-left cursor-pointer" onclick={() => selectYear(year)}>
+                        {year}
+                    </button>
+                </li>
+            {/each}
+        </Dropdown>
+    {/if}
 
-    <Button class="cursor-pointer" on:click={() => showAddEmployeeModal()} color="primary"><UserAddSolid /></Button>
-    <Tooltip placement='bottom'>Add New Employee</Tooltip>
+    <Button size="sm" class="cursor-pointer w-12 h-12" on:click={() => showAddEmployeeModal()} color="primary"><UserAddSolid /></Button>
+    <Tooltip placement="bottom">Add New Employee</Tooltip>
     
-    {#if selectedEmployee.name !== "No employee selected"} 
-        <Button class="cursor-pointer" on:click={() => showAddDataModal()} color="primary"><CirclePlusSolid /></Button>
-        <Tooltip placement='bottom'>Add New Data</Tooltip>
+    {#if selectedEmployee.name !== "No employee selected"}
+        <Button size="sm" class="cursor-pointer w-12 h-12" on:click={() => showAddDataModal()} color="primary"><CirclePlusSolid /></Button>
+        <Tooltip placement="bottom">Add New Data</Tooltip>
     {/if} 
     {#if selectedYear !== "No year selected"} 
-        <Button class="cursor-pointer" on:click={() => showEditDataModal()} color="primary"><EditSolid /></Button>
-        <Tooltip placement='bottom'>Edit Current Data</Tooltip>
+        <Button size="sm" class="cursor-pointer w-12 h-12" on:click={() => showEditDataModal()} color="primary"><EditSolid /></Button>
+        <Tooltip placement="bottom">Edit Current Data</Tooltip>
     {/if} 
 </div>
-<!---------------------- DISPLAY INFO ---------------------->
 
-<!-- MODALS -->
 <Modal title="Change Employee Name" bind:open={nameModal} autoclose>
     <p>
         <span>Please provide an updated name for {selectedEmployee.data.firstName} {selectedEmployee.data.lastName}</span>
