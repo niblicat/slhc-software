@@ -523,7 +523,11 @@
 
 <div class="relative dropdown-container flex space-x-4" style="margin-top: 20px; margin-left: 20px;"> 
     <!-- User Dropdown -->
-    <Button class="cursor-pointer" color="primary" style="width:300px">{selectedEmployee.name}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
+    <Button class="cursor-pointer" color="primary" style="width:300px">
+        {selectedEmployee.name}
+        <ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" />
+    </Button>
+    <Tooltip placement='bottom'>Select Employee</Tooltip>
     <Dropdown bind:open={nameMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
         <div  class="p-3">
             <Search size="md" bind:value={inputValueName}/>
@@ -538,7 +542,11 @@
     </Dropdown>
 
     <!-- Year Dropdown -->
-    <Button class="cursor-pointer" color="primary" style="width:300px">{selectedYear}<ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" /></Button>
+    <Button class="cursor-pointer" color="primary" style="width:300px">
+        {selectedYear}
+        <ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" />
+    </Button>
+    <Tooltip placement='bottom'>Select Year</Tooltip>
     <Dropdown bind:open={yearMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
         <div  class="p-3">
             <Search size="md" bind:value={inputValueYear}/>
