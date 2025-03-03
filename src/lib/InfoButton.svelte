@@ -19,7 +19,7 @@
         <Information {page} />
         
         <svelte:fragment slot="footer">
-            <Button class="primary" color="red" on:click={() => infoModal = false}>OK</Button>
+            <Button color="primary" on:click={() => infoModal = false}>OK</Button>
         </svelte:fragment>
     </Modal>
 
