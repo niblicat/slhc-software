@@ -2,14 +2,18 @@
     import { Navbar, NavBrand } from 'flowbite-svelte';
     import { Button } from 'flowbite-svelte';
     import CustomAvatar from './CustomAvatar.svelte';
-    import type { UserSimple } from './MyTypes';
+    import { PageCategory, type UserSimple } from './MyTypes';
     import { BarsOutline, CloseOutline } from 'flowbite-svelte-icons';
+    import { page } from '$app/state';
+	import InfoButton from './InfoButton.svelte';
+
+    let activeURLHash = $derived(page.url.hash);
 
     interface Props {
         hasSidebar?: any;
         sidebarOpen: any;
         user: UserSimple;
-        toggle: any;
+        toggle?: any;
     }
 
     let { hasSidebar = false, sidebarOpen, user, toggle }: Props = $props();
@@ -17,6 +21,22 @@
     function sidebarToggleDispatch() {
         toggle();
     }
+
+    let currentPageCategory = $derived.by(() => {
+        switch (activeURLHash) {
+            case "#":
+            case "":
+                return PageCategory.Home;
+            case "#admin":
+                return PageCategory.Admin;
+            case "#employees":
+                return PageCategory.Employee;
+            case "#mailings":
+                return PageCategory.Mailing;
+            default:
+                return PageCategory.Other;
+        }
+    })
 </script>
 
 {#if hasSidebar}
@@ -35,5 +55,8 @@
             SIUE SLHC Employee Hearing Panel
         </span>
     </NavBrand>
+    <div class="!absolute top-5 right-20 z-100">
+        <InfoButton page={currentPageCategory} />
+    </div>
     <CustomAvatar {user} />
 </Navbar>

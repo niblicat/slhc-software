@@ -30,13 +30,21 @@
 
 </script>
 
+<svelte:head>
+    <style>
+        body {
+            background-color: rgb(243, 244, 246); /* Tailwind gray-100 */
+        }
+    </style>
+</svelte:head>
+
 <CustomNavbar {user} hasSidebar
     sidebarOpen={sidebarOpen} toggle={toggleSidebar} />
 
 <CustomSidebar sidebarOpen={sidebarOpen}
     activeUrl={activeURLHash} toggle={toggleSidebar} />
 
-<div id="content" class="h-dvh bg-gray-100 pt-16">
+<div id="content" class="min-h-dvh w-full bg-gray-100 pt-16">
     {#if activeURLHash == "#employees"}
         <EmployeesPage {employees} />
     {:else if activeURLHash == "#mailings"}
@@ -44,7 +52,6 @@
     {:else if activeURLHash == "#admin"}
         <AdminPage {admins} />
     {:else}
-        <!-- User who is not logged in should be redirected to home (no hash) -->
         <div class="flex justify-center p-4 text-2xl">Welcome to the dashboard</div>
         <Information />
     {/if}
