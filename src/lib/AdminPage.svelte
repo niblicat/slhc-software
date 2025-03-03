@@ -2,14 +2,12 @@
     import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Checkbox, Modal, Button, Tooltip } from 'flowbite-svelte';
 
     import { Input, Label } from 'flowbite-svelte';
-	import { invalidateAll } from '$app/navigation';
+    import { invalidateAll } from '$app/navigation';
 
     import type { Admin, AdminSelectable } from './MyTypes.ts';
-	import { EditOutline, InfoCircleOutline } from 'flowbite-svelte-icons';
-	import ErrorMessage from './ErrorMessage.svelte';
-	import PageTitle from './PageTitle.svelte';
-    import { Li } from "flowbite-svelte";
-    import { InfoCircleSolid } from 'flowbite-svelte-icons';
+    import { EditOutline, InfoCircleOutline } from 'flowbite-svelte-icons';
+    import ErrorMessage from './ErrorMessage.svelte';
+    import PageTitle from './PageTitle.svelte';
 
     interface Props {
         admins: Array<Admin>;

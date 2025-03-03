@@ -52,7 +52,6 @@
     {:else if activeURLHash == "#admin"}
         <AdminPage {admins} />
     {:else}
-        <!-- User who is not logged in should be redirected to home (no hash) -->
         <div class="flex justify-center p-4 text-2xl">Welcome to the dashboard</div>
         <Information />
     {/if}

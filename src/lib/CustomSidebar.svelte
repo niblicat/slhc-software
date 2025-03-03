@@ -45,7 +45,6 @@
     let nonActiveClass = 'flex items-center p-2 text-base font-normal text-green-900 rounded-lg dark:text-white hover:bg-green-100 dark:hover:bg-green-700';
 </script>
 
-<!-- Sidebar -->
 {#key sidebarOpen}
     <div out:slide={{ axis: 'x', easing: backIn }} in:slide={{ axis: 'x' }} 
         use:clickOutside={clickedOutside} use:tapOutside={clickedOutside}
