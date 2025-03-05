@@ -277,8 +277,13 @@
 
 <div class="relative w-full">
     <div class="flex items-center justify-center">
-      <PageTitle title="Mail Merge Management" caption="Begin the process of mailing out status notifications." />
-      <ErrorMessage {success} {errorMessage} />
+        <PageTitle >
+            Mail Merge Management
+            {#snippet caption()}
+                Begin the process of mailing out status notifications.
+            {/snippet}
+        </PageTitle>
+        <ErrorMessage {success} {errorMessage} />
     </div>
 </div>
 

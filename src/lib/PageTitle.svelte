@@ -1,8 +1,8 @@
 <script lang="ts">
     interface Props {
-        caption?: string
         sub?: boolean
         children?: any
+        caption?: any
     }
 
     let { children, caption, sub = false }: Props = $props();
@@ -19,6 +19,8 @@
         </h2>
     {/if}
     {#if caption}
-        <p class="text-sm font-normal text-gray-500 dark:text-gray-400 text-center">{caption}</p>
+        <p class="text-sm font-normal text-gray-500 dark:text-gray-400 text-center">
+            {@render caption?.()}
+        </p>
     {/if}
 </div>

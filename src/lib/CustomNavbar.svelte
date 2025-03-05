@@ -38,7 +38,7 @@
         }
     })
 </script>
-<!-- TODO: FIX Z INDEX OF SIDEBAR BUTTON -->
+
 <Navbar color="primary" class="fixed z-30" navContainerClass="flex flex-nowrap space-x-4 h-16">
     {#if hasSidebar}
         <Button color="primary" class="w-8 h-10 cursor-pointer !z-50" on:click={sidebarToggleDispatch}>
