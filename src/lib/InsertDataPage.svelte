@@ -15,8 +15,8 @@
     interface Props {
         employees?: Array<Employee>,
         year?: string,
-        employee?: Employee
-        allowModify?: boolean
+        employee?: Employee,
+        allowModify?: boolean,
         showTitle?: boolean
     }
 

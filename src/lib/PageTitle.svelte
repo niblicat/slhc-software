@@ -1,25 +1,36 @@
 <script lang="ts">
+    const defaultClass = "text-2xl text-center";
+    const defaultCaptionClass = "text-sm font-normal text-gray-500 dark:text-gray-400 text-center";
+
     interface Props {
         sub?: boolean
         children?: any
         caption?: any
+        class?: string,
+        captionClass?: string
     }
 
-    let { children, caption, sub = false }: Props = $props();
+    let {
+        children,
+        caption,
+        sub = false,
+        class: classValue = defaultClass,
+        captionClass = defaultCaptionClass
+    }: Props = $props();
 </script>
 
 <div class="p-4">
     {#if sub}
-        <h1 class="text-2xl text-center">
+        <h1 class={classValue}>
             {@render children?.()}
         </h1>
     {:else}
-        <h2 class="text-2xl text-center">
+        <h2 class={classValue}>
             {@render children?.()}
         </h2>
     {/if}
     {#if caption}
-        <p class="text-sm font-normal text-gray-500 dark:text-gray-400 text-center">
+        <p class={captionClass}>
             {@render caption?.()}
         </p>
     {/if}
