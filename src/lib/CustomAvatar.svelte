@@ -12,7 +12,7 @@
 </script>
 
 
-<Avatar id="avatar-menu" class="cursor-pointer shadow-sm shadow-black !absolute top-2.5 right-5 z-50"
+<Avatar id="avatar-menu" class="cursor-pointer shadow-sm shadow-black z-50"
     src={user.avatar.replace(/=(.*)/, '')} size="md" />
 <Dropdown placement="bottom" triggeredBy="#avatar-menu">
     <DropdownHeader>

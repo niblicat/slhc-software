@@ -38,25 +38,24 @@
         }
     })
 </script>
-
-{#if hasSidebar}
-    <Button color="primary" class="fixed top-2.5 left-5 z-50 w-8 h-10 cursor-pointer" on:click={sidebarToggleDispatch}>
-        {#if sidebarOpen}
-            <CloseOutline size="xl" />
-        {:else}
-            <BarsOutline size="xl" />
-        {/if}
-    </Button>
-{/if}
-
-<Navbar color="primary" class="fixed flex justify-between items-center h-16 z-30">
-    <NavBrand href="/dashboard" class="w-full text-center cursor-pointer">
-        <span class="m-auto relative inline-block overflow-hidden whitespace-nowrap text-3xl font-bold text-[clamp(0.75rem,_3vw,_2rem)]">
-            SIUE SLHC Employee Hearing Panel
+<!-- TODO: FIX Z INDEX OF SIDEBAR BUTTON -->
+<Navbar color="primary" class="fixed z-30" navContainerClass="flex flex-nowrap space-x-4 h-16">
+    {#if hasSidebar}
+        <Button color="primary" class="w-8 h-10 cursor-pointer !z-50" on:click={sidebarToggleDispatch}>
+            {#if sidebarOpen}
+                <CloseOutline size="xl" />
+            {:else}
+                <BarsOutline size="xl" />
+            {/if}
+        </Button>
+    {/if}
+    <NavBrand href="/dashboard" class="absolute left-1/2 transform -translate-x-1/2 cursor-pointer">
+        <span class="whitespace-nowrap text-3xl font-bold text-[clamp(0.75rem,_3vw,_2rem)]">
+            SLHC Employee Hearing Panel
         </span>
     </NavBrand>
-    <div class="!absolute top-5 right-20 z-100">
+    <div class="ml-auto flex items-center space-x-4">
         <InfoButton page={currentPageCategory} />
+        <CustomAvatar {user} />
     </div>
-    <CustomAvatar {user} />
 </Navbar>

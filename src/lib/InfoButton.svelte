@@ -16,7 +16,7 @@
 </script>
 
 {#if page != PageCategory.Home}
-    <Modal title="Information" bind:open={infoModal} placement="top-right" outsideclose>
+    <Modal title="Information" bind:open={infoModal} placement="top-right" class="z-100" outsideclose>
         <Information {page} />
         
         <svelte:fragment slot="footer">
