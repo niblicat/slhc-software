@@ -179,6 +179,7 @@ export class UserHearingScreeningHistory {
     /**
      * GenerateHearingReport
      * Returns an array of EarAnomalyStatus for each year
+     * Calculated STS for every year through one report because of how the baselines are redefined and not stored 
      */
     public GenerateHearingReport(): EarAnomalyStatus[] {
         let arrayLength = this.screenings.length;
