@@ -253,7 +253,12 @@
 
 <div class="relative w-full">
     <div class="flex items-center justify-center">
-        <PageTitle title="Admin Management" caption="Modify the privileges of anyone who has attempted to sign in." />
+        <PageTitle>
+            Admin Management
+            {#snippet caption()}
+                Modify the privileges of anyone who has attempted to sign in.
+            {/snippet}
+        </PageTitle>
         <ErrorMessage {success} {errorMessage} />
     </div>
 </div>

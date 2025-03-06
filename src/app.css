@@ -29,4 +29,9 @@
 	--color-primary-950: #0a2629;
 }
 
+/* disable max width since it breaks the navbar on different screen sizes */
+@utility container {
+    max-width: none;
+}
+
 @source "../node_modules/flowbite-svelte/dist";
