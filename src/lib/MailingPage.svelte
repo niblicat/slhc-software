@@ -291,7 +291,7 @@
             <TableHeadCell>ID</TableHeadCell>
         </TableHead>
         <TableBody tableBodyClass="divide-y">
-            {#each employees as employee (employee.employeeID)}
+            {#each [...employees].sort((a, b) => a.firstName.localeCompare(b.firstName)) as employee (employee.employeeID)}
                 <TableBodyRow>
                     <TableBodyCell>
                         {employee.firstName} {employee.lastName}

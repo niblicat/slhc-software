@@ -84,10 +84,15 @@
     // employee map that is search friendly
     // name will hold first and last so it's easier to search
     // actual employee data (id and stuff) is in employee_dict.data
-    let employee_dict = $derived(employees.map((employee) => ({
-        name: `${employee.firstName} ${employee.lastName}`,
-        data: employee
-    })) as Array<EmployeeSearchable>);
+    let employee_dict = $derived(
+        employees
+            .slice() // Create a copy to avoid modifying the original array
+            .sort((a, b) => a.firstName.localeCompare(b.firstName))
+            .map((employee) => ({
+                name: `${employee.firstName} ${employee.lastName}`,
+                data: employee
+            })) as Array<EmployeeSearchable>
+    );
 
     // When the user types into the selection text box, the employees list should filter
     let filteredEmployees = $derived(employee_dict.filter(item => item.name.toLowerCase().includes(inputValueName.toLowerCase())));
