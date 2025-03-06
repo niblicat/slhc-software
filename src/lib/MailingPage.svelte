@@ -31,7 +31,9 @@
 
     // Function to create an array of employees (no filtering needed)
     function createEmployeeList() {
-        return employees.map((employee) => ({
+    return employees
+        .filter(employee => employee.activeStatus === null) // Only include active employees
+        .map((employee) => ({
             employeeID: employee.employeeID,
             firstName: employee.firstName,
             lastName: employee.lastName,
@@ -39,7 +41,7 @@
             dob: employee.dob,
             sex: employee.sex
         }));
-    }
+}
 
     const createCSV = async (employeeList: Array<any>) => {
         const headers = [
@@ -296,7 +298,7 @@
             <TableHeadCell>ID</TableHeadCell>
         </TableHead>
         <TableBody tableBodyClass="divide-y">
-            {#each employees as employee (employee.employeeID)}
+            {#each [...employees].sort((a, b) => a.firstName.localeCompare(b.firstName)) as employee (employee.employeeID)}
                 <TableBodyRow>
                     <TableBodyCell>
                         {employee.firstName} {employee.lastName}
