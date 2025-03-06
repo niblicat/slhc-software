@@ -1,11 +1,12 @@
 <script lang="ts">
-    import { Navbar, NavBrand } from 'flowbite-svelte';
+    import { Modal, Navbar, NavBrand } from 'flowbite-svelte';
     import { Button } from 'flowbite-svelte';
     import CustomAvatar from './CustomAvatar.svelte';
     import { PageCategory, type UserSimple } from './MyTypes';
     import { BarsOutline, CloseOutline } from 'flowbite-svelte-icons';
     import { page } from '$app/state';
 	import InfoButton from './InfoButton.svelte';
+	import Information from './Information.svelte';
 
     let activeURLHash = $derived(page.url.hash);
 
@@ -37,6 +38,8 @@
                 return PageCategory.Other;
         }
     })
+
+    let infoModal = $state(false);
 </script>
 
 <Navbar color="primary" class="fixed z-30" navContainerClass="flex flex-nowrap space-x-4 h-16">
@@ -49,13 +52,24 @@
             {/if}
         </Button>
     {/if}
-    <NavBrand href="/dashboard" class="absolute left-1/2 transform -translate-x-1/2 cursor-pointer">
-        <span class="whitespace-nowrap text-3xl font-bold text-[clamp(0.75rem,_3vw,_2rem)]">
+
+    <NavBrand href="/dashboard" class="cursor-pointer mr-0">
+        <img src="favicon.png" class="me-3 h-6 sm:h-9" alt="Hearing Panel Logo" />
+        <span class="text-3xl font-bold text-[clamp(0.5rem,_3vw,_2.5rem)] overflow-ellipsis">
             SLHC Employee Hearing Panel
         </span>
     </NavBrand>
-    <div class="ml-auto flex items-center space-x-4">
-        <InfoButton page={currentPageCategory} />
+    
+    <div class="ml-auto flex">
+        <InfoButton page={currentPageCategory} bind:infoModal={infoModal} />
         <CustomAvatar {user} />
     </div>
 </Navbar>
+
+<Modal title="Information" bind:open={infoModal} placement="top-right" outsideclose>
+    <Information page={currentPageCategory} />
+    
+    <svelte:fragment slot="footer">
+        <Button class="cursor-pointer" color="primary" on:click={() => infoModal = false}>OK</Button>
+    </svelte:fragment>
+</Modal>
