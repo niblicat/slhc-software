@@ -3,6 +3,7 @@
     import CustomNavbar from '$lib/CustomNavbar.svelte';
 	import ErrorMessage from '$lib/ErrorMessage.svelte';
     import type { UserSimple } from '$lib/MyTypes';
+	import PageTitle from '$lib/PageTitle.svelte';
     import { LoginStatus, loginMessages } from '$lib/utility';
     import { Alert, Button } from 'flowbite-svelte';
 
@@ -37,7 +38,7 @@
 
 <CustomNavbar {user} sidebarOpen={sidebarOpen} toggle={toggleSidebar} />
 
-<div id="content" class="h-dvh bg-gray-100 pt-16">
+<div id="content" class="h-dvh bg-gray-100 dark:bg-gray-900 pt-16">
     {#if loginStatus != LoginStatus.None}
         <Alert color={badLogin ? "red" : "yellow"} 
             class="ml-10 mr-10">
@@ -47,11 +48,13 @@
 
     <!-- Main content -->
     <section class="flex flex-col items-center justify-center py-12">
-        <div class="max-w-3xl text-center">
-            <h1 class="text-4xl font-extrabold text-gray-800 mb-6">Welcome to the Speech-Language-Hearing Center's Hearing Degradation Software</h1>
-            <p class="text-lg text-gray-600 mb-8">
+        <PageTitle>
+            Welcome to the Speech-Language-Hearing Center's Hearing Degradation Software
+            {#snippet caption()}
                 Access powerful features and manage everything efficiently in our easy-to-use dashboard.
-            </p>
+            {/snippet}
+        </PageTitle>
+        <div class="max-w-3xl text-center">
 
             <!-- Correct Image Reference -->
             <img src="landingpage/SIUE_logo_2024.png" alt="SIUE Logo">

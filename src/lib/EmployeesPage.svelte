@@ -698,45 +698,45 @@
 <div class="flex-container">
     <!-- Information Section -->
     <section class="selected-info text-xl">
-        <br>
-        <p>Year: {selectedYear}</p> <br>
-        <p>Employee: {selectedEmployee.name}
+        <!-- TODO: Make this into a table (maybe in a different component) -->
+        <p class="text-gray-900 dark:text-white">Year: {selectedYear}</p>
+        <p class="text-gray-900 dark:text-white">Employee: {selectedEmployee.name}
             {#if selectedEmployee.data.employeeID !== "-1"} 
                 <Button outline size="sm" class="p-1! cursor-pointer" on:click={() => showNameChangeModal(selectedEmployee.data)}>
                     <EditOutline class="w-4 h-4" />
                 </Button>
             {/if} 
-        </p> <br>
-        <p>Email: {selectedEmail}
+        </p>
+        <p class="text-gray-900 dark:text-white">Email: {selectedEmail}
             {#if selectedEmployee.data.email !== "Undefined"} 
                 <Button outline size="sm" class="p-1! cursor-pointer" on:click={() => showEmailChangeModal(selectedEmployee.data)}>
                     <EditOutline class="w-4 h-4" />
                 </Button> 
             {/if} 
-        </p> <br>
-        <p>Date of Birth: {selectedDOB}
+        </p>
+        <p class="text-gray-900 dark:text-white">Date of Birth: {selectedDOB}
             {#if selectedEmployee.data.dob !== "Undefined"} 
                 <Button outline size="sm" class="p-1! cursor-pointer" on:click={() => showDOBChangeModal(selectedEmployee.data)}>
                     <EditOutline class="w-4 h-4" />
                 </Button> 
             {/if} 
-        </p> <br>
-        <p>Sex: {selectedEmployee.data.sex}
+        </p>
+        <p class="text-gray-900 dark:text-white">Sex: {selectedEmployee.data.sex}
             {#if selectedEmployee.data.sex !== "Undefined"} 
                 <Button outline size="sm" class="p-1! cursor-pointer" on:click={() => showSexChangeModal(selectedEmployee.data)}>
                     <EditOutline class="w-4 h-4" />
                 </Button> 
             {/if} 
-        </p> <br>
-        <p>Employment Status: {selectedStatus} <!-- inactive to active is not working // double check --> 
+        </p>
+        <p class="text-gray-900 dark:text-white">Employment Status: {selectedStatus} <!-- inactive to active is not working // double check --> 
             {#if selectedEmployee.data.employeeID !== "-1"} 
                 <Button outline size="sm" class="p-1! cursor-pointer" on:click={() => showActiveStatusChangeModal(selectedEmployee.data)}>
                     <EditOutline class="w-4 h-4" />
                 </Button>
             {/if} 
-        </p> <br>
-        <p class="text-3xl">STS Status Left: {STSstatusLeft}</p> <br>
-        <p class="text-3xl">STS Status Right: {STSstatusRight}</p> <br>
+        </p>
+        <p class="text-3xl text-gray-900 dark:text-white">STS Status Left: {STSstatusLeft}</p>
+        <p class="text-3xl text-gray-900 dark:text-white">STS Status Right: {STSstatusRight}</p>
     </section>
 
     <!-- Chart Section -->

@@ -1,5 +1,5 @@
 <script lang="ts">
-    const defaultClass = "text-2xl text-center";
+    const defaultClass = "text-2xl text-gray-900 dark:text-white text-center";
     const defaultCaptionClass = "text-sm font-normal text-gray-500 dark:text-gray-400 text-center";
 
     interface Props {
