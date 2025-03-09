@@ -37,7 +37,7 @@
 <CustomSidebar sidebarOpen={sidebarOpen}
     activeUrl={activeURLHash} toggle={toggleSidebar} />
 
-<div id="content" class="min-h-dvh w-full bg-gray-100 dark:bg-gray-800 pt-20">
+<div id="content" class="min-h-dvh w-full bg-gray-100 dark:bg-gray-900 pt-20">
     {#if activeURLHash == "#employees"}
         <EmployeesPage {employees} />
     {:else if activeURLHash == "#mailings"}
