@@ -26,6 +26,7 @@
                         <Li>{@html point}</Li>
                     {/each}
                     {#if main.sub}
+                        <br>
                         <Accordion>
                             {#each main.sub as sub}
                                 <AccordionItem class="cursor-pointer">
