@@ -26,6 +26,7 @@
                         <Li>{@html point}</Li>
                     {/each}
                     {#if main.sub}
+                        <br>
                         <Accordion>
                             {#each main.sub as sub}
                                 <AccordionItem class="cursor-pointer">
@@ -49,7 +50,7 @@
             {/each}
         </List>
         {#if singleInformation.sub}
-            <Accordion class="bg-gray-100">
+            <Accordion>
                 {#each singleInformation.sub as sub}
                     <AccordionItem class="cursor-pointer">
                     <span slot="header">{sub.header}</span>

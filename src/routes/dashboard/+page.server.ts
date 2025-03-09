@@ -1,10 +1,10 @@
 import type { Actions, PageServerLoad } from './$types';
 import { getAdminsFromDatabase, getEmployeesFromDatabase, turnAwayNonAdmins } from '$lib/utility';
-import { addHearingData, checkYearAvailability, modifyHearingData } from '$lib/actionshearingdata';
-import { fetchEmployeeInfo, fetchHearingData, fetchHearingDataForYear, fetchYears, modifyEmployeeDOB, modifyEmployeeEmail, modifyEmployeeName, modifyEmployeeStatus, modifyEmployeeSex, calculateSTS } from '$lib/actionsemployees';
-import { addEmployee } from '$lib/actionsemployeeadd';
-import { deleteAdmins, modifyAdminName, modifyAdminPermissions } from '$lib/actionsadmins';
-import { extractAllEmployeeData, extractHearingData, extractBaselineHearingData, extractRecentHearingData } from '$lib/actionsmailing';
+import { addHearingData, checkYearAvailability, modifyHearingData } from '$lib/server/actionshearingdata';
+import { fetchEmployeeInfo, fetchHearingData, fetchHearingDataForYear, fetchYears, modifyEmployeeDOB, modifyEmployeeEmail, modifyEmployeeName, modifyEmployeeStatus, modifyEmployeeSex, calculateSTS } from '$lib/server/actionsemployees';
+import { addEmployee } from '$lib/server/actionsemployeeadd';
+import { deleteAdmins, modifyAdminName, modifyAdminPermissions } from '$lib/server/actionsadmins';
+import { extractAllEmployeeData, extractHearingData, extractBaselineHearingData, extractRecentHearingData } from '$lib/server/actionsmailing';
 
 
 export const load: PageServerLoad = async ( event ) => {

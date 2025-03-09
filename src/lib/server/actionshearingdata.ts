@@ -2,7 +2,7 @@
 // Contains server functions pertaining to hearing data actions
 
 import { sql } from '@vercel/postgres';
-import { validateFrequencies } from './utility';
+import { validateFrequencies } from '$lib/utility';
 
 export async function checkYearAvailability(request: Request) {
     const formData = await request.formData();

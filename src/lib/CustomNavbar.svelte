@@ -7,6 +7,7 @@
     import { page } from '$app/state';
 	import InfoButton from './InfoButton.svelte';
 	import Information from './Information.svelte';
+	import { STRING_HEADER_TITLE } from './strings';
 
     let activeURLHash = $derived(page.url.hash);
 
@@ -57,7 +58,7 @@
     <NavBrand href="/dashboard" class="cursor-pointer mr-0">
         <img src="favicon.png" class="me-3 h-6 sm:h-9" alt="Hearing Panel Logo" />
         <span class="text-3xl font-bold text-[clamp(0.5rem,_3vw,_2.5rem)] overflow-ellipsis">
-            SLHC Employee Hearing Panel
+            {STRING_HEADER_TITLE}
         </span>
     </NavBrand>
     
