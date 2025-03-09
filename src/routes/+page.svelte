@@ -4,8 +4,9 @@
 	import ErrorMessage from '$lib/ErrorMessage.svelte';
     import type { UserSimple } from '$lib/MyTypes';
 	import PageTitle from '$lib/PageTitle.svelte';
+	import { STRING_INDEX_CAPTION, STRING_INDEX_WELCOME } from '$lib/strings.js';
     import { LoginStatus, loginMessages } from '$lib/utility';
-    import { Alert, Button } from 'flowbite-svelte';
+    import { Alert } from 'flowbite-svelte';
 
     let { data } = $props();
 
@@ -49,9 +50,9 @@
     <!-- Main content -->
     <section class="flex flex-col items-center justify-center py-12">
         <PageTitle>
-            Welcome to the Speech-Language-Hearing Center's Hearing Degradation Software
+            {STRING_INDEX_WELCOME}
             {#snippet caption()}
-                Access powerful features and manage everything efficiently in our easy-to-use dashboard.
+                {STRING_INDEX_CAPTION}
             {/snippet}
         </PageTitle>
         <div class="max-w-3xl text-center">

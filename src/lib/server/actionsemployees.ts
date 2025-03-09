@@ -2,9 +2,9 @@
 // Contains server functions pertaining to employee actions
 
 import { sql } from '@vercel/postgres';
-import { UserHearingScreeningHistory, HearingScreening, HearingDataOneEar, PersonSex } from "./interpret";
-import { getHearingDataFromDatabaseRow } from './utility';
-import type { HearingDataSingle } from './MyTypes';
+import { UserHearingScreeningHistory, HearingScreening, HearingDataOneEar, PersonSex } from "$lib/interpret";
+import { getHearingDataFromDatabaseRow } from '$lib/utility';
+import type { HearingDataSingle } from '$lib/MyTypes';
 
 export async function fetchYears(request: Request) {
     const formData = await request.formData();
