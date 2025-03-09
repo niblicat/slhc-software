@@ -37,7 +37,7 @@
 
 <CustomNavbar {user} sidebarOpen={sidebarOpen} toggle={toggleSidebar} />
 
-<div id="content" class="h-dvh bg-gray-100 pt-16">
+<div id="content" class="h-dvh bg-gray-100 dark:bg-gray-800 pt-16">
     {#if loginStatus != LoginStatus.None}
         <Alert color={badLogin ? "red" : "yellow"} 
             class="ml-10 mr-10">

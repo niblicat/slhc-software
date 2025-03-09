@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Modal, Navbar, NavBrand } from 'flowbite-svelte';
+    import { DarkMode, Modal, Navbar, NavBrand } from 'flowbite-svelte';
     import { Button } from 'flowbite-svelte';
     import CustomAvatar from './CustomAvatar.svelte';
     import { PageCategory, type UserSimple } from './MyTypes';
@@ -40,6 +40,7 @@
     })
 
     let infoModal = $state(false);
+    const darkClass = "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-hidden rounded-lg text-sm p-2.5";
 </script>
 
 <Navbar color="primary" class="fixed z-30" navContainerClass="flex flex-nowrap space-x-4 h-16">
@@ -61,7 +62,8 @@
     </NavBrand>
     
     <div class="ml-auto flex">
-        <InfoButton page={currentPageCategory} bind:infoModal={infoModal} />
+        <DarkMode class={darkClass + " mr-4 cursor-pointer"} />
+        <InfoButton class="p-1! mr-4 cursor-pointer" page={currentPageCategory} bind:infoModal={infoModal} />
         <CustomAvatar {user} />
     </div>
 </Navbar>

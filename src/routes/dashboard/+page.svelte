@@ -31,21 +31,13 @@
 
 </script>
 
-<svelte:head>
-    <style>
-        body {
-            background-color: rgb(243, 244, 246); /* Tailwind gray-100 */
-        }
-    </style>
-</svelte:head>
-
 <CustomNavbar {user} hasSidebar
     sidebarOpen={sidebarOpen} toggle={toggleSidebar} />
 
 <CustomSidebar sidebarOpen={sidebarOpen}
     activeUrl={activeURLHash} toggle={toggleSidebar} />
 
-<div id="content" class="min-h-dvh w-full bg-gray-100 pt-20">
+<div id="content" class="min-h-dvh w-full bg-gray-100 dark:bg-gray-800 pt-20">
     {#if activeURLHash == "#employees"}
         <EmployeesPage {employees} />
     {:else if activeURLHash == "#mailings"}
