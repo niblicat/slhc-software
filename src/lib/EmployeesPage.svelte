@@ -1,20 +1,17 @@
 <script lang="ts">
 
-    import { ButtonGroup, Button, Search, Modal, Label, Input, Radio, Tooltip } from 'flowbite-svelte';
-    import { ChevronDownOutline, UserRemoveSolid, UserAddSolid, CirclePlusSolid, EditSolid, EditOutline, InfoCircleSolid } from 'flowbite-svelte-icons';
+    import { Button, Search, Modal, Label, Input, Radio, Tooltip } from 'flowbite-svelte';
+    import { ChevronDownOutline, UserAddSolid, CirclePlusSolid, EditSolid } from 'flowbite-svelte-icons';
     import { Dropdown } from 'flowbite-svelte';
-    import ScatterPlot from './ScatterPlot.svelte';
-    import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
     import { AnomalyStatus } from "./interpret";
     import type { Employee, EmployeeSearchable } from './MyTypes';
     import InsertEmployeePage from './InsertEmployeePage.svelte';
     import { extractFrequencies } from './utility';
     import InsertDataPage from './InsertDataPage.svelte';
-    import { Li } from "flowbite-svelte";
     import PageTitle from './PageTitle.svelte';
     import ErrorMessage from './ErrorMessage.svelte';
-
-    let chart: any;
+    import EmployeeChart from './EmployeeChart.svelte';
+    import EmployeeData from './EmployeeData.svelte';
 
     interface Props {
         employees: Array<Employee>;
@@ -60,10 +57,6 @@
     let nameMenuOpen = $state(false);
     let yearMenuOpen = $state(false);
 
-    // Chart Selection
-    let isRightEar = $state(false);
-    let showBoth = $state(true);
-
     let yearItems = $state<Array<string>>([]);
 
     function displayError(message: string) {
@@ -101,15 +94,6 @@
         name: "No employee selected", 
         data: undefinedEmployee
     });
-    
-    const toggleChart = (ear: string) => {
-        if (ear === 'both') {
-            showBoth = true;
-        } else {
-            isRightEar = ear === 'right';
-            showBoth = false;
-        }
-    };
   
     // Functions to update selected employee and year
     const selectEmployee = async (employee: EmployeeSearchable) => {
@@ -122,6 +106,8 @@
         selectedYear = "No year selected";
         yearItems = [];
         inputValueYear = "";
+        STSstatusRight = "No data selected";
+        STSstatusLeft = "No data selected";
         // Clear previous data
         RightBaselineHearingData.length = 0;
         RightNewHearingData.length = 0;
@@ -196,7 +182,7 @@
         yearMenuOpen = false;
 
         try {
-            await fetchUpdatedHearingData(selectedEmployee.name, year);
+            await fetchUpdatedHearingData();
 
             const formData = new FormData();
             formData.append('employeeID', selectedEmployee.data.employeeID);
@@ -262,30 +248,6 @@
     let newActiveStatus = $state("");
     let isInactive = $state(false);
     let newSex = $state("");
-
-    function showNameChangeModal(employee: Employee) {
-        newFirstName = employee.firstName;
-        newLastName = employee.lastName;
-        nameModal = true;
-    }
-    function showEmailChangeModal(employee: Employee) {
-        newEmail = employee.email;
-        emailModal = true;
-    }
-    function showDOBChangeModal(employee: Employee) {
-        newDOB = employee.dob
-        selectedDOB = newDOB
-                    ? new Date(newDOB).toISOString().split('T')[0]
-                    : "No selection made";
-        DOBmodal = true;
-    }
-    function showSexChangeModal(employee: Employee) {
-        newSex = employee.sex
-        sexModal = true;
-    }
-    function showActiveStatusChangeModal(employee: Employee) {
-        activeStatusModal = true;
-    }
 
     function showAddEmployeeModal() {
         addEmployeeModal = true;
@@ -464,8 +426,7 @@
         }
     }
 
-    export async function fetchUpdatedHearingData(employeeID: string, year: string) {
-        // ! employeeID and year from the parameters are unused
+    export async function fetchUpdatedHearingData() {
         try {
             const formData = new FormData();
             formData.append('employeeID', selectedEmployee.data.employeeID);
@@ -519,6 +480,7 @@
     }
 </script>
 
+<!-- TITLE PAGE SECTION -->
 <div class="relative w-full">
     <div class="flex items-center justify-center">
         <PageTitle title="Employee Data Management" caption="View employee information and data." />
@@ -526,8 +488,8 @@
     </div>
 </div>
 
+<!-- DROPDOWN MENU SECTION BEGINS -->
 <div class="relative dropdown-container flex flex-wrap space-x-4 space-y-2 ml-[20px] mr-[20px]"> 
-
     <Button class="cursor-pointer w-64 h-12" color="primary">
         {selectedEmployee.name}
         <ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" />
@@ -576,7 +538,9 @@
         <Tooltip placement="bottom">Edit Current Data</Tooltip>
     {/if} 
 </div>
+<!-- DROPDOWN MENU SECTION ENDS -->
 
+<!-- MODAL SECTION BEGINS -->
 <Modal title="Change Employee Name" bind:open={nameModal} autoclose>
     <p>
         <span>Please provide an updated name for {selectedEmployee.data.firstName} {selectedEmployee.data.lastName}</span>
@@ -689,101 +653,35 @@
         </Button>
     </svelte:fragment>
 </Modal>
+<!-- MODAL SECTION ENDS -->
 
-<div class="flex-container">
-    <!-- Information Section -->
-    <section class="selected-info text-xl">
-        <br>
-        <p>Year: {selectedYear}</p> <br>
-        <p>Employee: {selectedEmployee.name}
-            {#if selectedEmployee.data.employeeID !== "-1"} 
-                <Button outline size="sm" class="p-1! cursor-pointer" on:click={() => showNameChangeModal(selectedEmployee.data)}>
-                    <EditOutline class="w-4 h-4" />
-                </Button>
-            {/if} 
-        </p> <br>
-        <p>Email: {selectedEmail}
-            {#if selectedEmployee.data.email !== "Undefined"} 
-                <Button outline size="sm" class="p-1! cursor-pointer" on:click={() => showEmailChangeModal(selectedEmployee.data)}>
-                    <EditOutline class="w-4 h-4" />
-                </Button> 
-            {/if} 
-        </p> <br>
-        <p>Date of Birth: {selectedDOB}
-            {#if selectedEmployee.data.dob !== "Undefined"} 
-                <Button outline size="sm" class="p-1! cursor-pointer" on:click={() => showDOBChangeModal(selectedEmployee.data)}>
-                    <EditOutline class="w-4 h-4" />
-                </Button> 
-            {/if} 
-        </p> <br>
-        <p>Sex: {selectedEmployee.data.sex}
-            {#if selectedEmployee.data.sex !== "Undefined"} 
-                <Button outline size="sm" class="p-1! cursor-pointer" on:click={() => showSexChangeModal(selectedEmployee.data)}>
-                    <EditOutline class="w-4 h-4" />
-                </Button> 
-            {/if} 
-        </p> <br>
-        <p>Employment Status: {selectedStatus} <!-- inactive to active is not working // double check --> 
-            {#if selectedEmployee.data.employeeID !== "-1"} 
-                <Button outline size="sm" class="p-1! cursor-pointer" on:click={() => showActiveStatusChangeModal(selectedEmployee.data)}>
-                    <EditOutline class="w-4 h-4" />
-                </Button>
-            {/if} 
-        </p> <br>
-        <p class="text-3xl">STS Status Left: {STSstatusLeft}</p> <br>
-        <p class="text-3xl">STS Status Right: {STSstatusRight}</p> <br>
-    </section>
-
-    <!-- Chart Section -->
-    <div class="chart-container">
-        {#if showBoth}
-            <ScatterPlot 
-                plotTitle="Both Ears"
-                baselineHearingData={RightBaselineHearingData.concat(LeftBaselineHearingData)}
-                newHearingData={RightNewHearingData.concat(LeftNewHearingData)}
-                labels={['Right Baseline', 'Right New', 'Left Baseline', 'Left New']}
+<!-- INFORMATION DISPLAY SECTION BEGINS -->
+<div class="container mx-auto p-4">
+    <div class="flex flex-col lg:flex-row justify-center items-center gap-8">
+        <div class="w-full lg:w-auto flex justify-center">
+            <EmployeeData 
+                {selectedYear}
+                {selectedEmployee}
+                {selectedEmail}
+                {selectedDOB}
+                {selectedStatus}
+                {STSstatusLeft}
+                {STSstatusRight}
+                on:editName={() => nameModal = true}
+                on:editEmail={() => emailModal = true}
+                on:editDOB={() => DOBmodal = true}
+                on:editSex={() => sexModal = true}
+                on:editStatus={() => activeStatusModal = true}
             />
-        {:else if isRightEar}
-            <ScatterPlot 
-                plotTitle="Right Ear"
-                baselineHearingData={RightBaselineHearingData} 
-                newHearingData={RightNewHearingData} 
-                labels={['Right Baseline', 'Right New']}
+        </div>
+        <div class="w-full lg:w-auto flex justify-center">
+            <EmployeeChart 
+                {RightBaselineHearingData}
+                {RightNewHearingData}
+                {LeftBaselineHearingData}
+                {LeftNewHearingData}
             />
-        {:else}
-            <ScatterPlot 
-                plotTitle="Left Ear"
-                baselineHearingData={LeftBaselineHearingData} 
-                newHearingData={LeftNewHearingData} 
-                labels={['Left Baseline', 'Left New']}
-            />
-        {/if}
-        <ButtonGroup class="*:!ring-primary-700">
-            <Button class="cursor-pointer" color="blue" style="width:175px" on:click={() => toggleChart('left')}>Left</Button>
-            <Button class="cursor-pointer" color="red" style="width:175px" on:click={() => toggleChart('right')}>Right</Button> 
-            <Button class="cursor-pointer" color="purple" style="width:175px" on:click={() => toggleChart('both')}>Both</Button> 
-        </ButtonGroup>
+        </div>
     </div>
 </div>
-<!-- TODO: Convert these styles into tailwind classes -->
-<style>
-    .flex-container {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-    }
-    .selected-info {
-        flex: 1; 
-        margin-left: 75px; 
-        margin-top: 55px; 
-        max-width: 500px; 
-    }
-    .chart-container {
-        flex: 1;  
-        margin-right: 75px; 
-        margin-top: 15px; 
-        margin-bottom: 40px;
-        max-width: 550px; 
-        text-align: center;
-    }
-</style>
+<!-- INFORMATION DISPLAY SECTION ENDS -->
