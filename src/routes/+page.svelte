@@ -39,13 +39,9 @@
 
 <CustomNavbar {user} sidebarOpen={sidebarOpen} toggle={toggleSidebar} />
 
-<div id="content" class="h-dvh bg-gray-100 dark:bg-gray-900 pt-16">
-    {#if loginStatus != LoginStatus.None}
-        <Alert color={badLogin ? "red" : "yellow"} 
-            class="ml-10 mr-10">
-            {loginMessages[loginStatus]}
-        </Alert>
-    {/if}
+<main id="content" class="min-h-dvh w-full bg-gray-100 dark:bg-gray-900 pt-24">
+    <ErrorMessage success={loginStatus === LoginStatus.None} type={badLogin ? "error" : "notice"}
+        errorMessage={loginMessages[loginStatus]} />
 
     <!-- Main content -->
     <section class="flex flex-col items-center justify-center py-12">
@@ -62,4 +58,4 @@
 
         </div>
     </section>
-</div>
+</main>
