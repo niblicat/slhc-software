@@ -112,9 +112,17 @@ export class UserHearingScreeningHistory {
         let yearPriorAverageChange = this.GetAverageDecibelChangeForOneEarForMainLevels(beforeEarData, afterEarData, correction, false); // compares current year and YEAR PRIOR (only main 3 points WITH AGE )
 
         // a larger value is worse
-        if (this.confirmCNT(baselineEarData) || this.confirmCNT(afterEarData) || this.confirmCNT(beforeEarData)) return AnomalyStatus.CNT; 
-        if (weightedAverageChange >= 10) return AnomalyStatus.STS;
+        
+        if (weightedAverageChange >= 10) {
+            // Check for CNT specifically in current year or baseline, which are used for STS determination
+            if (this.confirmCNT(baselineEarData) || this.confirmCNT(afterEarData)) {
+                return AnomalyStatus.CNT;
+            }
+            return AnomalyStatus.STS;
+        }
         if (yearPriorAverageChange >= 10) return AnomalyStatus.Warning;
+        // Only check for CNT after handling the STS case
+        if (this.confirmCNT(baselineEarData) || this.confirmCNT(afterEarData)) return AnomalyStatus.CNT; // if any 2000,3000,4000 value is a CNT, whole status is CNT
         else if (weightedAverageChange <= -7) return AnomalyStatus.Improvement; // baseline redefinition (-7 may be different number)
         else if (yearPriorAverageChange >= 3) return AnomalyStatus.Worse; // i think +/-3 is the correct turning point
         else if (yearPriorAverageChange <= -3) return AnomalyStatus.Better; 

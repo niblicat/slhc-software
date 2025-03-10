@@ -10,7 +10,6 @@
     import InsertDataPage from './InsertDataPage.svelte';
     import PageTitle from './PageTitle.svelte';
     import ErrorMessage from './ErrorMessage.svelte';
-    import EmployeeChart from './EmployeeChart.svelte';
     import EmployeeData from './EmployeeData.svelte';
 
     interface Props {
@@ -24,6 +23,8 @@
     let RightNewHearingData =  $state<Array<number>>([]);
     let LeftBaselineHearingData =  $state<Array<number>>([]);
     let LeftNewHearingData =  $state<Array<number>>([]);
+    
+    let hearingHistory = $state<Array<{year: string, leftStatus: string, rightStatus: string}>>([]);
 
     // Selected employee and year
     let selectedYear = $state("No year selected");
@@ -195,10 +196,8 @@
             });
 
             const serverResponse = await response.json();
-            console.log(response);
-
             const result = JSON.parse(JSON.parse(serverResponse.data)[0]);
-    
+
             if (result["success"]) {
                 success = true;
 
@@ -208,20 +207,25 @@
                 if (selectedYearReport) {
                     STSstatusRight = GetAnomalyStatusText(selectedYearReport.rightStatus);
                     STSstatusLeft = GetAnomalyStatusText(selectedYearReport.leftStatus);
-
-                    console.log(`STS Report for ${year} - RIGHT:`, STSstatusRight);
-                    console.log(`STS Report for ${year} - LEFT:`, STSstatusLeft);
                 } else {
-                    console.warn(`No hearing report found for year: ${year}`);
                     STSstatusRight = "No Data";
                     STSstatusLeft = "No Data";
                 }
+
+                // Build the full hearing history from all years
+                hearingHistory = result.hearingReport.map((report: any) => ({
+                    year: report.reportYear.toString(),
+                    leftStatus: GetAnomalyStatusText(report.leftStatus),
+                    rightStatus: GetAnomalyStatusText(report.rightStatus)
+                }));
+                
+                // Sort by year (newest first)
+                hearingHistory.sort((a, b) => parseInt(b.year) - parseInt(a.year));
             } else {
                 throw new Error(serverResponse.error ?? "Failed to calculate STS");
             }
-
         } catch (error) {
-            console.error('Error fetching hearing JOE data:', error);
+            console.error('Error fetching hearing data:', error);
             displayError('Error fetching hearing data');
         }
     };
@@ -488,57 +492,83 @@
     </div>
 </div>
 
-<!-- DROPDOWN MENU SECTION BEGINS -->
-<div class="relative dropdown-container flex flex-wrap space-x-4 space-y-2 ml-[20px] mr-[20px]"> 
-    <Button class="cursor-pointer w-64 h-12" color="primary">
-        {selectedEmployee.name}
-        <ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" />
-    </Button>
-    <Dropdown bind:open={nameMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
-        <div class="p-3">
-            <Search size="md" bind:value={inputValueName}/>
-        </div>
-        {#each filteredEmployees as employee}
-            <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
-                <button type="button" class="w-full text-left cursor-pointer" onclick={() => selectEmployee(employee)}>
-                    {employee.name}
-                </button>
-            </li>
-        {/each}
-    </Dropdown>
-
-    {#if selectedEmployee.name !== "No employee selected"}
+<div class="container mx-auto p-4">
+    <!-- DROPDOWN MENU SECTION BEGINS -->
+    <div class="mb-4 flex flex-wrap gap-2 items-center">
         <Button class="cursor-pointer w-64 h-12" color="primary">
-            {selectedYear}
+            {selectedEmployee.name}
             <ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" />
         </Button>
-        <Dropdown bind:open={yearMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
+        <Dropdown bind:open={nameMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
             <div class="p-3">
-                <Search size="md" bind:value={inputValueYear}/>
+                <Search size="md" bind:value={inputValueName}/>
             </div>
-            {#each filteredYears as year}
+            {#each filteredEmployees as employee}
                 <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
-                    <button type="button" class="w-full text-left cursor-pointer" onclick={() => selectYear(year)}>
-                        {year}
+                    <button type="button" class="w-full text-left cursor-pointer" onclick={() => selectEmployee(employee)}>
+                        {employee.name}
                     </button>
                 </li>
             {/each}
         </Dropdown>
-    {/if}
 
-    <Button size="sm" class="cursor-pointer w-12 h-12" on:click={() => showAddEmployeeModal()} color="primary"><UserAddSolid /></Button>
-    <Tooltip placement="bottom">Add New Employee</Tooltip>
-    
-    {#if selectedEmployee.name !== "No employee selected"}
-        <Button size="sm" class="cursor-pointer w-12 h-12" on:click={() => showAddDataModal()} color="primary"><CirclePlusSolid /></Button>
-        <Tooltip placement="bottom">Add New Data</Tooltip>
-    {/if} 
-    {#if selectedYear !== "No year selected"} 
-        <Button size="sm" class="cursor-pointer w-12 h-12" on:click={() => showEditDataModal()} color="primary"><EditSolid /></Button>
-        <Tooltip placement="bottom">Edit Current Data</Tooltip>
-    {/if} 
+        {#if selectedEmployee.name !== "No employee selected"}
+            <Button class="cursor-pointer w-64 h-12" color="primary">
+                {selectedYear}
+                <ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" />
+            </Button>
+            <Dropdown bind:open={yearMenuOpen} class="overflow-y-auto px-3 pb-3 text-sm h-44">
+                <div class="p-3">
+                    <Search size="md" bind:value={inputValueYear}/>
+                </div>
+                {#each filteredYears as year}
+                    <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+                        <button type="button" class="w-full text-left cursor-pointer" onclick={() => selectYear(year)}>
+                            {year}
+                        </button>
+                    </li>
+                {/each}
+            </Dropdown>
+        {/if}
+
+        <Button size="sm" class="cursor-pointer w-12 h-12" on:click={() => showAddEmployeeModal()} color="primary"><UserAddSolid /></Button>
+        <Tooltip placement="bottom">Add New Employee</Tooltip>
+        
+        {#if selectedEmployee.name !== "No employee selected"}
+            <Button size="sm" class="cursor-pointer w-12 h-12" on:click={() => showAddDataModal()} color="primary"><CirclePlusSolid /></Button>
+            <Tooltip placement="bottom">Add New Data</Tooltip>
+        {/if} 
+        {#if selectedYear !== "No year selected"} 
+            <Button size="sm" class="cursor-pointer w-12 h-12" on:click={() => showEditDataModal()} color="primary"><EditSolid /></Button>
+            <Tooltip placement="bottom">Edit Current Data</Tooltip>
+        {/if} 
+    </div>
+    <!-- DROPDOWN MENU SECTION ENDS -->
+
+    <!-- INFORMATION DISPLAY SECTION BEGINS -->
+    <div class="mb-4">
+        <EmployeeData 
+            {selectedYear}
+            {selectedEmployee}
+            {selectedEmail}
+            {selectedDOB}
+            {selectedStatus}
+            {STSstatusLeft}
+            {STSstatusRight}
+            {RightBaselineHearingData}
+            {RightNewHearingData}
+            {LeftBaselineHearingData}
+            {LeftNewHearingData}
+            {hearingHistory}
+            on:editName={() => nameModal = true}
+            on:editEmail={() => emailModal = true}
+            on:editDOB={() => DOBmodal = true}
+            on:editSex={() => sexModal = true}
+            on:editStatus={() => activeStatusModal = true}
+        />
+    </div>
 </div>
-<!-- DROPDOWN MENU SECTION ENDS -->
+<!-- INFORMATION DISPLAY SECTION ENDS -->
 
 <!-- MODAL SECTION BEGINS -->
 <Modal title="Change Employee Name" bind:open={nameModal} autoclose>
@@ -654,34 +684,3 @@
     </svelte:fragment>
 </Modal>
 <!-- MODAL SECTION ENDS -->
-
-<!-- INFORMATION DISPLAY SECTION BEGINS -->
-<div class="container mx-auto p-4">
-    <div class="flex flex-col lg:flex-row justify-center items-center gap-8">
-        <div class="w-full lg:w-auto flex justify-center">
-            <EmployeeData 
-                {selectedYear}
-                {selectedEmployee}
-                {selectedEmail}
-                {selectedDOB}
-                {selectedStatus}
-                {STSstatusLeft}
-                {STSstatusRight}
-                on:editName={() => nameModal = true}
-                on:editEmail={() => emailModal = true}
-                on:editDOB={() => DOBmodal = true}
-                on:editSex={() => sexModal = true}
-                on:editStatus={() => activeStatusModal = true}
-            />
-        </div>
-        <div class="w-full lg:w-auto flex justify-center">
-            <EmployeeChart 
-                {RightBaselineHearingData}
-                {RightNewHearingData}
-                {LeftBaselineHearingData}
-                {LeftNewHearingData}
-            />
-        </div>
-    </div>
-</div>
-<!-- INFORMATION DISPLAY SECTION ENDS -->

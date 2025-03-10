@@ -7,6 +7,7 @@
     export let RightNewHearingData: Array<number> = [];
     export let LeftBaselineHearingData: Array<number> = [];
     export let LeftNewHearingData: Array<number> = [];
+    export let selectedYear: string = "No year selected";
 
     // Chart Selection
     let isRightEar = false;
@@ -20,36 +21,44 @@
             showBoth = false;
         }
     };
+
+    // Title for the chart that changes based on selected year
+    $: plotTitle = selectedYear !== "No year selected" 
+        ? `Audiogram for ${selectedYear}` 
+        : "No Data Selected";
 </script>
 
 <div class="chart-container w-full max-w-xl">
     {#if showBoth}
         <ScatterPlot 
-            plotTitle="Both Ears"
+            plotTitle={plotTitle}
             baselineHearingData={RightBaselineHearingData.concat(LeftBaselineHearingData)}
             newHearingData={RightNewHearingData.concat(LeftNewHearingData)}
             labels={['Right Baseline', 'Right New', 'Left Baseline', 'Left New']}
+            noDataSelected={selectedYear === "No year selected"}
         />
     {:else if isRightEar}
         <ScatterPlot 
-            plotTitle="Right Ear"
+            plotTitle={plotTitle}
             baselineHearingData={RightBaselineHearingData} 
             newHearingData={RightNewHearingData} 
             labels={['Right Baseline', 'Right New']}
+            noDataSelected={selectedYear === "No year selected"}
         />
     {:else}
         <ScatterPlot 
-            plotTitle="Left Ear"
+            plotTitle={plotTitle}
             baselineHearingData={LeftBaselineHearingData} 
             newHearingData={LeftNewHearingData} 
             labels={['Left Baseline', 'Left New']}
+            noDataSelected={selectedYear === "No year selected"}
         />
     {/if}
-    <div class="mt-4 flex justify-center">
-        <ButtonGroup class="*:!ring-primary-700">
-            <Button class="cursor-pointer" color="blue" style="width:175px" on:click={() => toggleChart('left')}>Left</Button>
-            <Button class="cursor-pointer" color="red" style="width:175px" on:click={() => toggleChart('right')}>Right</Button> 
-            <Button class="cursor-pointer" color="purple" style="width:175px" on:click={() => toggleChart('both')}>Both</Button> 
+    <div class="mt-4 flex justify-center w-full">
+        <ButtonGroup class="*:!ring-primary-700 w-full">
+            <Button class="cursor-pointer flex-1" color="blue" on:click={() => toggleChart('left')}>Left</Button>
+            <Button class="cursor-pointer flex-1" color="red" on:click={() => toggleChart('right')}>Right</Button> 
+            <Button class="cursor-pointer flex-1" color="purple" on:click={() => toggleChart('both')}>Both</Button> 
         </ButtonGroup>
     </div>
 </div>
