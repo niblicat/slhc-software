@@ -67,13 +67,3 @@ export enum PageCategory {
     Mailing,
     Other
 }
-
-export type InformationPerCategory = {
-    category: PageCategory,
-    header: string,
-    points: string[]
-    sub: {
-        header: string,
-        points: string[]
-    }[]
-}

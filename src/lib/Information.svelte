@@ -1,7 +1,7 @@
 <script lang="ts">
     import { Accordion, AccordionItem, Li, List } from "flowbite-svelte";
-    import { PageCategory, type InformationPerCategory } from "./MyTypes";
-    import { getInformationPerCategory } from "./infopercategory.svelte";
+    import { PageCategory } from "./MyTypes";
+    import { getInformationPerCategory, type InformationPerCategory } from "./infopercategory.svelte";
 
     interface Props {
         page?: PageCategory
@@ -26,7 +26,8 @@
                         <Li>{@html point}</Li>
                     {/each}
                     {#if main.sub}
-                        <Accordion class="bg-gray-100">
+                        <br>
+                        <Accordion>
                             {#each main.sub as sub}
                                 <AccordionItem class="cursor-pointer">
                                 <span slot="header">{sub.header}</span>
@@ -49,7 +50,7 @@
             {/each}
         </List>
         {#if singleInformation.sub}
-            <Accordion class="bg-gray-100">
+            <Accordion>
                 {#each singleInformation.sub as sub}
                     <AccordionItem class="cursor-pointer">
                     <span slot="header">{sub.header}</span>

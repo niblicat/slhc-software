@@ -487,7 +487,12 @@
 <!-- TITLE PAGE SECTION -->
 <div class="relative w-full">
     <div class="flex items-center justify-center">
-        <PageTitle title="Employee Data Management" caption="View employee information and data." />
+        <PageTitle>
+            Employee Data Management
+            {#snippet caption()}
+                View employee information and data.
+            {/snippet}
+        </PageTitle>
         <ErrorMessage {success} {errorMessage} />
     </div>
 </div>

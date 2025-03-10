@@ -12,19 +12,19 @@
 </script>
 
 
-<Avatar id="avatar-menu" class="cursor-pointer shadow-sm shadow-black !absolute top-2.5 right-5 z-50"
+<Avatar id="avatar-menu" class="cursor-pointer shadow-sm shadow-black z-50"
     src={user.avatar.replace(/=(.*)/, '')} size="md" />
-<Dropdown placement="bottom" triggeredBy="#avatar-menu">
+<Dropdown placement="bottom-start" triggeredBy="#avatar-menu">
     <DropdownHeader>
         <span class="block text-sm">{user.name}</span>
         <span class="block truncate text-sm font-medium">{user.email}</span>
     </DropdownHeader>
     {#if user.loggedIn}
-        <DropdownItem on:click={() => signOut()} class="text-red-700 hover:text-red-800 hover:no-underline cursor-pointer">
+        <DropdownItem on:click={() => signOut()} class="text-red-700 hover:text-red-800 dark:text-red-300 dark:hover:text-red-400 hover:no-underline cursor-pointer">
             Log Out
         </DropdownItem>
     {:else}
-        <DropdownItem on:click={() => signIn("google")} class="text-primary-700 hover:text-primary-800 hover:no-underline cursor-pointer">
+        <DropdownItem on:click={() => signIn("google")} class="text-primary-700 hover:text-primary-800 dark:text-primary-300 dark:hover:text-primary-400 hover:no-underline cursor-pointer">
             Log In
         </DropdownItem>
     {/if}

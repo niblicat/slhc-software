@@ -7,6 +7,7 @@
     import AdminPage from '$lib/AdminPage.svelte';
     import Information from '$lib/Information.svelte'
     import type { UserSimple } from '$lib/MyTypes.js';
+    import PageTitle from '$lib/PageTitle.svelte';
     let { data } = $props();
 
     let activeURL = $derived(page.url.pathname);
@@ -30,21 +31,13 @@
 
 </script>
 
-<svelte:head>
-    <style>
-        body {
-            background-color: rgb(243, 244, 246); /* Tailwind gray-100 */
-        }
-    </style>
-</svelte:head>
-
 <CustomNavbar {user} hasSidebar
     sidebarOpen={sidebarOpen} toggle={toggleSidebar} />
 
 <CustomSidebar sidebarOpen={sidebarOpen}
     activeUrl={activeURLHash} toggle={toggleSidebar} />
 
-<div id="content" class="min-h-dvh w-full bg-gray-100 pt-16">
+<main class="min-h-dvh w-full bg-gray-100 dark:bg-gray-900 pt-24 px-4">
     {#if activeURLHash == "#employees"}
         <EmployeesPage {employees} />
     {:else if activeURLHash == "#mailings"}
@@ -52,7 +45,15 @@
     {:else if activeURLHash == "#admin"}
         <AdminPage {admins} />
     {:else}
-        <div class="flex justify-center p-4 text-2xl">Welcome to the dashboard</div>
-        <Information />
+        <PageTitle>
+            Welcome to the Dashboard!
+            {#snippet caption()}
+                Check out the dropdowns below to get started. Use the sidebar to navigate through the various pages.
+            {/snippet}
+        </PageTitle>
+
+        <div class="max-w-3xl mx-auto">
+            <Information />
+        </div>
     {/if}
-</div>
+</main>
