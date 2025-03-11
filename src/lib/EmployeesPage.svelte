@@ -497,7 +497,7 @@
     </div>
 </div>
 
-<div class="container mx-auto p-4">
+<div class="w-full px-4">
     <!-- DROPDOWN MENU SECTION BEGINS -->
     <div class="mb-4 flex flex-wrap gap-2 items-center">
         <Button class="cursor-pointer w-64 h-12" color="primary">
