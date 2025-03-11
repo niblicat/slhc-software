@@ -499,7 +499,7 @@
 
 <div class="w-full px-4">
     <!-- DROPDOWN MENU SECTION BEGINS -->
-    <div class="mb-4 flex flex-wrap gap-2 items-center">
+    <div class="mb-4 flex gap-4 md:ms-13">
         <Button class="cursor-pointer w-64 h-12" color="primary">
             {selectedEmployee.name}
             <ChevronDownOutline class="w-6 h-6 ms-2 text-white dark:text-white" />
