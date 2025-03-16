@@ -282,6 +282,7 @@
     }
 
 </script>
+
 {#if showTitle}
     <PageTitle sub>
         {allowModify ? "Modify Data" : "Add New Data"}

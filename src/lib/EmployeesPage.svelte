@@ -486,14 +486,14 @@
 
 <!-- TITLE PAGE SECTION -->
 <div class="relative w-full">
-    <div class="flex items-center justify-center">
+    <div class="flex flex-col items-center justify-center">
         <PageTitle>
             Employee Data Management
             {#snippet caption()}
                 View employee information and data.
             {/snippet}
         </PageTitle>
-        <ErrorMessage {success} {errorMessage} />
+        <ErrorMessage class="mx-10 mb-4 w-full" {success} {errorMessage} />
     </div>
 </div>
 
