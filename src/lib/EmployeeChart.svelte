@@ -35,7 +35,6 @@
             baselineHearingData={rightBaselineHearingData.concat(leftBaselineHearingData)}
             newHearingData={rightNewHearingData.concat(leftNewHearingData)}
             labels={['Right Baseline', 'Right New', 'Left Baseline', 'Left New']}
-            noDataSelected={selectedYear === "No year selected"}
         />
     {:else if isRightEar}
         <ScatterPlot 
@@ -43,7 +42,6 @@
             baselineHearingData={rightBaselineHearingData} 
             newHearingData={rightNewHearingData} 
             labels={['Right Baseline', 'Right New']}
-            noDataSelected={selectedYear === "No year selected"}
         />
     {:else}
         <ScatterPlot 
@@ -51,7 +49,6 @@
             baselineHearingData={leftBaselineHearingData} 
             newHearingData={leftNewHearingData} 
             labels={['Left Baseline', 'Left New']}
-            noDataSelected={selectedYear === "No year selected"}
         />
     {/if}
     <div class="mt-4 flex justify-center w-full">
