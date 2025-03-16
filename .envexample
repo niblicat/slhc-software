@@ -1,4 +1,6 @@
-# When you are ready to use this and 
+# When you are finished setting up your environment variables, rename this file to ".env" (without quotes).
+# Be VERY sure that you do not commit your real environment variables!
+# Also, all AUTH environment variables should be included in Vercel's configuration.
 
 # use `npx auth secret`
 AUTH_SECRET="{FILL THIS}"
