@@ -95,7 +95,8 @@
         name: "No employee selected", 
         data: undefinedEmployee
     });
-  
+
+    // TODO: Change this to no longer be a lambda function. Just make it a regular function for consistency
     // Functions to update selected employee and year
     const selectEmployee = async (employee: EmployeeSearchable) => {
         const formData = new FormData();
@@ -177,14 +178,19 @@
 
         return filterable.filter(item => item.includes(filter));
     });
-   
+
+    // TODO: Change this to no longer be a lambda function. Just make it a regular function for consistency
     const selectYear = async (year: string) => {
         selectedYear = year;
         yearMenuOpen = false;
 
         try {
+            // ! Awaiting the fetch in a try block is not necessary since it already has error handling
+            // either handle errors here and remove error handling from fetchUpdatedHearingData() or
+            // move this outside of the try
             await fetchUpdatedHearingData();
 
+            // ! Creating form data does not need to be in the try block
             const formData = new FormData();
             formData.append('employeeID', selectedEmployee.data.employeeID);
             formData.append('year', selectedYear);
@@ -195,12 +201,12 @@
                 body: formData,
             });
 
+            // ! Everything before this point should be outside of the try block
             const serverResponse = await response.json();
             const result = JSON.parse(JSON.parse(serverResponse.data)[0]);
 
             if (result["success"]) {
                 success = true;
-
                 // Find the test result that matches the selected year
                 const selectedYearReport = result.hearingReport.find((report: any) => report.reportYear === parseInt(year, 10));
 
@@ -221,15 +227,18 @@
                 
                 // Sort by year (newest first)
                 hearingHistory.sort((a, b) => parseInt(b.year) - parseInt(a.year));
-            } else {
-                throw new Error(serverResponse.error ?? "Failed to calculate STS");
+            }
+            else {
+                displayError(result["message"]);
             }
         } catch (error) {
-            console.error('Error fetching hearing data:', error);
-            displayError('Error fetching hearing data');
+            const errorMessage = 'Error fetching hearing data: ' + error;
+            console.error(errorMessage);
+            displayError(errorMessage);
         }
     };
 
+     // TODO: Change this to no longer be a lambda function. Just make it a regular function for consistency
     // Helper function to get the readable status
     const GetAnomalyStatusText = (status: AnomalyStatus): string => {
         return AnomalyStatus[status] ?? "Unknown";
@@ -302,6 +311,7 @@
             displayError(errorMessage);
         }
     }
+
     async function modifyEmployeeEmail(): Promise<void> {
         const formData = new FormData();
         formData.append('employeeID', selectedEmployee.data.employeeID);
