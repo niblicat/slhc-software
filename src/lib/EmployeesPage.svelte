@@ -19,10 +19,10 @@
     let { employees }: Props = $props();
 
     // Data for scatter plot
-    let RightBaselineHearingData = $state<Array<number>>([]);
-    let RightNewHearingData =  $state<Array<number>>([]);
-    let LeftBaselineHearingData =  $state<Array<number>>([]);
-    let LeftNewHearingData =  $state<Array<number>>([]);
+    let rightBaselineHearingData = $state<Array<number>>([]);
+    let rightNewHearingData =  $state<Array<number>>([]);
+    let leftBaselineHearingData =  $state<Array<number>>([]);
+    let leftNewHearingData =  $state<Array<number>>([]);
     
     let hearingHistory = $state<Array<{year: string, leftStatus: string, rightStatus: string}>>([]);
 
@@ -110,10 +110,10 @@
         STSstatusRight = "No data selected";
         STSstatusLeft = "No data selected";
         // Clear previous data
-        RightBaselineHearingData.length = 0;
-        RightNewHearingData.length = 0;
-        LeftBaselineHearingData.length = 0;
-        LeftNewHearingData.length = 0;
+        rightBaselineHearingData.length = 0;
+        rightNewHearingData.length = 0;
+        leftBaselineHearingData.length = 0;
+        leftNewHearingData.length = 0;
 
         formData.append('employeeID', selectedEmployee.data.employeeID);
 
@@ -447,30 +447,30 @@
                 const { baselineData, newData } = result.hearingData;
 
                 // Clear previous data
-                RightBaselineHearingData.length = 0;
-                RightNewHearingData.length = 0;
-                LeftBaselineHearingData.length = 0;
-                LeftNewHearingData.length = 0;
+                rightBaselineHearingData.length = 0;
+                rightNewHearingData.length = 0;
+                leftBaselineHearingData.length = 0;
+                leftNewHearingData.length = 0;
 
                 // Extract frequencies and populate arrays
                 // For right ear baseline data
                 if (baselineData.rightEar) {
-                    RightBaselineHearingData.push(...extractFrequencies(baselineData.rightEar));
+                    rightBaselineHearingData.push(...extractFrequencies(baselineData.rightEar));
                 }
 
                 // For right ear new data
                 if (newData.rightEar) {
-                    RightNewHearingData.push(...extractFrequencies(newData.rightEar));
+                    rightNewHearingData.push(...extractFrequencies(newData.rightEar));
                 }
 
                 // For left ear baseline data
                 if (baselineData.leftEar) {
-                    LeftBaselineHearingData.push(...extractFrequencies(baselineData.leftEar));
+                    leftBaselineHearingData.push(...extractFrequencies(baselineData.leftEar));
                 }
 
                 // For left ear new data
                 if (newData.leftEar) {
-                    LeftNewHearingData.push(...extractFrequencies(newData.leftEar));
+                    leftNewHearingData.push(...extractFrequencies(newData.leftEar));
                 }
             } 
             else {
@@ -560,16 +560,16 @@
             {selectedStatus}
             {STSstatusLeft}
             {STSstatusRight}
-            {RightBaselineHearingData}
-            {RightNewHearingData}
-            {LeftBaselineHearingData}
-            {LeftNewHearingData}
+            {rightBaselineHearingData}
+            {rightNewHearingData}
+            {leftBaselineHearingData}
+            {leftNewHearingData}
             {hearingHistory}
-            on:editName={() => nameModal = true}
-            on:editEmail={() => emailModal = true}
-            on:editDOB={() => DOBmodal = true}
-            on:editSex={() => sexModal = true}
-            on:editStatus={() => activeStatusModal = true}
+            editname={() => nameModal = true}
+            editemail={() => emailModal = true}
+            editdob={() => DOBmodal = true}
+            editsex={() => sexModal = true}
+            editstatus={() => activeStatusModal = true}
         />
     </div>
 </div>

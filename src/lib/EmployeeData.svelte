@@ -5,43 +5,64 @@
     import EmployeeChart from './EmployeeChart.svelte';
 
     // Props
-    export let selectedYear: string = "No year selected";
-    export let selectedEmployee: { name: string, data: Employee };
-    export let selectedEmail: string = "No data selected";
-    export let selectedDOB: string = "No data selected";
-    export let selectedStatus: string = "No data selected";
-    export let STSstatusLeft: string = "No data selected";
-    export let STSstatusRight: string = "No data selected";
-    export let hearingHistory: Array<{year: string, leftStatus: string, rightStatus: string}> = [];
-    
-    // Chart data props
-    export let RightBaselineHearingData: Array<number> = [];
-    export let RightNewHearingData: Array<number> = [];
-    export let LeftBaselineHearingData: Array<number> = [];
-    export let LeftNewHearingData: Array<number> = [];
-    
-    // Event dispatcher to handle edit buttons
-    import { createEventDispatcher } from 'svelte';
-    const dispatch = createEventDispatcher();
+    interface Props {
+        selectedYear: string,
+        selectedEmployee: { name: string, data: Employee },
+        selectedEmail: string,
+        selectedDOB: string,
+        selectedStatus: string,
+        STSstatusLeft: string,
+        STSstatusRight: string,
+        hearingHistory: Array<{year: string, leftStatus: string, rightStatus: string}>
+        rightBaselineHearingData: Array<number>,
+        rightNewHearingData: Array<number>,
+        leftBaselineHearingData: Array<number>,
+        leftNewHearingData: Array<number>,
+        editname: (arg0: Employee) => void,
+        editemail: (arg0: Employee) => void,
+        editdob: (arg0: Employee) => void,
+        editsex: (arg0: Employee) => void,
+        editstatus: (arg0: Employee) => void,
+    }
+
+    let {
+        selectedYear = "No year selected",
+        selectedEmployee,
+        selectedEmail = "No data selected",
+        selectedDOB = "No data selected",
+        selectedStatus = "No data selected",
+        STSstatusLeft = "No data selected",
+        STSstatusRight = "No data selected",
+        hearingHistory = [],
+        rightBaselineHearingData = [],
+        rightNewHearingData = [],
+        leftBaselineHearingData = [],
+        leftNewHearingData = [],
+        editname = () => {},
+        editemail = () => {},
+        editdob = () => {},
+        editsex = () => {},
+        editstatus = () => {}
+    }: Props = $props();
 
     function showNameChangeModal() {
-        dispatch('editName', selectedEmployee.data);
+        editname(selectedEmployee.data);
     }
     
     function showEmailChangeModal() {
-        dispatch('editEmail', selectedEmployee.data);
+        editemail(selectedEmployee.data);
     }
     
     function showDOBChangeModal() {
-        dispatch('editDOB', selectedEmployee.data);
+        editdob(selectedEmployee.data);
     }
     
     function showSexChangeModal() {
-        dispatch('editSex', selectedEmployee.data);
+        editsex(selectedEmployee.data);
     }
     
     function showActiveStatusChangeModal() {
-        dispatch('editStatus', selectedEmployee.data);
+        editstatus(selectedEmployee.data);
     }
 </script>
 
@@ -61,7 +82,7 @@
                             <td class="p-3 flex items-center">
                                 <span>{selectedEmployee.name}</span>
                                 {#if selectedEmployee.data.employeeID !== "-1"} 
-                                    <Button color="light" size="xs" class="ml-2" on:click={showNameChangeModal}>
+                                    <Button color="light" size="xs" class="ml-2 cursor-pointer" on:click={showNameChangeModal}>
                                         <EditOutline class="w-3 h-3" />
                                     </Button>
                                 {/if}
@@ -72,7 +93,7 @@
                             <td class="p-3 flex items-center">
                                 <span class="break-words overflow-hidden">{selectedEmail}</span>
                                 {#if selectedEmployee.data.email !== "Undefined"} 
-                                    <Button color="light" size="xs" class="ml-2" on:click={showEmailChangeModal}>
+                                    <Button color="light" size="xs" class="ml-2 cursor-pointer" on:click={showEmailChangeModal}>
                                         <EditOutline class="w-3 h-3" />
                                     </Button>
                                 {/if}
@@ -83,7 +104,7 @@
                             <td class="p-3 flex items-center">
                                 <span class="break-words overflow-hidden">{selectedDOB}</span>
                                 {#if selectedEmployee.data.dob !== "Undefined"} 
-                                    <Button color="light" size="xs" class="ml-2" on:click={showDOBChangeModal}>
+                                    <Button color="light" size="xs" class="ml-2 cursor-pointer" on:click={showDOBChangeModal}>
                                         <EditOutline class="w-3 h-3" />
                                     </Button>
                                 {/if}
@@ -94,7 +115,7 @@
                             <td class="p-3 flex items-center">
                                 <span class="break-words overflow-hidden">{selectedEmployee.data.sex}</span>
                                 {#if selectedEmployee.data.sex !== "Undefined"} 
-                                    <Button color="light" size="xs" class="ml-2" on:click={showSexChangeModal}>
+                                    <Button color="light" size="xs" class="ml-2 cursor-pointer" on:click={showSexChangeModal}>
                                         <EditOutline class="w-3 h-3" />
                                     </Button>
                                 {/if}
@@ -105,7 +126,7 @@
                             <td class="p-3 flex items-center">
                                 <span class="break-words overflow-hidden">{selectedStatus}</span>
                                 {#if selectedEmployee.data.employeeID !== "-1"} 
-                                    <Button color="light" size="xs" class="ml-2" on:click={showActiveStatusChangeModal}>
+                                    <Button color="light" size="xs" class="ml-2 cursor-pointer" on:click={showActiveStatusChangeModal}>
                                         <EditOutline class="w-3 h-3" />
                                     </Button>
                                 {/if}
@@ -145,10 +166,10 @@
         <div class="flex justify-center">
             <Card padding="sm" class="w-full max-w-xl">
                 <EmployeeChart 
-                    {RightBaselineHearingData}
-                    {RightNewHearingData}
-                    {LeftBaselineHearingData}
-                    {LeftNewHearingData}
+                    {rightBaselineHearingData}
+                    {rightNewHearingData}
+                    {leftBaselineHearingData}
+                    {leftNewHearingData}
                     {selectedYear}
                 />
             </Card>
