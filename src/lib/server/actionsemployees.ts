@@ -375,6 +375,9 @@ export async function modifyEmployeeSex(request: Request) {
 }
 
 export async function calculateSTS(request: Request) {
+    // ! This function should probably not exist.
+    // ! We should instead do this on the client side
+    // ! Get all of the hearing data for an employee, then calculate STS on the client side
     const formData = await request.formData();
     const employeeID = formData.get('employeeID') as string;
     const year = parseInt(formData.get('year') as string, 10);
@@ -382,12 +385,11 @@ export async function calculateSTS(request: Request) {
 
     //console.log("ID: ", employeeID, "YEAR: ", year, "SEX: ", sex);
 
-    try { 
+    try {
         // get dob from database 
         const employeeQuery = await sql`SELECT date_of_birth FROM Employee WHERE employee_id = ${employeeID};`;
         if (employeeQuery.rows.length === 0) {
             throw new Error("User not found");
-            const errorMessage = "User not found"
         }
         const employee = employeeQuery.rows[0];
         const dob = employee.date_of_birth;
@@ -414,8 +416,6 @@ export async function calculateSTS(request: Request) {
 
         if (dataQuery.rows.length === 0) {
             throw new Error("Hearing data not found");
-            const errorMessage = "Hearing data not found"
-            
         }
         //console.log("query: ", JSON.stringify(dataQuery));
 
@@ -480,8 +480,6 @@ export async function calculateSTS(request: Request) {
             const errorMessage = "Hearing report not generated.";
             throw new Error(errorMessage);
         }
-
-    //    console.log("REPORT: ", hearingReport);
 
         return JSON.stringify({
             success: true, 

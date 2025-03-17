@@ -19,10 +19,10 @@
     let { employees }: Props = $props();
 
     // Data for scatter plot
-    let RightBaselineHearingData = $state<Array<number>>([]);
-    let RightNewHearingData =  $state<Array<number>>([]);
-    let LeftBaselineHearingData =  $state<Array<number>>([]);
-    let LeftNewHearingData =  $state<Array<number>>([]);
+    let rightBaselineHearingData = $state<Array<number>>([]);
+    let rightNewHearingData =  $state<Array<number>>([]);
+    let leftBaselineHearingData =  $state<Array<number>>([]);
+    let leftNewHearingData =  $state<Array<number>>([]);
     
     let hearingHistory = $state<Array<{year: string, leftStatus: string, rightStatus: string}>>([]);
 
@@ -95,7 +95,8 @@
         name: "No employee selected", 
         data: undefinedEmployee
     });
-  
+
+    // TODO: Change this to no longer be a lambda function. Just make it a regular function for consistency
     // Functions to update selected employee and year
     const selectEmployee = async (employee: EmployeeSearchable) => {
         const formData = new FormData();
@@ -110,10 +111,10 @@
         STSstatusRight = "No data selected";
         STSstatusLeft = "No data selected";
         // Clear previous data
-        RightBaselineHearingData.length = 0;
-        RightNewHearingData.length = 0;
-        LeftBaselineHearingData.length = 0;
-        LeftNewHearingData.length = 0;
+        rightBaselineHearingData.length = 0;
+        rightNewHearingData.length = 0;
+        leftBaselineHearingData.length = 0;
+        leftNewHearingData.length = 0;
 
         formData.append('employeeID', selectedEmployee.data.employeeID);
 
@@ -177,14 +178,19 @@
 
         return filterable.filter(item => item.includes(filter));
     });
-   
+
+    // TODO: Change this to no longer be a lambda function. Just make it a regular function for consistency
     const selectYear = async (year: string) => {
         selectedYear = year;
         yearMenuOpen = false;
 
         try {
+            // ! Awaiting the fetch in a try block is not necessary since it already has error handling
+            // either handle errors here and remove error handling from fetchUpdatedHearingData() or
+            // move this outside of the try
             await fetchUpdatedHearingData();
 
+            // ! Creating form data does not need to be in the try block
             const formData = new FormData();
             formData.append('employeeID', selectedEmployee.data.employeeID);
             formData.append('year', selectedYear);
@@ -195,12 +201,12 @@
                 body: formData,
             });
 
+            // ! Everything before this point should be outside of the try block
             const serverResponse = await response.json();
             const result = JSON.parse(JSON.parse(serverResponse.data)[0]);
 
             if (result["success"]) {
                 success = true;
-
                 // Find the test result that matches the selected year
                 const selectedYearReport = result.hearingReport.find((report: any) => report.reportYear === parseInt(year, 10));
 
@@ -221,15 +227,18 @@
                 
                 // Sort by year (newest first)
                 hearingHistory.sort((a, b) => parseInt(b.year) - parseInt(a.year));
-            } else {
-                throw new Error(serverResponse.error ?? "Failed to calculate STS");
+            }
+            else {
+                displayError(result["message"]);
             }
         } catch (error) {
-            console.error('Error fetching hearing data:', error);
-            displayError('Error fetching hearing data');
+            const errorMessage = 'Error fetching hearing data: ' + error;
+            console.error(errorMessage);
+            displayError(errorMessage);
         }
     };
 
+     // TODO: Change this to no longer be a lambda function. Just make it a regular function for consistency
     // Helper function to get the readable status
     const GetAnomalyStatusText = (status: AnomalyStatus): string => {
         return AnomalyStatus[status] ?? "Unknown";
@@ -302,6 +311,7 @@
             displayError(errorMessage);
         }
     }
+
     async function modifyEmployeeEmail(): Promise<void> {
         const formData = new FormData();
         formData.append('employeeID', selectedEmployee.data.employeeID);
@@ -447,30 +457,30 @@
                 const { baselineData, newData } = result.hearingData;
 
                 // Clear previous data
-                RightBaselineHearingData.length = 0;
-                RightNewHearingData.length = 0;
-                LeftBaselineHearingData.length = 0;
-                LeftNewHearingData.length = 0;
+                rightBaselineHearingData.length = 0;
+                rightNewHearingData.length = 0;
+                leftBaselineHearingData.length = 0;
+                leftNewHearingData.length = 0;
 
                 // Extract frequencies and populate arrays
                 // For right ear baseline data
                 if (baselineData.rightEar) {
-                    RightBaselineHearingData.push(...extractFrequencies(baselineData.rightEar));
+                    rightBaselineHearingData.push(...extractFrequencies(baselineData.rightEar));
                 }
 
                 // For right ear new data
                 if (newData.rightEar) {
-                    RightNewHearingData.push(...extractFrequencies(newData.rightEar));
+                    rightNewHearingData.push(...extractFrequencies(newData.rightEar));
                 }
 
                 // For left ear baseline data
                 if (baselineData.leftEar) {
-                    LeftBaselineHearingData.push(...extractFrequencies(baselineData.leftEar));
+                    leftBaselineHearingData.push(...extractFrequencies(baselineData.leftEar));
                 }
 
                 // For left ear new data
                 if (newData.leftEar) {
-                    LeftNewHearingData.push(...extractFrequencies(newData.leftEar));
+                    leftNewHearingData.push(...extractFrequencies(newData.leftEar));
                 }
             } 
             else {
@@ -486,14 +496,14 @@
 
 <!-- TITLE PAGE SECTION -->
 <div class="relative w-full">
-    <div class="flex items-center justify-center">
+    <div class="flex flex-col items-center justify-center">
         <PageTitle>
             Employee Data Management
             {#snippet caption()}
                 View employee information and data.
             {/snippet}
         </PageTitle>
-        <ErrorMessage {success} {errorMessage} />
+        <ErrorMessage class="mx-10 mb-4 w-full" {success} {errorMessage} />
     </div>
 </div>
 
@@ -560,16 +570,16 @@
             {selectedStatus}
             {STSstatusLeft}
             {STSstatusRight}
-            {RightBaselineHearingData}
-            {RightNewHearingData}
-            {LeftBaselineHearingData}
-            {LeftNewHearingData}
+            {rightBaselineHearingData}
+            {rightNewHearingData}
+            {leftBaselineHearingData}
+            {leftNewHearingData}
             {hearingHistory}
-            onEditName={() => nameModal = true}
-            onEditEmail={() => emailModal = true}
-            onEditDOB={() => DOBmodal = true}
-            onEditSex={() => sexModal = true}
-            onEditStatus={() => activeStatusModal = true}
+            editname={() => nameModal = true}
+            editemail={() => emailModal = true}
+            editdob={() => DOBmodal = true}
+            editsex={() => sexModal = true}
+            editstatus={() => activeStatusModal = true}
         />
     </div>
 </div>

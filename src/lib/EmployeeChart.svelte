@@ -3,10 +3,10 @@
     import ScatterPlot from './ScatterPlot.svelte';
 
     // Props
-    export let RightBaselineHearingData: Array<number> = [];
-    export let RightNewHearingData: Array<number> = [];
-    export let LeftBaselineHearingData: Array<number> = [];
-    export let LeftNewHearingData: Array<number> = [];
+    export let rightBaselineHearingData: Array<number> = [];
+    export let rightNewHearingData: Array<number> = [];
+    export let leftBaselineHearingData: Array<number> = [];
+    export let leftNewHearingData: Array<number> = [];
     export let selectedYear: string = "No year selected";
 
     // Chart Selection
@@ -32,26 +32,23 @@
     {#if showBoth}
         <ScatterPlot 
             plotTitle={plotTitle}
-            baselineHearingData={RightBaselineHearingData.concat(LeftBaselineHearingData)}
-            newHearingData={RightNewHearingData.concat(LeftNewHearingData)}
+            baselineHearingData={rightBaselineHearingData.concat(leftBaselineHearingData)}
+            newHearingData={rightNewHearingData.concat(leftNewHearingData)}
             labels={['Right Baseline', 'Right New', 'Left Baseline', 'Left New']}
-            noDataSelected={selectedYear === "No year selected"}
         />
     {:else if isRightEar}
         <ScatterPlot 
             plotTitle={plotTitle}
-            baselineHearingData={RightBaselineHearingData} 
-            newHearingData={RightNewHearingData} 
+            baselineHearingData={rightBaselineHearingData} 
+            newHearingData={rightNewHearingData} 
             labels={['Right Baseline', 'Right New']}
-            noDataSelected={selectedYear === "No year selected"}
         />
     {:else}
         <ScatterPlot 
             plotTitle={plotTitle}
-            baselineHearingData={LeftBaselineHearingData} 
-            newHearingData={LeftNewHearingData} 
+            baselineHearingData={leftBaselineHearingData} 
+            newHearingData={leftNewHearingData} 
             labels={['Left Baseline', 'Left New']}
-            noDataSelected={selectedYear === "No year selected"}
         />
     {/if}
     <div class="mt-4 flex justify-center w-full">
