@@ -20,29 +20,12 @@
     export let LeftBaselineHearingData: Array<number> = [];
     export let LeftNewHearingData: Array<number> = [];
     
-    // Event dispatcher to handle edit buttons
-    import { createEventDispatcher } from 'svelte';
-    const dispatch = createEventDispatcher();
-
-    function showNameChangeModal() {
-        dispatch('editName', selectedEmployee.data);
-    }
-    
-    function showEmailChangeModal() {
-        dispatch('editEmail', selectedEmployee.data);
-    }
-    
-    function showDOBChangeModal() {
-        dispatch('editDOB', selectedEmployee.data);
-    }
-    
-    function showSexChangeModal() {
-        dispatch('editSex', selectedEmployee.data);
-    }
-    
-    function showActiveStatusChangeModal() {
-        dispatch('editStatus', selectedEmployee.data);
-    }
+    // Define callback props instead of using event dispatcher
+    export let onEditName: (employee: Employee) => void = () => {};
+    export let onEditEmail: (employee: Employee) => void = () => {};
+    export let onEditDOB: (employee: Employee) => void = () => {};
+    export let onEditSex: (employee: Employee) => void = () => {};
+    export let onEditStatus: (employee: Employee) => void = () => {};
 </script>
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -61,9 +44,9 @@
                             <td class="p-3 flex items-center">
                                 <span>{selectedEmployee.name}</span>
                                 {#if selectedEmployee.data.employeeID !== "-1"} 
-                                    <Button color="light" size="xs" class="ml-2" on:click={showNameChangeModal}>
-                                        <EditOutline class="w-3 h-3" />
-                                    </Button>
+                                <Button color="light" size="xs" class="ml-2" on:click={() => onEditName(selectedEmployee.data)}>
+                                    <EditOutline class="w-3 h-3" />
+                                </Button>
                                 {/if}
                             </td>
                         </tr>
@@ -72,7 +55,7 @@
                             <td class="p-3 flex items-center">
                                 <span class="break-words overflow-hidden">{selectedEmail}</span>
                                 {#if selectedEmployee.data.email !== "Undefined"} 
-                                    <Button color="light" size="xs" class="ml-2" on:click={showEmailChangeModal}>
+                                    <Button color="light" size="xs" class="ml-2" on:click={() => onEditEmail(selectedEmployee.data)}>
                                         <EditOutline class="w-3 h-3" />
                                     </Button>
                                 {/if}
@@ -83,7 +66,7 @@
                             <td class="p-3 flex items-center">
                                 <span class="break-words overflow-hidden">{selectedDOB}</span>
                                 {#if selectedEmployee.data.dob !== "Undefined"} 
-                                    <Button color="light" size="xs" class="ml-2" on:click={showDOBChangeModal}>
+                                    <Button color="light" size="xs" class="ml-2" on:click={() => onEditDOB(selectedEmployee.data)}>
                                         <EditOutline class="w-3 h-3" />
                                     </Button>
                                 {/if}
@@ -94,7 +77,7 @@
                             <td class="p-3 flex items-center">
                                 <span class="break-words overflow-hidden">{selectedEmployee.data.sex}</span>
                                 {#if selectedEmployee.data.sex !== "Undefined"} 
-                                    <Button color="light" size="xs" class="ml-2" on:click={showSexChangeModal}>
+                                    <Button color="light" size="xs" class="ml-2" on:click={() => onEditSex(selectedEmployee.data)}>
                                         <EditOutline class="w-3 h-3" />
                                     </Button>
                                 {/if}
@@ -105,7 +88,7 @@
                             <td class="p-3 flex items-center">
                                 <span class="break-words overflow-hidden">{selectedStatus}</span>
                                 {#if selectedEmployee.data.employeeID !== "-1"} 
-                                    <Button color="light" size="xs" class="ml-2" on:click={showActiveStatusChangeModal}>
+                                    <Button color="light" size="xs" class="ml-2" on:click={() => onEditStatus(selectedEmployee.data)}>
                                         <EditOutline class="w-3 h-3" />
                                     </Button>
                                 {/if}

@@ -565,11 +565,11 @@
             {LeftBaselineHearingData}
             {LeftNewHearingData}
             {hearingHistory}
-            on:editName={() => nameModal = true}
-            on:editEmail={() => emailModal = true}
-            on:editDOB={() => DOBmodal = true}
-            on:editSex={() => sexModal = true}
-            on:editStatus={() => activeStatusModal = true}
+            onEditName={() => nameModal = true}
+            onEditEmail={() => emailModal = true}
+            onEditDOB={() => DOBmodal = true}
+            onEditSex={() => sexModal = true}
+            onEditStatus={() => activeStatusModal = true}
         />
     </div>
 </div>
